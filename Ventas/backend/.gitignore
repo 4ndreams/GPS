@@ -1,0 +1,12 @@
+# Ignorar dependencias
+node_modules/
+
+# Ignorar variables de entorno
+.env
+
+# Ignorar logs
+*.log
+
+# Ignorar carpeta de pruebas temporales o cachés
+coverage/
+dist/
