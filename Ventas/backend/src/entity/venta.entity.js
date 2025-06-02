@@ -1,5 +1,6 @@
 "use strict";
 import { EntitySchema } from "typeorm";
+import { ClienteSchema } from "./clientes.entity.js";
 
 
 const VentaSchema = new EntitySchema({
@@ -51,3 +52,5 @@ const VentaSchema = new EntitySchema({
         },
     ],
 });
+
+export default VentaSchema;

@@ -1,5 +1,6 @@
 "use strict";
 import { EntitySchema } from "typeorm";
+import {UsuarioSchema} from "./user.entity.js";
 
 const EmpleadoSchema = new EntitySchema({
     name: "Empleado",
@@ -53,3 +54,5 @@ const EmpleadoSchema = new EntitySchema({
         },
     ],
 });
+
+export default EmpleadoSchema;
