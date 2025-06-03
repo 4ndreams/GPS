@@ -1,7 +1,5 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-import { ClienteSchema } from "./clientes.entity.js";
-
 
 const VentaSchema = new EntitySchema({
     name: "Venta",
@@ -32,14 +30,7 @@ const VentaSchema = new EntitySchema({
             nullable: false,
         },
     },
-    relations: {
-        usuario: {
-            target: "Usuario",
-            type: "many-to-one",
-            joinColumn: { name: "id_usuario" },
-            cascade: true,
-        },
-    },
+
     indices: [
         {
             name: "idx_venta_id",

@@ -20,3 +20,5 @@ const MaterialSchema = new EntitySchema({
         }
     },
     });
+
+    export default MaterialSchema;

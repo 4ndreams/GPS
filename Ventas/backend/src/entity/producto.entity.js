@@ -1,7 +1,8 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-import { MaterialSchema } from "./material.entity.js";
-import { TipoSchema } from "./tipo.entity.js";
+import MaterialSchema from "./material.entity.js";
+import TipoSchema from "./tipo.entity.js";
+
 
 const ProductoSchema = new EntitySchema({
     name: "Producto",
@@ -65,7 +66,7 @@ const ProductoSchema = new EntitySchema({
     relations: {
         material: {
             type: "many-to-one",
-            target: "MaterialSchema",
+            target: MaterialSchema,
             joinColumn: {
                 name: "id_material",
             },
@@ -73,7 +74,7 @@ const ProductoSchema = new EntitySchema({
         },
         tipo: {
             type: "many-to-one",
-            target: "TipoSchema",
+            target: TipoSchema,
             joinColumn: {
                 name: "id_tipo",
             },
@@ -81,3 +82,5 @@ const ProductoSchema = new EntitySchema({
         },
     },
 });
+
+export default ProductoSchema;

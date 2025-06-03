@@ -17,3 +17,5 @@ const TipoSchema = new EntitySchema({
         }
     },
 });
+
+export default TipoSchema;
