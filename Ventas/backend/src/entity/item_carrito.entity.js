@@ -1,0 +1,67 @@
+"use strtict";
+import { EntitySchema } from "typeorm";
+import { Venta } from "./venta.entity.js";
+import { Producto } from "./producto.entity.js";
+
+const ItemCarritoSchema = new EntitySchema({
+
+    name: "ItemCarrito",
+    tableName: "item_carrito",
+    columns: {
+        id_item_carrito: {
+            type: "int",
+            primary: true,
+            generated: true,
+        },
+        id_producto: {
+            type: "int",
+            nullable: false,
+        },
+        cantidad: {
+            type: "int",
+            nullable: false,
+        },
+        precio: {
+            type: "decimal",
+            precision: 10,
+            scale: 2,
+            nullable: false,
+        },
+        id_venta: {
+            type: "int",
+            nullable: false,
+        },
+    },
+    relations: {
+        venta: {
+            target: "Venta",
+            type: "many-to-one",
+            joinColumn: { name: "id_venta" },
+            cascade: true,
+        },
+        producto: {
+            target: "Producto",
+            type: "many-to-one",
+            joinColumn: { name: "id_producto" },
+            cascade: true,
+        },
+    },
+    indices: [
+        {
+            name: "idx_item_carrito_id",
+            columns: ["id_item_carrito"],
+            unique: true,
+        },
+        {
+            name: "idx_item_carrito_id_producto",
+            columns: ["id_producto"],
+        },
+        {
+            name: "idx_item_carrito_id_venta",
+            columns: ["id_venta"],
+        },
+    ],
+})
+
+export { ItemCarritoSchema };
+export default ItemCarritoSchema;

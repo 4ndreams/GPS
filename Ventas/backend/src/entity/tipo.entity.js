@@ -17,4 +17,5 @@ const TipoSchema = new EntitySchema({
         }
     },
 });
+
 export { TipoSchema };
