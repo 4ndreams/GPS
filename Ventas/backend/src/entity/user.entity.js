@@ -34,6 +34,11 @@ const UsuarioSchema = new EntitySchema({
             nullable: false,
             unique: true,
         },
+        password: {
+            type: "varchar",
+            length: 255,
+            nullable: false,
+        },
         flag_blacklist: {
             type: "boolean",
             default: false,
