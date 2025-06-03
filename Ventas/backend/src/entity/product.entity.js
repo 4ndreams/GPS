@@ -65,7 +65,7 @@ const ProductoSchema = new EntitySchema({
     relations: {
         material: {
             type: "many-to-one",
-            target: "MaterialSchema",
+            target: MaterialSchema,
             joinColumn: {
                 name: "id_material",
             },
@@ -73,7 +73,7 @@ const ProductoSchema = new EntitySchema({
         },
         tipo: {
             type: "many-to-one",
-            target: "TipoSchema",
+            target: TipoSchema,
             joinColumn: {
                 name: "id_tipo",
             },

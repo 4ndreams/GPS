@@ -19,4 +19,14 @@ const MaterialSchema = new EntitySchema({
             nullable: true,
         }
     },
-    });
+    relations: {
+        productos: {
+            type: "one-to-many",
+            target: "Producto",
+            inverseSide: "material",
+        },
+    },
+    }
+);
+
+export { MaterialSchema };
