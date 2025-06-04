@@ -1,14 +1,18 @@
 import { Router } from "express";
-import authRoutes from "./auth.routes.js"; // Asegúrate de que esta ruta es correcta
+import authRoutes from "./auth.routes.js"; 
 
 const router = Router();
 
-// Ruta básica de prueba
 router.get("/", (req, res) => {
   res.json({ message: "¡API funcionando!" });
 });
 
-// Aquí montas las rutas de autenticación
-router.use("/auth", authRoutes); // Esto habilita /api/auth/register, etc.
+router.use("/auth", authRoutes); 
+
+router.stack.forEach(layer => {
+  if (layer.route) {
+    console.log(`Ruta registrada: ${layer.route.path}`);
+  }
+});
 
 export default router;
