@@ -28,7 +28,7 @@ const UsuarioSchema = new EntitySchema({
             nullable: false,
             unique: true,
         },
-        correo: {
+        email: {
             type: "varchar",
             length: 255,
             nullable: false,
@@ -61,6 +61,15 @@ const UsuarioSchema = new EntitySchema({
             default: "Cliente",
             nullable: false,
         },
+        intentosFallidos: {
+            type: "int",
+            default: 0,
+            nullable: false,
+        },
+        fechaBloqueo: {
+            type: "timestamp with time zone",
+            nullable: true,
+        },
     },
     relations: {
         itemCarrito: {
@@ -89,8 +98,8 @@ const UsuarioSchema = new EntitySchema({
             unique: true,
         },
         {
-            name: "idx_usuario_correo",
-            columns: ["correo"],
+            name: "idx_usuario_email",
+            columns: ["email"],
             unique: true,
         },
     ],

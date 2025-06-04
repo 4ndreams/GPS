@@ -1,25 +1,28 @@
 "use strict";
 import Joi from "joi";
 
-// Valida dominio de correo
+// Valida dominio de email
 const domainEmailValidator = (value, helper) => {
-  if (!value.endsWith("@gmail.cl")) {
-    return helper.message("El correo electrónico debe finalizar en @gmail.cl.");
+  const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl"];
+  
+  if (!allowedDomains.some(domain => value.endsWith(domain))) {
+    return helper.message(`El email electrónico debe finalizar en uno de los siguientes dominios: ${allowedDomains.join(", ")}.`);
   }
+  
   return value;
 };
 
 export const authValidation = Joi.object({
-  correo: Joi.string()
+  email: Joi.string()
     .min(15)
     .max(255)
     .email()
     .required()
     .custom(domainEmailValidator)
     .messages({
-      "string.empty": "El correo electrónico no puede estar vacío.",
-      "any.required": "El correo electrónico es obligatorio.",
-      "string.email": "Debe ser un correo válido.",
+      "string.empty": "El email electrónico no puede estar vacío.",
+      "any.required": "El email electrónico es obligatorio.",
+      "string.email": "Debe ser un email válido.",
     }),
 
   password: Joi.string()
@@ -64,16 +67,16 @@ export const registerValidation = Joi.object({
       "string.pattern.base": "Formato RUT inválido.",
     }),
 
-  correo: Joi.string()
+  email: Joi.string()
     .min(15)
     .max(255)
     .email()
     .required()
     .custom(domainEmailValidator)
     .messages({
-      "string.empty": "El correo electrónico no puede estar vacío.",
-      "any.required": "El correo electrónico es obligatorio.",
-      "string.email": "Debe ser un correo válido.",
+      "string.empty": "El email electrónico no puede estar vacío.",
+      "any.required": "El email electrónico es obligatorio.",
+      "string.email": "Debe ser un email válido.",
     }),
 
   password: Joi.string()

@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 import { AppDataSource } from "../config/configDb.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
 import { ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
+import { addMinutes, isBefore } from "date-fns";
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCK_TIME = 15; // in minutes
 
 export async function loginService(user) {
   try {
@@ -16,21 +20,44 @@ export async function loginService(user) {
     });
 
     const userFound = await userRepository.findOne({
-      where: { email }
+      where: { email: email }, // asegúrate que el campo es "email"
     });
 
     if (!userFound) {
-      return [null, createErrorMessage("email", "El correo electrónico es incorrecto")];
+      return [null, createErrorMessage("email", "El email electrónico es incorrecto")];
+    }
+
+    // Revisar si la cuenta está temporalmente bloqueada
+    if (userFound.bloqueadoHasta && isBefore(new Date(), userFound.bloqueadoHasta)) {
+      return [null, createErrorMessage("email", "Cuenta temporalmente bloqueada por intentos fallidos. Intenta más tarde.")];
     }
 
     const isMatch = await comparePassword(password, userFound.password);
 
     if (!isMatch) {
+      userFound.intentosFallidos = (userFound.intentosFallidos || 0) + 1;
+
+      if (userFound.intentosFallidos >= MAX_LOGIN_ATTEMPTS) {
+        userFound.bloqueadoHasta = addMinutes(new Date(), LOCK_TIME_MINUTES);
+        userFound.intentosFallidos = 0;
+
+        await userRepository.save(userFound);
+        await sendLoginAlertEmail(userFound.email);
+
+        return [null, createErrorMessage("email", "Cuenta bloqueada temporalmente. Revisa tu email.")];
+      }
+
+      await userRepository.save(userFound);
       return [null, createErrorMessage("password", "La contraseña es incorrecta")];
     }
 
+    // Login exitoso: resetea contador de fallos
+    userFound.intentosFallidos = 0;
+    userFound.bloqueadoHasta = null;
+    await userRepository.save(userFound);
+
     const payload = {
-      nombreCompleto: userFound.nombreCompleto,
+      nombreCompleto: userFound.nombre + " " + userFound.apellidos,
       email: userFound.email,
       rut: userFound.rut,
       rol: userFound.rol,
@@ -41,6 +68,7 @@ export async function loginService(user) {
     });
 
     return [accessToken, null];
+
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
     return [null, "Error interno del servidor"];
@@ -65,7 +93,7 @@ export async function registerService(user) {
       },
     });
     
-    if (existingEmailUser) return [null, createErrorMessage("email", "Correo electrónico en uso")];
+    if (existingEmailUser) return [null, createErrorMessage("email", "email electrónico en uso")];
 
     const existingRutUser = await userRepository.findOne({
       where: {
@@ -79,7 +107,7 @@ export async function registerService(user) {
       nombre: user.nombre,
       apellidos: user.apellidos,
       rut: user.rut,
-      correo: user.correo,
+      email: user.email,
       password: await encryptPassword(user.password),
       rol: "Cliente", // Default role
     });
