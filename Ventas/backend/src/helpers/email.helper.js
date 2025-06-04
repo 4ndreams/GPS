@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import transporter from "../config/mailer.config.js";
-import { RESET_PASSWORD_URL, ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
+import { RESET_PASSWORD_URL, VERIFY_EMAIL_URL, ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
 
 export async function sendLoginAlertEmail(email) {
   const token = jwt.sign({ email }, ACCESS_TOKEN_SECRET, { expiresIn: "2m" });
@@ -81,10 +81,26 @@ export async function sendLoginAlertEmail(email) {
     </html>
   `;
 
-  // 4. Enviar el correo
   await transporter.sendMail({
     to: email,
     subject: "🔒 Alerta de seguridad: Múltiples intentos fallidos de inicio de sesión",
     html: htmlContent,
+  });
+}
+
+export async function sendVerificationEmail(to, token) {
+  const verificationLink = `${VERIFY_EMAIL_URL}?token=${(token)}`;
+  
+  await transporter.sendMail({
+    to,
+    subject: "Verifica tu cuenta en Mundo Puertas",
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+        <h2 style="color: #2C3E50;">¡Bienvenido a Mundo Puertas!</h2>
+        <p>Gracias por registrarte. Para completar tu registro, por favor verifica tu dirección de correo electrónico haciendo clic en el botón de abajo:</p>
+        <a href="${verificationLink}" style="display:inline-block;padding:10px 20px;background-color:#3498DB;color:white;text-decoration:none;border-radius:5px;">Verificar correo</a>
+        <p style="margin-top: 20px;">Este enlace expirará en 10 minutos.</p>
+      </div>
+    `
   });
 }

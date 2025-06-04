@@ -3,9 +3,9 @@ import User from "../entity/user.entity.js";
 import jwt from "jsonwebtoken";
 import { AppDataSource } from "../config/configDb.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
-import { ACCESS_TOKEN_SECRET, RESET_PASSWORD_URL } from "../config/configEnv.js";
+import { ACCESS_TOKEN_SECRET} from "../config/configEnv.js";
 import { addMinutes, isBefore } from "date-fns";
-import { sendLoginAlertEmail } from "../helpers/email.helper.js";
+import { sendLoginAlertEmail, sendVerificationEmail } from "../helpers/email.helper.js";
 
 
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -81,46 +81,70 @@ export async function loginService(user) {
 export async function registerService(user) {
   try {
     const userRepository = AppDataSource.getRepository(User);
-
-    const { nombreCompleto, rut, email } = user;
+    const { nombre, apellidos, rut, email, password, rol } = user;
 
     const createErrorMessage = (dataInfo, message) => ({
       dataInfo,
       message
     });
 
-    const existingEmailUser = await userRepository.findOne({
-      where: {
-        email,
-      },
-    });
-    
-    if (existingEmailUser) return [null, createErrorMessage("email", "email electrónico en uso")];
+    const existingEmailUser = await userRepository.findOne({ where: { email } });
+    if (existingEmailUser) return [null, createErrorMessage("email", "Correo electrónico en uso")];
 
-    const existingRutUser = await userRepository.findOne({
-      where: {
+    const existingRutUser = await userRepository.findOne({ where: { rut } });
+    if (existingRutUser) return [null, createErrorMessage("rut", "RUT ya asociado a una cuenta")];
+
+    // Generar un token con todos los datos del usuario (excepto password en texto plano)
+    const verificationToken = jwt.sign(
+      {
+        nombre,
+        apellidos,
         rut,
+        email,
+        rol,
+        password: await encryptPassword(password),
       },
-    });
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: "10m" }
+    );
 
-    if (existingRutUser) return [null, createErrorMessage("rut", "Rut ya asociado a una cuenta")];
+    // Enviar email con enlace de verificación
+    await sendVerificationEmail(email, verificationToken);
+
+    return [{ email, mensaje: "Correo de verificación enviado" }, null];
+  } catch (error) {
+    console.error("Error al registrar un usuario:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+export async function verifyEmailService(token) {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+
+    let payload;
+    try {
+      payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
+    } catch (err) {
+      return [null, "Token inválido o expirado"];
+    }
+
+    const existingUser = await userRepository.findOne({ where: { email: payload.email } });
+    if (existingUser) return [null, "El correo electrónico ya está en uso"];
 
     const newUser = userRepository.create({
-      nombre: user.nombre,
-      apellidos: user.apellidos,
-      rut: user.rut,
-      email: user.email,
-      password: await encryptPassword(user.password),
-      rol: "Cliente", // Default role
+      nombre: payload.nombre,
+      apellidos: payload.apellidos,
+      rut: payload.rut,
+      email: payload.email,
+      password: payload.password,
+      rol: payload.rol || "Cliente", // Default role if not provided
     });
 
     await userRepository.save(newUser);
-
-    const { password, ...dataUser } = newUser;
-
-    return [dataUser, null];
+    return [newUser, null];
   } catch (error) {
-    console.error("Error al registrar un usuario", error);
+    console.error("Error al verificar el correo electrónico:", error);
     return [null, "Error interno del servidor"];
   }
 }
