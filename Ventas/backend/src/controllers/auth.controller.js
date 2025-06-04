@@ -1,5 +1,5 @@
 "use strict";
-import { loginService, registerService } from "../services/auth.service.js";
+import { loginService, registerService, recoverPasswordService } from "../services/auth.service.js";
 import {
   authValidation,
   registerValidation,
@@ -57,6 +57,26 @@ export async function logout(req, res) {
   try {
     res.clearCookie("jwt", { httpOnly: true });
     handleSuccess(res, 200, "Sesión cerrada exitosamente");
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
+
+export async function recoverPassword(req, res) {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return handleErrorClient(res, 400, "Faltan datos requeridos");
+    }
+
+    const [success, error] = await recoverPasswordService(token, newPassword);
+
+    if (error) {
+      return handleErrorClient(res, 400, "Error al recuperar la contraseña", error);
+    }
+
+    handleSuccess(res, 200, "Contraseña actualizada con éxito");
   } catch (error) {
     handleErrorServer(res, 500, error.message);
   }

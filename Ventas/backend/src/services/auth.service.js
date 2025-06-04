@@ -3,8 +3,10 @@ import User from "../entity/user.entity.js";
 import jwt from "jsonwebtoken";
 import { AppDataSource } from "../config/configDb.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
-import { ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
+import { ACCESS_TOKEN_SECRET, RESET_PASSWORD_URL } from "../config/configEnv.js";
 import { addMinutes, isBefore } from "date-fns";
+import { sendLoginAlertEmail } from "../helpers/email.helper.js";
+
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 15; // in minutes
@@ -38,7 +40,7 @@ export async function loginService(user) {
       userFound.intentosFallidos = (userFound.intentosFallidos || 0) + 1;
 
       if (userFound.intentosFallidos >= MAX_LOGIN_ATTEMPTS) {
-        userFound.bloqueadoHasta = addMinutes(new Date(), LOCK_TIME_MINUTES);
+        userFound.bloqueadoHasta = addMinutes(new Date(), LOCK_TIME);
         userFound.intentosFallidos = 0;
 
         await userRepository.save(userFound);
@@ -119,6 +121,31 @@ export async function registerService(user) {
     return [dataUser, null];
   } catch (error) {
     console.error("Error al registrar un usuario", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+export async function recoverPasswordService(token, newPassword) {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+
+    let payload;
+    try {
+      payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
+    } catch (err) {
+      return [null, "Token inválido o expirado"];
+    }
+
+    const user = await userRepository.findOne({ where: { correo: payload.email } });
+
+    if (!user) return [null, "Usuario no encontrado"];
+
+    user.password = await encryptPassword(newPassword);
+    await userRepository.save(user);
+
+    return [true, null];
+  } catch (error) {
+    console.error("Error en recuperación de contraseña:", error);
     return [null, "Error interno del servidor"];
   }
 }
