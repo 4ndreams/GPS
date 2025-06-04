@@ -1,6 +1,7 @@
 "use strict";
-import { EntitySchema } from "typeorm";
-import ItemCarrito from "./item_carrito.entity.js";
+import { EntitySchema } from "typeorm"
+import ItemCarritoSchema from "./item_carrito.entity.js";
+import VentaSchema from "./venta.entity.js";
 
 const UsuarioSchema = new EntitySchema({
     name: "Usuario",
@@ -27,11 +28,16 @@ const UsuarioSchema = new EntitySchema({
             nullable: false,
             unique: true,
         },
-        correo: {
+        email: {
             type: "varchar",
             length: 255,
             nullable: false,
             unique: true,
+        },
+        password: {
+            type: "varchar",
+            length: 255,
+            nullable: false,
         },
         flag_blacklist: {
             type: "boolean",
@@ -55,32 +61,25 @@ const UsuarioSchema = new EntitySchema({
             default: "Cliente",
             nullable: false,
         },
+        intentosFallidos: {
+            type: "int",
+            default: 0,
+            nullable: false,
+        },
+        fechaBloqueo: {
+            type: "timestamp with time zone",
+            nullable: true,
+        },
     },
     relations: {
-        usuario: {
-            type: "many-to-one",
-            target: "Usuario",
-            joinColumn: {
-                name: "id_usuario",
-            },
-            inverseSide: "venta",
-        },
         itemCarrito: {
             type: "one-to-many",
-            target: ItemCarrito,
+            target: ItemCarritoSchema,
             inverseSide: "venta",
-        },
-        clientes: {
-            type: "one-to-many",
-            target: "Cliente",
-            joinColumn: {
-                name: "id_usuario",
-            },
-            inverseSide: "usuario",
         },
         venta: {
             type: "one-to-many",
-            target: "Venta",
+            target: VentaSchema,
             joinColumn: {
                 name: "id_usuario",
             },
@@ -99,8 +98,8 @@ const UsuarioSchema = new EntitySchema({
             unique: true,
         },
         {
-            name: "idx_usuario_correo",
-            columns: ["correo"],
+            name: "idx_usuario_email",
+            columns: ["email"],
             unique: true,
         },
     ],

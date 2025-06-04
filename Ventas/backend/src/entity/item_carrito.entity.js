@@ -1,7 +1,7 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-import { VentaSchema } from "./venta.entity.js";
-import { ProductoSchema } from "./producto.entity.js";
+import VentaSchema from "./venta.entity.js";
+import ProductoSchema from "./producto.entity.js";
 
 const ItemCarritoSchema = new EntitySchema({
 
@@ -63,5 +63,4 @@ const ItemCarritoSchema = new EntitySchema({
     ],
 })
 
-export { ItemCarritoSchema };
 export default ItemCarritoSchema;
