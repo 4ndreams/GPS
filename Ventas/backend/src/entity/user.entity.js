@@ -1,6 +1,6 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-//import { ItemCarrito } from "./itemCarrito.entity.js";
+import ItemCarrito from "./item_carrito.entity.js";
 
 const UsuarioSchema = new EntitySchema({
     name: "Usuario",
@@ -67,7 +67,7 @@ const UsuarioSchema = new EntitySchema({
         },
         itemCarrito: {
             type: "one-to-many",
-            target: "ItemCarrito",
+            target: ItemCarrito,
             inverseSide: "venta",
         },
         clientes: {

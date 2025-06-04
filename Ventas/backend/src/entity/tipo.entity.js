@@ -18,4 +18,4 @@ const TipoSchema = new EntitySchema({
     },
 });
 
-export { TipoSchema };
+export default TipoSchema;

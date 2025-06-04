@@ -29,4 +29,4 @@ const MaterialSchema = new EntitySchema({
     }
 );
 
-export { MaterialSchema };
+export default MaterialSchema;

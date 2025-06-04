@@ -1,7 +1,7 @@
-"use strtict";
+"use strict";
 import { EntitySchema } from "typeorm";
-import { Venta } from "./venta.entity.js";
-import { Producto } from "./producto.entity.js";
+import { VentaSchema } from "./venta.entity.js";
+import { ProductoSchema } from "./producto.entity.js";
 
 const ItemCarritoSchema = new EntitySchema({
 
@@ -34,13 +34,13 @@ const ItemCarritoSchema = new EntitySchema({
     },
     relations: {
         venta: {
-            target: "Venta",
+            target: VentaSchema,
             type: "many-to-one",
             joinColumn: { name: "id_venta" },
             cascade: true,
         },
         producto: {
-            target: "Producto",
+            target: ProductoSchema,
             type: "many-to-one",
             joinColumn: { name: "id_producto" },
             cascade: true,
