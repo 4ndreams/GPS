@@ -9,7 +9,7 @@ import { sendLoginAlertEmail } from "../helpers/email.helper.js";
 
 
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOCK_TIME = 15; // in minutes
+const LOCK_TIME = 3; // in minutes
 
 export async function loginService(user) {
   try {
@@ -22,7 +22,7 @@ export async function loginService(user) {
     });
 
     const userFound = await userRepository.findOne({
-      where: { email: email }, // asegúrate que el campo es "email"
+      where: { email: email }, 
     });
 
     if (!userFound) {
@@ -136,7 +136,7 @@ export async function recoverPasswordService(token, newPassword) {
       return [null, "Token inválido o expirado"];
     }
 
-    const user = await userRepository.findOne({ where: { correo: payload.email } });
+    const user = await userRepository.findOne({ where: {email: payload.email } });
 
     if (!user) return [null, "Usuario no encontrado"];
 
