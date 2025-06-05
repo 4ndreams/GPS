@@ -1,85 +1,217 @@
-.body-login {
-  background-image: url('../assets/TerplacFoto1.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
+.login-page {
+  display: flex;
+  height: 100vh;
+  font-family: "Inter", sans-serif;
+}
+
+.text-overlay-login h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 18px 0;
+  line-height: 1.1;
+}
+
+.text-overlay-login {
+  position: absolute;
+  top: 30%;
+  left: 40px;
+  color: white;
+  max-width: 350px;
+  z-index: 2;
+}
+
+.text-overlay-login p {
+  font-size: 1.7rem;
+  margin-top: 16px;
+  line-height: 1.4;
+}
+
+.form-header h2 {
+  color: #333;
+  font-family: "Inria Sans", sans-serif;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   margin: 0;
-  padding: 0;
 }
 
-.login-container {
-  display: flex;
+/* LEFT SIDE */
+.left-side {
+  width: 100vw;
   height: 100vh;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.login-left {
   flex: 1;
-  display: flex;
-  align-items: stretch;
-  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+.left-side::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45); /* Ajusta el 0.45 para más o menos oscuridad */
+  pointer-events: none;
+  z-index: 1;
 }
 
-.login-card {
-  background: #fff;
-  width: 100%;
+.text-overlay {
+  position: absolute;
+  top: 30%;
+  left: 40px;
+  color: white;
+  max-width: 300px;
+  z-index: 2; /* Asegura que el texto quede sobre el overlay */
+}
+
+.background-img {
+  width: 100vw;
   height: 100vh;
-  border-radius: 0 32px 32px 0;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.10);
+  object-fit: cover;
+  
+}
+
+.text-overlay {
+  position: absolute;
+  top: 30%;
+  left: 40px;
+  color: white;
+  max-width: 300px;
+}
+
+.text-overlay .dot {
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.text-overlay h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.text-overlay p {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+/* RIGHT SIDE */
+.right-side {
+  flex: 1;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form {
+  width: 80%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-header h2 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.form label {
+  text-align: left;
+  display: block;
+  margin-bottom: 0px;
+  font-weight: 300;
+}
+
+.ingresa-link {
+  font-size: 0.9rem;
+  color: black;
+  text-decoration: underline;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff; /* Hace los inputs blancos */
+  font-size: 1rem;
+  color: #222;
+}
+
+.checkbox {
+  font-size: 0.85rem;
+}
+
+.checkbox input {
+  margin-right: 8px;
+}
+
+.secondary-btn .bi-google {
+  color: #ea4335; /* Rojo Google */
+  margin-right: 8px;
+}
+
+.secondary-btn .bi-facebook {
+  color: #1877f3; /* Azul Facebook */
+  margin-right: 8px;
+}
+
+.checkbox a {
+  text-decoration: underline;
+  color: black;
+}
+
+.submit-btn {
+  padding: 14px;
+  background: #ccc;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 24px;
+  cursor: not-allowed;
+}
+
+.divider {
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
+  position: relative;
+  margin: 20px 0;
 }
 
-.login-right {
+.divider::before,
+.divider::after {
+  content: "";
   flex: 1;
-  display: flex;
-  align-items: stretch; /* Cambia a stretch para ocupar todo el alto */
-  justify-content: flex-end; /* Alinea la tarjeta a la derecha */
+  height: 1px;
+  background: #ccc;
+  margin: 0 10px;
 }
 
-.login-right input {
-  background: #fff;
+.divider span {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.secondary-btn {
+  padding: 12px;
+  text-align: center;
+  border-radius: 24px;
   border: 1px solid #ccc;
-  padding: 2rem;
-  border-radius: 8px;
-  font-size: 1.2rem;
-}
-
-
-.login-card form {
-  width: 100%;
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-}
-
-.login-card input,
-.login-card button {
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border-radius: 8px;
-}
-
-.login-card input {
-  border: 1px solid #ccc;
-  background: #fff;
-}
-
-.login-card button {
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
-}
-
-.login-card button:hover {
-  background: #125ea2;
+  color: black;
+  text-decoration: none;
 }

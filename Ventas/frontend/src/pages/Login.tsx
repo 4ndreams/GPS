@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import '../styles/Login.css'; // Asegúrate de tener este archivo CSS
-
+import { Link } from "react-router-dom";
+import "../styles/Login.css";
+import puertaImg from "../assets/TerplacFoto1.png";
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState("");
@@ -9,7 +10,6 @@ const Login: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Aquí puedes agregar la lógica de autenticación real
         if (email && password) {
             setError("");
             alert("Login exitoso");
@@ -19,34 +19,63 @@ const Login: React.FC = () => {
         }
     };
 
-return (
-    <div className="body-login">
-        <div className="login-container">
-            <div className="login-left">
-                <div className="login-card">
-                    <h1>Iniciar Sesión</h1>
-                    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem", minWidth: "300px" }}>
-                        <input
-                            type="email"
-                            placeholder="Correo"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <input
-                            type="password"
-                            placeholder="Contraseña"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <button type="submit">Entrar</button>
-                        {error && <span style={{ color: "red" }}>{error}</span>}
-                    </form>
+    return (
+        <div className="login-page">
+            <div className="left-side">
+                <img src={puertaImg} alt="Terplac fondo" className="background-img" />
+                <div className="text-overlay-login">
+                    <div className="dot"></div>
+                        <h1>Bienvenido de nuevo</h1>
+                        <p>
+                            Ingresa con tu cuenta para continuar usando la plataforma.
+                        </p>
+                    </div>
                 </div>
+            <div className="right-side">
+                <form className="form" onSubmit={handleSubmit}>
+                    <div className="form-header">
+                        <h2>Ingresa</h2>
+                        <Link to="/register" className="ingresa-link">Crear cuenta</Link>
+                    </div>
+                    <Link to={'google.com'} className="secondary-btn" onClick={() => alert("Login con Google")}>
+                        <i className="bi bi-google"></i>Continuar con Google
+                    </Link>
+                    <Link to={'google.com'} className="secondary-btn" onClick={() => alert("Login con Facebook")}>
+                        <i className="bi bi-facebook"></i>Continuar con Facebook
+                    </Link>
+                    <div className="divider">
+                        <span>o</span>
+                    </div>
+                    <label>Correo electrónico</label>
+                    <input
+                        type="email"
+                        placeholder="Correo electrónico"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <label>Contraseña</label>
+                    <input
+                        type="password"
+                        placeholder="Contraseña"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    {error && <span style={{ color: "red" }}>{error}</span>}
+                    <button type="submit" className="submit-btn" disabled>
+                        Entrar
+                    </button>
+                    <div className="divider">
+                        <span>o</span>
+                    </div>
+                    <Link to="/register" className="secondary-btn">
+                        Crear una cuenta nueva
+                    </Link>
+                </form>
             </div>
-            <div className="login-right"></div>
         </div>
-    </div>
-);
-}
+    );
+};
 
 export default Login;
