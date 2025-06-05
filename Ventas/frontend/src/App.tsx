@@ -1,3 +1,8 @@
+import {Routes, Route} from 'react-router-dom'
+import Home from './pages/Home'
+
+import Navbar from './components/Navbar'
+
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/puerta.png'
@@ -8,6 +13,10 @@ function App() {
 
   return (
     <>
+    <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
       <div>
         <a href="https://www.terplac.cl/" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -28,6 +37,8 @@ function App() {
       <p className="read-the-docs">
         Click en la puerta para entrar al antiguo MundoPuertas
       </p>
+
+      
     </>
   )
 }
