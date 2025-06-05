@@ -18,7 +18,7 @@ function Home() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      // Multiplica el scroll para que suba más rápido, cambiar el valor para ajustar velo
+      // Multiplica el scroll para que suba más rápido, cambiar el valor para ajustar velocidad
       const translateY = -scrollY * 1.5;
       if (heroContentRef.current) {
         heroContentRef.current.style.transform = `translateY(${translateY}px)`;
@@ -158,7 +158,9 @@ useEffect(() => {
               ref={nosotrosRefs[0]}
               className={`card card-nosotros${visibleNosotros[0] ? ' visible' : ''}`}
             >
-            <span className="circle-indicator"></span>
+            <span className="circle-indicator">
+              <i className="bi bi-globe"></i>
+            </span>
             <h1>Calidad Premium</h1>
             <p className="hero-subtitle">Utilizamos los mejores materiales nacionales e internacionales para garantizar durabilidad y elegancia en cada producto.</p>
           </div>
@@ -166,7 +168,9 @@ useEffect(() => {
             ref={nosotrosRefs[1]}
             className={`card card-nosotros${visibleNosotros[1] ? ' visible' : ''}`}
           >
-            <span className="circle-indicator"></span>
+            <span className="circle-indicator">
+              <i className="bi bi-arrow-repeat"></i>
+            </span>
             <h1>Garantía Extendida</h1>
             <p className="hero-subtitle">Ofrecemos garantía en todos nuestros productos para tu tranquilidad y satisfacción.</p>
           </div>
@@ -174,7 +178,9 @@ useEffect(() => {
             ref={nosotrosRefs[2]}
             className={`card card-nosotros${visibleNosotros[2] ? ' visible' : ''}`}
           >
-            <span className="circle-indicator"></span> 
+            <span className="circle-indicator">
+              <i className="bi bi-shield"></i>  
+            </span> 
             <h1>Certificación</h1>
             <p className="hero-subtitle">Todos nuestros modelos de puertas cumplen con certificación según norma NCH354 / NCH723.</p>
           </div>
@@ -193,14 +199,39 @@ useEffect(() => {
               <p>Estamos aquí para ayudarte a encontrar la solución perfecta para tu hogar o negocio.
                  Completa el formulario y nos pondremos en contacto contigo a la brevedad.</p>
             </div>
-            <h2>Dirección</h2>
-            <p>Lincoyan 880 - Concepción</p>
-            <h2>Teléfono</h2>
-            <p>+56984184801 / 412223967</p>
-            <h2>Email</h2>
-            <p>info@terplac.cl</p>
-            <h2>Facebook</h2>
-            <h2>Instagram</h2>
+            <div className="info-row">
+                <i className="bi bi-geo-alt info-icon"></i>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Dirección</h2>
+                <p style={{ margin: 0 }}>Lincoyan 880 - Concepción</p>
+              </div>
+            </div>
+            <div className="info-row">
+                <i className="bi bi-telephone info-icon"></i>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Teléfono</h2>
+                <p style={{ margin: 0 }}>+56984184801 / 412223967</p>
+              </div>
+            </div>
+            <div className="info-row">
+                <i className="bi bi-envelope info-icon"></i>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Email</h2>
+                <p style={{ margin: 0 }}>info@terplac.cl</p>
+              </div>
+            </div>
+            <div className="info-row">
+                <i className="bi bi-facebook info-icon"></i>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Facebook</h2>
+              </div>
+            </div>
+            <div className="info-row">
+                <i className="bi bi-instagram info-icon"></i>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Instagram</h2>
+              </div>
+            </div>
           </div>
           <div className='card card-contacto'>
             <form>

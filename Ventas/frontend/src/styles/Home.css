@@ -162,13 +162,20 @@
 }
 
 .card.card-nosotros .circle-indicator {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto 0.4rem auto; /* Centrado y separado del h1 */
   width: 50px;
   height: 50px;
   background: #FF0404;
   border-radius: 50%;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.circle-indicator .bi {
+  font-size: 2rem;   /* Ajusta el tamaño del ícono */
+  color: #fff;      /* O el color que prefieras */
 }
 
 .card.card-nosotros .hero-subtitle {
@@ -183,6 +190,23 @@
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 5rem; 
+}
+
+/* Para el contenedor de ícono y texto */
+.contacto-info .info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+    margin-top: 0.3rem; /* Ajusta el valor según lo que necesites */
+
+  margin-bottom: 0.7rem;
+}
+
+/* Para el ícono */
+.contacto-info .info-row .info-icon {
+  font-size: 2rem;
+  margin-top: 0.2rem;
+  color: #EC221F !important; 
 }
 
 /*Animaciones tarjetas(cards)*/
