@@ -1,16 +1,20 @@
 "use strict";
+
+import express, { json, urlencoded } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import express, { json, urlencoded } from "express";
 import passport from "passport";
 
 import indexRoutes from "./src/routes/index.routes.js";
 import { connectDB } from "./src/config/configDb.js";
 import { testConnection } from "./src/config/initialSetup.js";
 import { cookieKey, HOST, PORT } from "./src/config/configEnv.js";
-import { passportJwtSetup, passportOAuthSetup} from "./src/auth/passport.auth.js";
+import {
+  passportJwtSetup,
+  passportOAuthSetup,
+} from "./src/auth/passport.auth.js";
 
 async function setupServer() {
   try {
@@ -18,51 +22,59 @@ async function setupServer() {
 
     app.disable("x-powered-by");
 
-    app.use(cors({ credentials: true, origin: true }));
+    // ✅ CORS (solo una vez)
+    app.use(cors({
+      origin: ["http://localhost:5173"], // Frontend en Vite
+      credentials: true
+    }));
+
+    // ✅ Middlewares de body y cookies
     app.use(urlencoded({ extended: true, limit: "1mb" }));
     app.use(json({ limit: "1mb" }));
     app.use(cookieParser());
     app.use(morgan("dev"));
 
+    // ✅ Sesiones (para login con Google/Facebook)
     app.use(session({
       secret: cookieKey,
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: false, 
+        secure: false,       // true si usas HTTPS
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "strict",  // evita CSRF
       },
     }));
 
+    // ✅ Passport
     app.use(passport.initialize());
     app.use(passport.session());
-    passportJwtSetup(); 
-    passportOAuthSetup();
+    passportJwtSetup();      // JWT strategy
+    passportOAuthSetup();    // Google y Facebook
 
-
+    // ✅ Rutas
     app.use("/api", indexRoutes);
 
+    // ✅ Inicio del servidor
     app.listen(PORT, () => {
-      console.log(`=> Servidor corriendo en ${HOST}:${PORT}/api`);
+      console.log(`✅ Servidor corriendo en ${HOST}:${PORT}/api`);
     });
+
   } catch (error) {
-    console.log("Error en index.js -> setupServer():", error);
+    console.error("❌ Error en setupServer:", error);
   }
 }
 
 async function setupAPI() {
   try {
-    await connectDB();
-    await setupServer();
-    await testConnection();
+    await connectDB();       // Conexión a la base de datos
+    await setupServer();     // Servidor Express
+    await testConnection();  // (Opcional) Validación inicial
   } catch (error) {
-    console.log("Error en index.js -> setupAPI():", error);
+    console.error("❌ Error al iniciar la API:", error);
   }
 }
 
 setupAPI()
-  .then(() => console.log("=> API Iniciada exitosamente"))
-  .catch((error) =>
-    console.log("Error en index.js -> setupAPI():", error),
-  );
+  .then(() => console.log("🚀 API Iniciada exitosamente"))
+  .catch((error) => console.error("❌ Error en setupAPI:", error));

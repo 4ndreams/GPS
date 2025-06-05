@@ -23,10 +23,32 @@ function Register() {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch("http://localhost:3000/api/register", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Error al registrarse");
+      return;
+    }
+
+    alert("Cuenta creada con éxito");
+    // Redirige si quieres:
+    // navigate("/login");
+  } catch (err) {
+    alert("Error en el servidor");
+  }
+};
 
   return (
     <div className="register-page fade-in-left">
@@ -58,7 +80,7 @@ function Register() {
             Estoy de acuerdo con los <a href="#">Términos de Uso</a> y las <a href="#">Políticas de privacidad</a>.
           </label>
 
-          <button type="submit" className="submit-btn" disabled>
+          <button type="submit" className="submit-btn">
             Crea una cuenta
           </button>
 

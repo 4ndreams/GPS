@@ -25,16 +25,20 @@ export function passportJwtSetup() {
     secretOrKey: ACCESS_TOKEN_SECRET,
   };
 
-  passport.use(new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
-    try {
-      const userRepository = AppDataSource.getRepository(User);
-      const user = await userRepository.findOne({ where: { email: jwt_payload.email } });
+  passport.use(
+    new JwtStrategy(jwtOptions, async (jwt_payload, done) => {
+      try {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({
+          where: { email: jwt_payload.email },
+        });
 
-      return user ? done(null, user) : done(null, false);
-    } catch (error) {
-      return done(error, false);
-    }
-  }));
+        return user ? done(null, user) : done(null, false);
+      } catch (error) {
+        return done(error, false);
+      }
+    })
+  );
 
   console.log("🔐 Estrategia JWT registrada");
 }
@@ -42,64 +46,82 @@ export function passportJwtSetup() {
 // 🔄 Facebook y Google OAuth Strategies
 export function passportOAuthSetup() {
   // Facebook
-  passport.use(new FacebookStrategy({
-    clientID: FACEBOOK_APP_ID,
-    clientSecret: FACEBOOK_APP_SECRET,
-    callbackURL: FACEBOOK_CALLBACK_URL,
-    profileFields: ["id", "displayName", "emails"],
-  }, async (accessToken, refreshToken, profile, done) => {
-    try {
-      const email = profile.emails?.[0]?.value;
-      const nombre = profile.displayName || "Usuario Facebook";
-      const userRepository = AppDataSource.getRepository(User);
-      let user = await userRepository.findOne({ where: { email } });
+  passport.use(
+    new FacebookStrategy(
+      {
+        clientID: FACEBOOK_APP_ID,
+        clientSecret: FACEBOOK_APP_SECRET,
+        callbackURL: FACEBOOK_CALLBACK_URL,
+        profileFields: ["id", "displayName", "emails"],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value;
+          const nombre = profile.displayName || "Usuario Facebook";
+          const userRepository = AppDataSource.getRepository(User);
+          let user = await userRepository.findOne({ where: { email } });
 
-      if (!user) {
-        user = await userRepository.save({
-          nombre,
-          apellidos: "", // vacío porque Facebook no da apellido separado aquí
-          email,
-          provider: "facebook",
-          rol: "Cliente",  // asignar rol por defecto
-        });
+          if (!user) {
+            user = await userRepository.save({
+              nombre,
+              apellidos: "", // vacío porque Facebook no da apellido separado aquí
+              email,
+              provider: "facebook",
+              rol: "Cliente", // asignar rol por defecto
+            });
+          }
+
+          return done(null, user);
+        } catch (error) {
+          return done(error, false);
+        }
       }
-
-      return done(null, user);
-    } catch (error) {
-      return done(error, false);
-    }
-  }));
+    )
+  );
 
   console.log("🔵 Estrategia de Facebook registrada");
 
   // Google
-  passport.use(new GoogleStrategy({
-    clientID: GOOGLE_CLIENT_ID,
-    clientSecret: GOOGLE_CLIENT_SECRET,
-    callbackURL: GOOGLE_CALLBACK_URL,
-  }, async (accessToken, refreshToken, profile, done) => {
-    try {
-      const email = profile.emails?.[0]?.value;
-      const nombre = profile.name?.givenName || "Usuario Google";
-      const apellidos = profile.name?.familyName || "";
-      const userRepository = AppDataSource.getRepository(User);
-      let user = await userRepository.findOne({ where: { email } });
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: GOOGLE_CALLBACK_URL,
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          const email = profile.emails?.[0]?.value;
+          const nombre = profile.name?.givenName || "Usuario Google";
+          const apellidos = profile.name?.familyName || "";
 
-      if (!user) {
-        user = await userRepository.save({
-          nombre,
-          apellidos,
-          email,
-          provider: "google",
-          rol: "Cliente",  // asignar rol por defecto
-        });
+          const userRepository = AppDataSource.getRepository(User);
+          let user = await userRepository.findOne({ where: { email } });
+
+          if (!user) {
+            user = await userRepository.save({
+              nombre,
+              apellidos,
+              email,
+              provider: "google",
+              rol: "Cliente",
+            });
+          }
+
+          // Generamos el token JWT
+          const token = jwt.sign(
+            { email: user.email, id: user.id },
+            ACCESS_TOKEN_SECRET,
+            { expiresIn: "1d" }
+          );
+
+          return done(null, { ...user, token });
+        } catch (error) {
+          return done(error, false);
+        }
       }
-
-      return done(null, user);
-    } catch (error) {
-      return done(error, false);
-    }
-  }));
+    )
+  );
 
   console.log("🔴 Estrategia de Google registrada");
 }
