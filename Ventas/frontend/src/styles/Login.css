@@ -77,14 +77,6 @@
   
 }
 
-.text-overlay {
-  position: absolute;
-  top: 30%;
-  left: 40px;
-  color: white;
-  max-width: 300px;
-}
-
 .text-overlay .dot {
   width: 14px;
   height: 14px;
@@ -128,8 +120,8 @@
 }
 
 .form-header h2 {
+  margin-top: 5rem;
   font-size: 1.8rem;
-  margin: 0;
 }
 
 .form label {
@@ -172,7 +164,7 @@ input[type="password"] {
 
 .secondary-btn .bi-facebook {
   color: #1877f3; /* Azul Facebook */
-  margin-right: 8px;
+  margin-right: 4px;
 }
 
 .checkbox a {
@@ -195,7 +187,7 @@ input[type="password"] {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
 .divider::before,
@@ -220,3 +212,11 @@ input[type="password"] {
   color: black;
   text-decoration: none;
 }
+
+.no-account {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+

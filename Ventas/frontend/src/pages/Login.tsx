@@ -35,7 +35,10 @@ const Login: React.FC = () => {
                 <form className="form" onSubmit={handleSubmit}>
                     <div className="form-header">
                         <h2>Ingresa</h2>
-                        <Link to="/register" className="ingresa-link">Crear cuenta</Link>
+                      <div className="no-account">
+                        <span>¿No tienes una cuenta?</span>
+                        <Link to="/register" className="ingresa-link">Crea una</Link>
+                      </div>
                     </div>
                     <Link to={'google.com'} className="secondary-btn" onClick={() => alert("Login con Google")}>
                         <i className="bi bi-google"></i>Continuar con Google
