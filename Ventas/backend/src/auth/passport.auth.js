@@ -1,36 +1,31 @@
-"use strict";
 import passport from "passport";
+import { Strategy as FacebookStrategy } from "passport-facebook";
+import { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, CALLBACK_URL } from "../config/configEnv.js";
 import User from "../entity/user.entity.js";
-import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
-import { ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
 import { AppDataSource } from "../config/configDb.js";
 
-const options = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: ACCESS_TOKEN_SECRET,
-};
+// 📌 **Configuración de Facebook Login**
+passport.use(new FacebookStrategy({
+  clientID: FACEBOOK_APP_ID,
+  clientSecret: FACEBOOK_APP_SECRET,
+  callbackURL: CALLBACK_URL,
+  profileFields: ["id", "displayName", "emails"]
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails?.[0]?.value;
+    const name = profile.displayName;
 
-passport.use(
-  new JwtStrategy(options, async (jwt_payload, done) => {
-    try {
-      const userRepository = AppDataSource.getRepository(User);
-      const user = await userRepository.findOne({
-        where: {
-          email: jwt_payload.email,
-        },
-      });
+    const userRepository = AppDataSource.getRepository(User);
+    let user = await userRepository.findOne({ where: { email } });
 
-      if (user) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
-    } catch (error) {
-      return done(error, false);
+    if (!user) {
+      user = await userRepository.save({ name, email, provider: "facebook" });
     }
-  }),
-);
 
-export function passportJwtSetup() {
-  passport.initialize();
-}
+    return done(null, user);
+  } catch (error) {
+    return done(error, false);
+  }
+}));
+
+export default passport;

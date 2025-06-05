@@ -58,7 +58,6 @@ const UsuarioSchema = new EntitySchema({
         rol: {
             type: "enum",
             enum: ["Cliente", "Empleado", "Administrador"],
-            default: "Cliente",
             nullable: false,
         },
         intentosFallidos: {
@@ -67,6 +66,20 @@ const UsuarioSchema = new EntitySchema({
             nullable: false,
         },
         fechaBloqueo: {
+            type: "timestamp with time zone",
+            nullable: true,
+        },
+        correoVerificado: {
+            type: "boolean",
+            default: false,
+            nullable: false,
+        },
+        tokenVerificacion: {
+            type: "varchar",
+            length: 255,
+            nullable: true,
+        },
+        verificacionTokenExpiracion: {
             type: "timestamp with time zone",
             nullable: true,
         },

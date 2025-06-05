@@ -1,5 +1,5 @@
 "use strict";
-import { loginService, registerService, recoverPasswordService } from "../services/auth.service.js";
+import { loginService, registerService, recoverPasswordService, verifyEmailService} from "../services/auth.service.js";
 import {
   authValidation,
   registerValidation,
@@ -77,6 +77,26 @@ export async function recoverPassword(req, res) {
     }
 
     handleSuccess(res, 200, "Contraseña actualizada con éxito");
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
+
+export async function verifyEmail(req, res) {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return handleErrorClient(res, 400, "Token de verificación requerido");
+    }
+
+    const [success, error] = await verifyEmailService(token);
+
+    if (error) {
+      return handleErrorClient(res, 400, "Error al verificar el correo", error);
+    }
+
+    handleSuccess(res, 200, "Correo verificado con éxito");
   } catch (error) {
     handleErrorServer(res, 500, error.message);
   }
