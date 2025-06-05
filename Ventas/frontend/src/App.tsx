@@ -1,15 +1,17 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useState } from 'react';
 
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Error404 from './pages/Error404';
 
-import Navbar from './components/Navbar';
+import Navbar from './components/Navbar'
 
-import reactLogo from './assets/react.svg';
-import viteLogo from '/puerta.png';
-import './App.css';
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/puerta.png'
+import './App.css'
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 
 function App() {
   const [count, setCount] = useState(0);
