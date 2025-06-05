@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Register.css"; 
+import "../styles/animations.css"; 
 import puertaImg from "../assets/TerplacFoto1.png";
+
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -27,15 +29,15 @@ function Register() {
   };
 
   return (
-    <div className="register-page">
+    <div className="register-page fade-in-left">
       <div className="left-side">
         <img src={puertaImg} alt="Terplac fondo" className="background-img" />
-        <div className="text-overlay">
+        <div className="text-overlay-login">
           <div className="dot"></div>
-          <h1>Bienvenido</h1>
-          <p>
-            Crea tu cuenta para una experiencia personalizada o ingresa con tu cuenta ya creada
-          </p>
+            <h1>Bienvenido</h1>
+            <p>
+              Crea tu cuenta para una experiencia personalizada o ingresa con tu cuenta ya creada
+            </p>
         </div>
       </div>
 

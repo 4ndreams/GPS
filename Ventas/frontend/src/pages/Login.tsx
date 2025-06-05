@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Login.css";
+import "../styles/animations.css"; 
 import puertaImg from "../assets/TerplacFoto1.png";
 
 const Login: React.FC = () => {
@@ -20,7 +21,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="login-page">
+        <div className="login-page fade-in-left">
             <div className="left-side">
                 <img src={puertaImg} alt="Terplac fondo" className="background-img" />
                 <div className="text-overlay-login">

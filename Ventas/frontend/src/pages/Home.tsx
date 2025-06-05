@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import TerplacFoto1 from '../assets/TerplacFoto1.png';
 import '../styles/Home.css';
+import '../styles/animations.css';
+
+
 
 function Home() {
   const heroContentRef = useRef<HTMLDivElement>(null);
@@ -118,7 +121,7 @@ function Home() {
   }, [nosotrosRefs]);
 
   return (
-    <div className="home-page">
+    <div className="home-page fade-in">
       <section className="hero-section">
         <img src={TerplacFoto1} alt="Terplac" className="hero-image" />
         <div className="hero-overlay"></div>
