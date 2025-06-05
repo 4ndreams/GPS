@@ -21,11 +21,12 @@ const UsuarioSchema = new EntitySchema({
             type: "varchar",
             length: 100,
             nullable: false,
+             default: "", // Agregado para evitar errores de null
         },
         rut: {
             type: "varchar",
             length: 12,
-            nullable: false,
+            nullable: true,
             unique: true,
         },
         email: {
@@ -37,7 +38,7 @@ const UsuarioSchema = new EntitySchema({
         password: {
             type: "varchar",
             length: 255,
-            nullable: false,
+            nullable: true, //Por mientras, cuando se haga el front se cambiará a false
         },
         flag_blacklist: {
             type: "boolean",
@@ -58,6 +59,7 @@ const UsuarioSchema = new EntitySchema({
         rol: {
             type: "enum",
             enum: ["Cliente", "Empleado", "Administrador"],
+            default: "Cliente",
             nullable: false,
         },
         intentosFallidos: {
