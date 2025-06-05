@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import TerplacFoto1 from '../assets/TerplacFoto1.png'
-import '../styles/Home.css'
+import TerplacFoto1 from '../assets/TerplacFoto1.png';
+import '../styles/Home.css';
 
 function Home() {
   const heroContentRef = useRef<HTMLDivElement>(null);
@@ -9,16 +9,56 @@ function Home() {
   const [visibleCards, setVisibleCards] = useState([false, false]);
 
   const nosotrosRefs = [
-  useRef<HTMLDivElement>(null),
-  useRef<HTMLDivElement>(null),
-  useRef<HTMLDivElement>(null)
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null)
   ];
   const [visibleNosotros, setVisibleNosotros] = useState([false, false, false]);
+
+  // Estado para los datos del formulario de contacto
+  const [formData, setFormData] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+    mensaje: ''
+  });
+
+  // Maneja cambios en inputs
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  // Maneja envío de formulario
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch('http://localhost:3000/api/contacto', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (res.ok) {
+        alert('¡Mensaje enviado correctamente!');
+        setFormData({ nombre: '', email: '', telefono: '', mensaje: '' });
+      } else {
+        alert('Ocurrió un error al enviar el mensaje');
+      }
+    } catch (error) {
+      console.error('Error al enviar mensaje:', error);
+      alert('Ocurrió un error al enviar el mensaje');
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      // Multiplica el scroll para que suba más rápido, cambiar el valor para ajustar velo
       const translateY = -scrollY * 1.5;
       if (heroContentRef.current) {
         heroContentRef.current.style.transform = `translateY(${translateY}px)`;
@@ -39,43 +79,43 @@ function Home() {
           entries.forEach(entry => {
             setVisibleCards(prev => {
               const updated = [...prev];
-              updated[idx] = entry.isIntersecting; // true si entra, false si sale
+              updated[idx] = entry.isIntersecting;
               return updated;
             });
           });
         },
         { threshold: 0.2 }
       );
-    observer.observe(ref.current);
-    observers.push(observer);
-  });
+      observer.observe(ref.current);
+      observers.push(observer);
+    });
 
-  return () => observers.forEach(o => o.disconnect());
-}, [cardRefs]);
+    return () => observers.forEach(o => o.disconnect());
+  }, [cardRefs]);
 
-useEffect(() => {
-  const observers: IntersectionObserver[] = [];
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
 
-  nosotrosRefs.forEach((ref, idx) => {
-    if (!ref.current) return;
-    const observer = new window.IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          setVisibleNosotros(prev => {
-            const updated = [...prev];
-            updated[idx] = entry.isIntersecting;
-            return updated;
+    nosotrosRefs.forEach((ref, idx) => {
+      if (!ref.current) return;
+      const observer = new window.IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            setVisibleNosotros(prev => {
+              const updated = [...prev];
+              updated[idx] = entry.isIntersecting;
+              return updated;
+            });
           });
-        });
-      },
-      { threshold: 0.2 }
-    );
-    observer.observe(ref.current);
-    observers.push(observer);
-  });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref.current);
+      observers.push(observer);
+    });
 
-  return () => observers.forEach(o => o.disconnect());
-}, [nosotrosRefs]);
+    return () => observers.forEach(o => o.disconnect());
+  }, [nosotrosRefs]);
 
   return (
     <div className="home-page">
@@ -94,7 +134,7 @@ useEffect(() => {
                   contacto.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              >
+            >
               Ver productos
             </button>
             <button
@@ -104,7 +144,7 @@ useEffect(() => {
                   contacto.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
-              >
+            >
               Contacto
             </button>
           </div>
@@ -113,36 +153,36 @@ useEffect(() => {
     
       <section id='productos-destacados' className='products-section'>
         <div className="hero-content-mobile">
-            <h1 style={{ color: 'black' }}>Nuestros Productos</h1>
-            <hr style={{ borderColor: 'black' }} />
+          <h1 style={{ color: 'black' }}>Nuestros Productos</h1>
+          <hr style={{ borderColor: 'black' }} />
         </div>
         <div className="card-container">
-            <div
-              ref={cardRefs[0]}
-              className={`card card-puertas${visibleCards[0] ? ' visible' : ''}`}
-            >                
-              <h1>Puertas</h1>
-                <p className="hero-subtitle">Elegancia y seguridad para cada entrada</p>
-                <div className="hero-buttons">
-                    <button>Ver puertas</button>
-                </div>
+          <div
+            ref={cardRefs[0]}
+            className={`card card-puertas${visibleCards[0] ? ' visible' : ''}`}
+          >                
+            <h1>Puertas</h1>
+            <p className="hero-subtitle">Elegancia y seguridad para cada entrada</p>
+            <div className="hero-buttons">
+              <button>Ver puertas</button>
             </div>
-            <div
-              ref={cardRefs[1]}
-              className={`card card-molduras${visibleCards[1] ? ' visible' : ''}`}
-            >
-                <h1>Marcos y Molduras</h1>
-                <p className="hero-subtitle">Detalles que transforman cualquier espacio</p>
-                <div className="hero-buttons">
-                    <button>Ver marcos y molduras</button>
-                </div>
+          </div>
+          <div
+            ref={cardRefs[1]}
+            className={`card card-molduras${visibleCards[1] ? ' visible' : ''}`}
+          >
+            <h1>Marcos y Molduras</h1>
+            <p className="hero-subtitle">Detalles que transforman cualquier espacio</p>
+            <div className="hero-buttons">
+              <button>Ver marcos y molduras</button>
             </div>
+          </div>
         </div>
       </section>
       <section className='products-section'>
         <div className="hero-content-mobile">
-            <h1 style={{ color: 'black' }}>Productos destacados</h1>
-            <hr style={{ borderColor: 'black' }} />
+          <h1 style={{ color: 'black' }}>Productos destacados</h1>
+          <hr style={{ borderColor: 'black' }} />
         </div>
         <div className="hero-buttons">
           <button>Ver todos los productos</button>
@@ -150,14 +190,14 @@ useEffect(() => {
       </section>
       <section className='nosotros-section black-bg'>
         <div className="hero-content-mobile">
-            <h1 style={{ color: 'white' }}>¿Por qué elegir Terplac?</h1>
+          <h1 style={{ color: 'white' }}>¿Por qué elegir Terplac?</h1>
         </div>
         
         <div className="nosotros-cards-container">
           <div
-              ref={nosotrosRefs[0]}
-              className={`card card-nosotros${visibleNosotros[0] ? ' visible' : ''}`}
-            >
+            ref={nosotrosRefs[0]}
+            className={`card card-nosotros${visibleNosotros[0] ? ' visible' : ''}`}
+          >
             <span className="circle-indicator"></span>
             <h1>Calidad Premium</h1>
             <p className="hero-subtitle">Utilizamos los mejores materiales nacionales e internacionales para garantizar durabilidad y elegancia en cada producto.</p>
@@ -179,7 +219,6 @@ useEffect(() => {
             <p className="hero-subtitle">Todos nuestros modelos de puertas cumplen con certificación según norma NCH354 / NCH723.</p>
           </div>
         </div>
-
       </section>
 
       <section id='contacto' className='nosotros-section contacto-section'>
@@ -203,66 +242,49 @@ useEffect(() => {
             <h2>Instagram</h2>
           </div>
           <div className='card card-contacto'>
-            <form>
+            <form onSubmit={handleSubmit}>
               <label>Nombre</label>
-              <input type="text" placeholder="Tu nombre" />
+              <input
+                type="text"
+                name="nombre"
+                placeholder="Tu nombre"
+                value={formData.nombre}
+                onChange={handleChange}
+                required
+              />
               <label>Email</label>
-              <input type="email" placeholder="Tu correo electrónico" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Tu correo electrónico"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
               <label>Teléfono</label>
-              <input type="tel" placeholder="Tu número de teléfono" />
+              <input
+                type="tel"
+                name="telefono"
+                placeholder="Tu número de teléfono"
+                value={formData.telefono}
+                onChange={handleChange}
+                required
+              />
               <label>Mensaje</label>
-              <textarea placeholder="¿En qué podemos ayudarte?"></textarea>
+              <textarea
+                name="mensaje"
+                placeholder="¿En qué podemos ayudarte?"
+                value={formData.mensaje}
+                onChange={handleChange}
+                required
+              />
               <button type="submit">Enviar Mensaje</button>
             </form>
           </div>
         </div>
       </section>
-      <section className="nosotros-section black-bg footer-section">
-  <div className="footer-container">
-    {/* Logo y descripción */}
-    <div className="footer-col footer-logo-desc">
-      <h1>TERPLAC</h1>
-      <p className="footer-desc">
-        Especialistas en puertas y molduras de alta calidad para transformar cualquier espacio.
-      </p>
     </div>
-    {/* Productos */}
-    <div className="footer-col">
-      <h3>Productos</h3>
-      <ul className="footer-list">
-        <li>Puertas Interiores</li>
-        <li>Puertas Exteriores</li>
-        <li>Marcos</li>
-        <li>Molduras</li>
-      </ul>
-    </div>
-    {/* Enlaces */}
-    <div className="footer-col">
-      <h3>Enlaces</h3>
-      <ul className="footer-list">
-        <li>Inicio</li>
-        <li>Productos</li>
-        <li>Nosotros</li>
-        <li>Contacto</li>
-        <li>Cotizar</li>
-      </ul>
-    </div>
-    {/* Contacto */}
-    <div className="footer-col">
-      <h3>Contacto</h3>
-      <ul className="footer-list">
-        <li>Lincoyan 880 - Concepción</li>
-        <li>+56984184801 / 412223967</li>
-        <li>info@terplac.cl</li>
-        <li>Facebook</li>
-        <li>Instagram</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-    </div>
-  )
+  );
 }
 
-export default Home
+export default Home;
