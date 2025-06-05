@@ -25,7 +25,7 @@ const Login: React.FC = () => {
                 <img src={puertaImg} alt="Terplac fondo" className="background-img" />
                 <div className="text-overlay-login">
                     <div className="dot"></div>
-                        <h1>Bienvenido de nuevo</h1>
+                        <h1>Bienvenido</h1>
                         <p>
                             Ingresa con tu cuenta para continuar usando la plataforma.
                         </p>
