@@ -332,7 +332,15 @@
   width: 100%;                
   margin-bottom: 0.5rem;      
   box-sizing: border-box;
+  transition: background 0.25s cubic-bezier(.77,0,.18,1), box-shadow 0.2s;
 }
+
+.card-contacto button:hover {
+  background: #a11616;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(236,34,31,0.15);
+}
+
 .card-contacto label {
   display: block;
   width: 100%;

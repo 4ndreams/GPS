@@ -314,6 +314,46 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <section className="nosotros-section black-bg footer-section">
+        <div className="footer-container">
+          <div className="footer-col footer-logo-desc">
+          <h1>TERPLAC</h1>
+          <p className="footer-desc">
+            Especialistas en puertas y molduras de alta calidad para transformar cualquier espacio.
+          </p>
+          </div>
+          <div className="footer-col">
+            <h3>Productos</h3>
+            <ul className="footer-list">
+              <li>Puertas Interiores</li>
+              <li>Puertas Exteriores</li>
+              <li>Marcos</li>
+              <li>Molduras</li>
+            </ul>
+          </div>
+          <div className="footer-col">
+            <h3>Enlaces</h3>
+            <ul className="footer-list">
+              <li>Inicio</li>
+              <li>Productos</li>
+              <li>Nosotros</li>
+              <li>Contacto</li>
+              <li>Cotizar</li>
+            </ul>
+          </div>
+          <div className="footer-col">
+            <h3>Contacto</h3>
+            <ul className="footer-list">
+              <li>Lincoyan 880 - Concepción</li>
+              <li>+56984184801 / 412223967</li>
+              <li>info@terplac.cl</li>
+              <li>Facebook</li>
+              <li>Instagram</li>
+            </ul>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
