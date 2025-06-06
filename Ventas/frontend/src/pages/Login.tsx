@@ -8,9 +8,14 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
       const response = await fetch("http://localhost:3000/api/login", {
         method: "POST",
@@ -84,18 +89,32 @@ const Login: React.FC = () => {
           />
 
           <label>Contraseña</label>
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="password-input-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="toggle-password-btn"
+              onClick={() => setShowPassword((prev) => !prev)}
+              tabIndex={-1}
+              aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+            >
+              {showPassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+            </button>
+          </div>
 
           {error && <span className="error-msg">{error}</span>}
 
-          <button type="submit" className="submit-btn">
-            Entrar
+          <button type="submit" 
+                  className="submit-btn"
+                disabled={!email.trim() || !password.trim() || loading}
+          >
+              Ingresar
           </button>
 
           <div className="divider"><span>o</span></div>
