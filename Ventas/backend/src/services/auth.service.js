@@ -34,6 +34,9 @@ export async function loginService(user) {
       return [null, createErrorMessage("email", "Cuenta temporalmente bloqueada por intentos fallidos. Intenta más tarde.")];
     }
 
+    console.log("userFound.password:", userFound.password);
+    console.log("Tipo de userFound.password:", typeof userFound.password);
+
     const isMatch = await comparePassword(password, userFound.password);
 
     if (!isMatch) {

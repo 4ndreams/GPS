@@ -208,6 +208,7 @@ input[type="password"] {
   padding: 12px;
   text-align: center;
   border-radius: 24px;
+  background-color: white;
   border: 1px solid #ccc;
   color: black;
   text-decoration: none;
@@ -219,4 +220,3 @@ input[type="password"] {
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
-
