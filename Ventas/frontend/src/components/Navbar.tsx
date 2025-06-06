@@ -35,14 +35,16 @@ function Navbar() {
 
         {/* Iconos (carrito y perfil) */}
         <div className="navbar-icons">
-          <Link to="/carrito" className="position-relative text-dark">
-            <i className="bi bi-cart"></i>
-            {cartItemCount > 0 && (
-              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {cartItemCount}
-              </span>
-            )}
-          </Link>
+          <div className="cart-icon-wrapper">
+            <Link to="/carrito" className="position-relative text-dark">
+              <i className="bi bi-cart"></i>
+              {cartItemCount > 0 && (
+                <span className="cart-badge">
+                  {cartItemCount}
+                </span>
+              )}
+            </Link>
+          </div>
           <Link to="/login" className="text-dark">
             <i className="bi bi-person"></i>
           </Link>

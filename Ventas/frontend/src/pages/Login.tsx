@@ -62,6 +62,11 @@ const Login: React.FC = () => {
 
       <div className="right-side">
         <form className="form" onSubmit={handleSubmit}>
+          <div className="back-home-row">
+            <Link to="/" className="back-home-btn">
+              <i className="bi bi-arrow-left"></i> Volver al inicio
+            </Link>
+          </div>
           <div className="form-header">
             <h2>Ingresa</h2>
             <div className="no-account">

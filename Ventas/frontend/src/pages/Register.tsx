@@ -73,6 +73,11 @@ function Register() {
 
       <div className="right-side">
         <form className="form" onSubmit={handleSubmit}>
+          <div className="back-home-row">
+              <Link to="/" className="back-home-btn">
+              <i className="bi bi-arrow-left"></i> Volver al inicio
+            </Link>
+          </div>
           <div className="form-header">
             <h2>Crea una cuenta</h2>
             <Link to="/login" className="ingresa-link">Ingresa</Link>
