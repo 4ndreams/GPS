@@ -38,7 +38,7 @@ const UsuarioSchema = new EntitySchema({
         password: {
             type: "varchar",
             length: 255,
-            nullable: true, //Por mientras, cuando se haga el front se cambiará a false
+            nullable: true, // Puede ser null si el usuario se registra con OAuth
         },
         flag_blacklist: {
             type: "boolean",
