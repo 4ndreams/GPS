@@ -1,10 +1,16 @@
+// src/components/Navbar.jsx
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/LogoTerPlac.svg';
 import '../styles/Navbar.css';
 
 function Navbar() {
-  const cartItemCount = 3; // Valor de prueba. Puedes usar contexto o props si lo necesitas dinámico
+  const [isOpen, setIsOpen] = useState(false);
+  const cartItemCount = 3; // Reemplaza por lógica dinámica si quieres
 
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   return (
     <nav className="navbar">
@@ -12,25 +18,23 @@ function Navbar() {
         <Link to="/" className="navbar-brand">
           <img src={logo} alt="Logo" className="logo-navbar" />
         </Link>
-        <ul className="navbar-menu">
-          <li>
-            <Link to="/" className="navbar-link">Inicio</Link>
-          </li>
-          <li>
-            <Link to="/productos" className="navbar-link">Productos</Link>
-          </li>
-          <li>
-            <Link to="/acerca-de" className="navbar-link">Acerca de</Link>
-          </li>
-          <li>
-            <Link to="/contacto" className="navbar-link">Contacto</Link>
-          </li>
-          <li>
-            <Link to="/cotizar" className="navbar-link">Cotizar</Link>
-          </li>
+
+        {/* Botón hamburguesa solo en pantallas pequeñas */}
+        <button className="menu-toggle" onClick={toggleMenu}>
+          <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
+        </button>
+
+        {/* Menú de navegación */}
+        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
+          <li><Link to="/" className="navbar-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
+          <li><Link to="/productos" className="navbar-link" onClick={() => setIsOpen(false)}>Productos</Link></li>
+          <li><Link to="/acerca-de" className="navbar-link" onClick={() => setIsOpen(false)}>Acerca de</Link></li>
+          <li><Link to="/contacto" className="navbar-link" onClick={() => setIsOpen(false)}>Contacto</Link></li>
+          <li><Link to="/cotizar" className="navbar-link" onClick={() => setIsOpen(false)}>Cotizar</Link></li>
         </ul>
 
-        <div className="navbar-icons d-flex align-items-center gap-3">
+        {/* Iconos (carrito y perfil) */}
+        <div className="navbar-icons">
           <Link to="/carrito" className="position-relative text-dark">
             <i className="bi bi-cart"></i>
             {cartItemCount > 0 && (
@@ -42,7 +46,7 @@ function Navbar() {
           <Link to="/login" className="text-dark">
             <i className="bi bi-person"></i>
           </Link>
-        </div>    
+        </div>
       </div>
     </nav>
   );

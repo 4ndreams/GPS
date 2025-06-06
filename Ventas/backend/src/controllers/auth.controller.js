@@ -84,7 +84,7 @@ export async function recoverPassword(req, res) {
 
 export async function verifyEmail(req, res) {
   try {
-    const { token } = req.body;
+    const { token } = req.query;
 
     if (!token) {
       return handleErrorClient(res, 400, "Token de verificación requerido");

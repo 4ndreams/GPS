@@ -10,7 +10,7 @@ router
   .post("/register", register)
   .post("/logout", logout)
   .post("/recover-password", recoverPassword)
-  .post("/verify-email", verifyEmail);
+  .get("/verify-email", verifyEmail);
 
 router.get("/auth/facebook",
   passport.authenticate("facebook", { scope: ["email", "public_profile"] })
