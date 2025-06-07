@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import "../styles/Login.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
+import Notification from "../components/Notification";
+
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -10,6 +12,8 @@ const Login: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,15 +33,19 @@ const Login: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Error al iniciar sesión");
+        setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
+        setLoading(false);        
         return;
       }
 
-      setError("");
-      alert("Inicio de sesión exitoso");
+      setNotification({ message: "Inicio de sesión exitoso", type: "success" });
+
       // aquí podrías redirigir con navigate("/dashboard") si usas react-router
     } catch (err) {
-      setError("Error en el servidor");
+            setNotification({ message: "Error en el servidor", type: "error" });
+
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,7 +121,13 @@ const Login: React.FC = () => {
             </button>
           </div>
 
-          {error && <span className="error-msg">{error}</span>}
+          {notification && (
+            <Notification
+              message={notification.message}
+              type={notification.type}
+              onClose={() => setNotification(null)}
+            />
+          )}
 
           <button type="submit" 
                   className="submit-btn"

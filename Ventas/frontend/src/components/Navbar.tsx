@@ -1,16 +1,29 @@
-// src/components/Navbar.jsx
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/LogoTerPlac.svg';
 import '../styles/Navbar.css';
 
+
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const cartItemCount = 3; // Reemplaza por lógica dinámica si quieres
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const cartItemCount = 1; // Reemplaza por lógica dinámica si quieres
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="navbar">
@@ -45,9 +58,28 @@ function Navbar() {
               )}
             </Link>
           </div>
-          <Link to="/login" className="text-dark">
-            <i className="bi bi-person"></i>
-          </Link>
+           <div className="user-menu-wrapper" ref={userMenuRef}>
+            <button
+              className="btn btn-outline-primary d-flex align-items-center user-menu-btn"
+              onClick={() => setUserMenuOpen((open) => !open)}
+              type="button"
+            >
+              <i className="bi bi-person"></i>
+              <span style={{ lineHeight: "1.1", textAlign: "left" }}>
+                Ingresar
+              </span>
+            </button>
+            {userMenuOpen && (
+              <div className="user-dropdown">
+                <Link to="/login" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                  Iniciar sesión
+                </Link>
+                <Link to="/register" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                  Registrarse
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

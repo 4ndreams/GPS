@@ -7,7 +7,7 @@
 .back-home-row {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: 0%;
 }
 
 .back-home-btn {
@@ -38,6 +38,7 @@
 .back-home-btn,
 .back-home-btn-inline {
   color: #111 !important;
+  margin-top: 8px;
   text-decoration: none;
   font-weight: 500;
   background: none;
@@ -165,6 +166,7 @@
 }
 
 .form-header {
+  margin-top: 1px;
   display: flex;
   justify-content: space-between;
   align-items: center;

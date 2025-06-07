@@ -43,3 +43,7 @@ export const loginWithFacebook = async () => {
     throw error;
   }
 };
+
+export const verifyEmail = async (token: string) => {
+  return axios.get(`${API_BASE_URL}/verify-email`, { params: { token } });
+};

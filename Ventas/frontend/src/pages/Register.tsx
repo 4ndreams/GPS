@@ -2,11 +2,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Notification from "../components/Notification";
 import "../styles/Register.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
 
-function formatRut(rut) {
+
+function formatRut(rut: string) {
   rut = rut.replace(/\./g, "").replace(/-/g, "").toUpperCase();
   if (rut.length < 2) return rut;
   const body = rut.slice(0, -1);
@@ -26,6 +28,7 @@ function Register() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -51,10 +54,10 @@ function Register() {
         password: formData.password,
       });
 
-      setSuccess("Confirma tu correo electrónico para continuar.");
+      setNotification({ message: "Confirma tu correo electrónico para continuar.", type: "success" });
     } catch (err) {
       console.error(err);
-      setError("Error al registrar. Verifica los campos.");
+      setNotification({ message: "Error al registrar. Verifica los campos.", type: "error" });
     }
   };
 
@@ -98,8 +101,13 @@ function Register() {
             Crea una cuenta
           </button>
 
-          {error && <p className="error">{error}</p>}
-          {success && <p className="success">{success}</p>}
+          {notification && (
+            <Notification
+              message={notification.message}
+              type={notification.type}
+              onClose={() => setNotification(null)}
+            />
+          )}
 
           <div className="divider">
             <span>0</span>
