@@ -36,6 +36,22 @@
   padding: 2rem;
 }
 
-.profile-info h2 {
-  color: #2563eb;
+/* ...existing code... */
+.profile-info {
+  margin-top: 24px; /* Reduce si es muy grande */
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 }
+
+.profile-info h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.5em;
+  color: #222;
+}
+/* ...existing code... */

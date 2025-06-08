@@ -5,15 +5,15 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 // Función para iniciar sesión con email y contraseña
 export const loginUser = async (email: string, password: string) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/login`, { email, password });
-    console.log("Login response:", response.data);
-    if (response.data.token) {
-      console.log("Token recibido:", response.data.token);
-      localStorage.setItem('token', response.data.token);
+    const response = await axios.post(`${API_BASE_URL}/login`, 
+      { email, 
+        password 
+      });
+    if (response.data.data.token) {
+      localStorage.setItem('token', response.data.data.token);
     }
     return response.data;
   } catch (error: any) {
-    console.error("Error en el login:", error.response?.data ?? error.message);
     throw error;
   }
 };

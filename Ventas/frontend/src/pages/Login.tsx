@@ -4,7 +4,7 @@ import "../styles/Login.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
 import Notification from "../components/Notification";
-
+import { loginUser } from "../services/authService";
 
 const Login: React.FC = () => {
   const navigate = useNavigate(); 
@@ -18,40 +18,30 @@ const Login: React.FC = () => {
 
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        credentials: "include", // para cookies JWT
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const data = await loginUser(email, password);
 
-      const data = await response.json();
-      console.log("Respuesta login:", data);
-      if (!response.ok) {
-        setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
-        setLoading(false);        
-        return;
-      }
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-
-      setNotification({ message: "Inicio de sesión exitoso", type: "success" });
-      navigate("/profile");
-      // aquí podrías redirigir con navigate("/dashboard") si usas react-router
-    } catch (err) {
-            setNotification({ message: "Error en el servidor", type: "error" });
-
-    } finally {
+    const token = data.data?.token;
+    
+    if (!token) {
+      setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
       setLoading(false);
+      return;
     }
-  };
+
+    setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
+    setTimeout(() => {
+      navigate("/profile");
+    }, 800);
+  } catch (err: any) {
+    setNotification({ message: err.response?.data?.message || "Error en el servidor", type: "error" });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/api/auth/google";

@@ -1,16 +1,15 @@
 .navbar {
   background: #FFFFFF;
-  padding: 0.1rem 0;  
+  padding: 1rem 0;   /* Aumenta el padding para más altura */
   width: 100vw;
   position: fixed;
+  top: 0;            /* Asegura que esté pegado arriba */
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
   box-sizing: border-box;
-    z-index: 1000;
-
-
+  z-index: 1000;
 }
 
 

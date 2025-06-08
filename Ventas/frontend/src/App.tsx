@@ -11,17 +11,30 @@ import Navbar from './components/Navbar'
 
 import './App.css'
 import 'bootstrap-icons/font/bootstrap-icons.css';
-
+import React, { useEffect, useState } from "react";
+import { getUserProfile } from './services/userService.ts';
 
 function App() {
   const location = useLocation();
 
   const hideNavbarRoutes = ["/login", "/register"];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    getUserProfile()
+      .then((data) => setUser(data))
+      .catch(() => setUser(null)); // Si no hay token o error, usuario no logueado
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+    // Redirige si quieres: window.location.href = "/login";
+  };
   return (
     <>
-      {!shouldHideNavbar && <Navbar />}
+      {!shouldHideNavbar && <Navbar user={user} onLogout={handleLogout} />}
 
       <Routes>
         <Route path="/" element={<Home />} />
