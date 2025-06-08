@@ -4,7 +4,7 @@ import passport from "passport";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
-
+import jwt from "jsonwebtoken";
 import {
   FACEBOOK_APP_ID,
   FACEBOOK_APP_SECRET,

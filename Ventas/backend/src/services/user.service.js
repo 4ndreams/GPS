@@ -127,3 +127,21 @@ export async function deleteUserService(query) {
     return [null, "Error interno del servidor"];
   }
 }
+
+export async function getProfileService(userId) {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+
+    const userFound = await userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!userFound) return [null, "Usuario no encontrado"];
+
+    const { password, ...userData } = userFound;
+
+    return [userData, null];
+  } catch (error) {
+    return [null, "Error interno del servidor", error];
+  }
+}

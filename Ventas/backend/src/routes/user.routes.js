@@ -7,9 +7,12 @@ import {
   getUser,
   getUsers,
   updateUser,
+  getProfile,
 } from "../controllers/user.controller.js";
 
 const router = Router();
+
+router.get("/profile", getProfile);
 
 router
   .use(authenticateJwt)

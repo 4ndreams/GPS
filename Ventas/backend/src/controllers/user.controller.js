@@ -4,6 +4,7 @@ import {
   getUserService,
   getUsersService,
   updateUserService,
+  getProfileService
 } from "../services/user.service.js";
 import {
   userBodyValidation,
@@ -130,6 +131,20 @@ export async function deleteUser(req, res) {
       );
 
     handleSuccess(res, 200, "Usuario eliminado correctamente", userDelete);
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
+
+export async function getProfile(req, res) {
+  try {
+    const userId = req.user.id; 
+    console.log("User ID from request:", userId);
+    const [user, errorUser] = await getProfileService(userId);
+    console.log("User profile:", user);
+    if (errorUser) return handleErrorClient(res, 404, errorUser);
+
+    handleSuccess(res, 200, "Perfil de usuario obtenido", user);
   } catch (error) {
     handleErrorServer(res, 500, error.message);
   }
