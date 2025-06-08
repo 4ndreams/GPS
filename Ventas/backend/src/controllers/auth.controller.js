@@ -3,7 +3,7 @@ import { loginService, registerService, recoverPasswordService, verifyEmailServi
 import {
   authValidation,
   registerValidation,
-} from "../validation/auth.validation.js";
+} from "../validations/auth.validation.js";
 import {
   handleErrorClient,
   handleErrorServer,

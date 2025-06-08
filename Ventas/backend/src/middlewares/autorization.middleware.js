@@ -1,5 +1,5 @@
-import User from "../src/entity/user.entity.js";
-import { AppDataSource } from "../src/config/configDb.js";
+import User from "../entity/user.entity.js";
+import { AppDataSource } from "../config/configDb.js";
 import {
 handleErrorClient,
 handleErrorServer,
