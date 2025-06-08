@@ -138,10 +138,10 @@ export async function deleteUser(req, res) {
 
 export async function getProfile(req, res) {
   try {
-    const userId = req.user.id; 
-    console.log("User ID from request:", userId);
+    // Usa el campo correcto según tu req.user
+    const userId = req.user?.id_usuario;
+
     const [user, errorUser] = await getProfileService(userId);
-    console.log("User profile:", user);
     if (errorUser) return handleErrorClient(res, 404, errorUser);
 
     handleSuccess(res, 200, "Perfil de usuario obtenido", user);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
@@ -7,6 +7,7 @@ import Notification from "../components/Notification";
 
 
 const Login: React.FC = () => {
+  const navigate = useNavigate(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,15 +32,18 @@ const Login: React.FC = () => {
       });
 
       const data = await response.json();
-
+      console.log("Respuesta login:", data);
       if (!response.ok) {
         setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
         setLoading(false);        
         return;
       }
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
 
       setNotification({ message: "Inicio de sesión exitoso", type: "success" });
-
+      navigate("/profile");
       // aquí podrías redirigir con navigate("/dashboard") si usas react-router
     } catch (err) {
             setNotification({ message: "Error en el servidor", type: "error" });

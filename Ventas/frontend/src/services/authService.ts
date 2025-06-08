@@ -6,9 +6,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 export const loginUser = async (email: string, password: string) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/login`, { email, password });
+    console.log("Login response:", response.data);
+    if (response.data.token) {
+      console.log("Token recibido:", response.data.token);
+      localStorage.setItem('token', response.data.token);
+    }
     return response.data;
   } catch (error: any) {
-    console.error("Error en el login:", error.response?.data || error.message);
+    console.error("Error en el login:", error.response?.data ?? error.message);
     throw error;
   }
 };
@@ -19,7 +24,7 @@ export const registerUser = async (userData: any) => {
     const response = await axios.post(`${API_BASE_URL}/register`, userData);
     return response.data;
   } catch (error: any) {
-    console.error("Error en el registro:", error.response?.data || error.message);
+    console.error("Error en el registro:", error.response?.data ?? error.message);
     throw error;
   }
 };

@@ -113,7 +113,7 @@ export async function deleteUserService(query) {
 
     if (!userFound) return [null, "Usuario no encontrado"];
 
-    if (userFound.rol === "administrador") {
+    if (userFound.rol === "Administrador") {
       return [null, "No se puede eliminar un usuario con rol de administrador"];
     }
 
@@ -130,10 +130,12 @@ export async function deleteUserService(query) {
 
 export async function getProfileService(userId) {
   try {
+    if (!userId) return [null, "ID de usuario no proporcionado"];
+
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: { id: userId },
+      where: { id_usuario: userId },
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
@@ -142,6 +144,7 @@ export async function getProfileService(userId) {
 
     return [userData, null];
   } catch (error) {
-    return [null, "Error interno del servidor", error];
+    console.error("Error al obtener el perfil del usuario:", error);
+    return [null, "Error interno del servidor"];
   }
 }

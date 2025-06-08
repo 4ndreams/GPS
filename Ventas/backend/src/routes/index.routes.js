@@ -13,6 +13,6 @@ router.get("/", (req, res) => {
 
 router.use(authRoutes);       
 router.use(contactRoutes);  
-router.use(userRoutes);  
+router.use('/users',userRoutes);  // IMPORTANTE USAR EL PATH /XXXX ANTES DE LAS RUTAS
 
 export default router;

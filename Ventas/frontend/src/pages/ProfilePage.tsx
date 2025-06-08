@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ProfileInfo from "../components/ProfileInfo";
-import "../styles/ProfilePage.css";
+import "../styles/ProfileInfo.css";
 
 const tabs = [
   { key: "info", label: "Mi Perfil" },
