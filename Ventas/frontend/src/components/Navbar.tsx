@@ -17,7 +17,7 @@ interface NavbarProps {
 function Navbar({user, onLogout}: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const cartItemCount = 1; // Reemplaza por lógica dinámica si quieres
+  const cartItemCount = 1; 
   const userMenuRef = useRef<HTMLDivElement>(null);
 
 

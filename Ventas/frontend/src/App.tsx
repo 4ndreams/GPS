@@ -24,8 +24,9 @@ function App() {
   useEffect(() => {
     getUserProfile()
       .then((data) => setUser(data))
-      .catch(() => setUser(null)); // Si no hay token o error, usuario no logueado
+      .catch(() => setUser(null)); 
   }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -35,8 +36,7 @@ function App() {
   return (
     <>
       {!shouldHideNavbar && <Navbar user={user} onLogout={handleLogout} />}
-
-      <Routes>
+        <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<Error404 />} />
@@ -45,7 +45,6 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
 
       </Routes>
-
     </>
   );
 }

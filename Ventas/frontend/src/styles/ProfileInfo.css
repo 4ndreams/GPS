@@ -1,12 +1,15 @@
 .profile-page {
   display: flex;
-  min-height: 70vh;
+  min-height: 100vh;      /* Ocupa todo el alto de la pantalla */
+  width: 100vw;    
   background: #f4f6fa;
+  margin-top: 98.4px; /* Mueve el margin-top aquí */
+
 }
 
 .profile-sidebar {
-  min-width: 180px;
-  background: #1e293b;
+  min-width: 150px;
+  background: #a11616;
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
@@ -25,19 +28,38 @@
   transition: background 0.2s;
 }
 
+button,
+.profile-edit-btn,
+.sidebar-tab {
+  outline: none;
+}
+
+button:focus,
+.profile-edit-btn:focus,
+.sidebar-tab:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .sidebar-tab.active,
 .sidebar-tab:hover {
-  background: #2563eb;
+  background: #EC221F;
   color: #fff;
 }
 
 .profile-content {
-  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   padding: 2rem;
+  width: 100%;
+  min-height: 100%;
 }
 
 /* ...existing code... */
 .profile-info {
+  text-align: left;
+  align-items: flex-start;
   margin-top: 24px; /* Reduce si es muy grande */
   padding: 16px;
   background: #fff;
@@ -47,11 +69,168 @@
   margin-left: auto;
   margin-right: auto;
 }
+.profile-title {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem; /* Igual que los botones */
+  text-align: left;
+}
+.profile-title i {
+  font-size: 1.4em; /* Ajusta el tamaño del icono si lo deseas */
+  margin-right: 0.5em;
+}
 
 .profile-info h2 {
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 1.5em;
   color: #222;
+  font-weight: 700;
+  flex: 1;
 }
 /* ...existing code... */
+
+
+.profile-info-card {
+  text-align: left;
+  align-items: flex-start;
+  background: #fff;
+  border: none;
+  border-radius: 22px;           
+  width: 100%;
+  max-width: 1200px;             
+  margin: 0 auto;
+  padding: 18px 24px 18px 24px;  
+  box-shadow: 0 6px 32px rgba(30, 41, 59, 0.10), 0 1.5px 6px rgba(30, 41, 59, 0.06); /* Sombra suave */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;                     
+  transition: box-shadow 0.2s;
+}
+
+.profile-info-main {
+  text-align: left;
+  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+.profile-info-header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  position: relative;
+  padding-right: 0; 
+}
+
+.profile-info-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.profile-edit-btn {
+  position: static; 
+  background: none;
+  border: none;
+  color: #222;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 30px;
+}
+
+.profile-label {
+  color: #222;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.profile-value {
+  color: #444;
+  font-size: 1.05rem;
+  font-weight: 400;
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+
+
+.profile-newsletter-box {
+  text-align: left;
+  align-items: flex-start;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fafafa;
+  margin-top: 0;
+}
+
+.profile-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.sidebar-toggle-btn {
+  display: none;
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 1201;
+  background: #a11616;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 0.7em;
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .sidebar-toggle-btn {
+    display: block;
+  }
+  .profile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -220px;
+    width: 200px;
+    height: 100vh;
+    background: #a11616;
+    z-index: 1200;
+    transition: left 0.3s cubic-bezier(.77,0,.18,1);
+    box-shadow: 2px 0 16px rgba(0,0,0,0.08);
+    padding-top: 60px;
+  }
+  .profile-sidebar.open {
+    left: 0;
+  }
+  .profile-content {
+    padding-top: 80px;
+    margin-left: 0 !important;
+  }
+  .profile-info-main {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .profile-info-card {
+    padding: 16px 6px;
+  }
+  .profile-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
