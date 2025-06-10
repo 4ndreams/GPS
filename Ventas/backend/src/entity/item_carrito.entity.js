@@ -1,4 +1,4 @@
-"use strtict";
+"use strict";
 import { EntitySchema } from "typeorm";
 import VentaSchema from "./venta.entity.js";
 import ProductoSchema from "./producto.entity.js";

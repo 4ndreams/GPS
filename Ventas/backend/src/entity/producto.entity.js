@@ -2,8 +2,6 @@
 import { EntitySchema } from "typeorm";
 import MaterialSchema from "./material.entity.js";
 import TipoSchema from "./tipo.entity.js";
-
-
 const ProductoSchema = new EntitySchema({
     name: "Producto",
     tableName: "productos",
@@ -82,5 +80,4 @@ const ProductoSchema = new EntitySchema({
         },
     },
 });
-
 export default ProductoSchema;

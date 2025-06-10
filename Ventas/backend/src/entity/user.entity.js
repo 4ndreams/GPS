@@ -21,11 +21,12 @@ const UsuarioSchema = new EntitySchema({
             type: "varchar",
             length: 100,
             nullable: false,
+             default: "", // Agregado para evitar errores de null
         },
         rut: {
             type: "varchar",
             length: 12,
-            nullable: false,
+            nullable: true,
             unique: true,
         },
         email: {
@@ -37,7 +38,7 @@ const UsuarioSchema = new EntitySchema({
         password: {
             type: "varchar",
             length: 255,
-            nullable: false,
+            nullable: true, // Puede ser null si el usuario se registra con OAuth
         },
         flag_blacklist: {
             type: "boolean",
@@ -67,6 +68,20 @@ const UsuarioSchema = new EntitySchema({
             nullable: false,
         },
         fechaBloqueo: {
+            type: "timestamp with time zone",
+            nullable: true,
+        },
+        correoVerificado: {
+            type: "boolean",
+            default: false,
+            nullable: false,
+        },
+        tokenVerificacion: {
+            type: "varchar",
+            length: 255,
+            nullable: true,
+        },
+        verificacionTokenExpiracion: {
             type: "timestamp with time zone",
             nullable: true,
         },

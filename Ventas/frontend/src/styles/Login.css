@@ -1,0 +1,323 @@
+.login-page {
+  display: flex;
+  height: 100vh;
+  font-family: "Inter", sans-serif;
+}
+/* Botón volver al inicio sobre el título */
+.back-home-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0%;
+}
+
+.back-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  color: #ff6600;
+  text-decoration: none;
+  font-weight: 500;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.back-home-btn:hover {
+  color: #d35400;
+}
+
+/* Botón volver al inicio en línea con crear cuenta */
+.no-account {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/* Botón volver al inicio sobre el título */
+.back-home-btn,
+.back-home-btn-inline {
+  color: #111 !important;
+  margin-top: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.back-home-btn:hover,
+.back-home-btn-inline:hover {
+  color: #444 !important;
+}
+
+.text-overlay-login h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0 0 18px 0;
+  line-height: 1.1;
+}
+
+.text-overlay-login {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  max-width: 350px;
+  z-index: 2;
+  text-align: left; /* Alinea el texto a la izquierda */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Asegura que los hijos estén a la izquierda */
+}
+
+.text-overlay-login p {
+  font-size: 1.7rem;
+  margin-top: 16px;
+  line-height: 1.4;
+}
+
+.form-header h2 {
+  color: #333;
+  font-family: "Inria Sans", sans-serif;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0;
+}
+
+/* LEFT SIDE */
+.left-side {
+  width: 100vw;
+  height: 100vh;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.left-side::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45); /* Ajusta el 0.45 para más o menos oscuridad */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.text-overlay {
+  position: absolute;
+  top: 30%;
+  left: 40px;
+  color: white;
+  max-width: 300px;
+  z-index: 2; /* Asegura que el texto quede sobre el overlay */
+}
+
+.background-img {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  
+}
+
+.text-overlay .dot {
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.text-overlay h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.text-overlay p {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+/* RIGHT SIDE */
+.right-side {
+  flex: 1;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form {
+  width: 80%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-header {
+  margin-top: 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-header h2 {
+  margin-top: 5rem;
+  font-size: 1.8rem;
+}
+
+.form label {
+  text-align: left;
+  display: block;
+  margin-bottom: 0px;
+  font-weight: 300;
+}
+
+.ingresa-link {
+  font-size: 0.9rem;
+  color: black;
+  text-decoration: underline;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff; /* Hace los inputs blancos */
+  font-size: 1rem;
+  color: #222;
+}
+
+.checkbox {
+  font-size: 0.85rem;
+}
+
+.checkbox input {
+  margin-right: 8px;
+}
+
+.secondary-btn .bi-google {
+  color: #ea4335; /* Rojo Google */
+  margin-right: 8px;
+}
+
+.secondary-btn .bi-facebook {
+  color: #1877f3; /* Azul Facebook */
+  margin-right: 4px;
+}
+
+.checkbox a {
+  text-decoration: underline;
+  color: black;
+}
+
+.submit-btn {
+  padding: 14px;
+  background: #EC221F;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background 0.3s, opacity 0.3s;
+}
+
+.submit-btn:hover {
+  background: #a11616;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.submit-btn:disabled:hover {
+  background: #ccc; /* Sin cambio de color en hover */
+}
+
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin: 10px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ccc;
+  margin: 0 10px;
+}
+
+.divider span {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.secondary-btn {
+  padding: 12px;
+  text-align: center;
+  border-radius: 24px;
+  background-color: white;
+  border: 1px solid #ccc;
+  color: black;
+  text-decoration: none;
+}
+
+.no-account {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 2.5em; /* Espacio para el icono */
+  box-sizing: border-box;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 0.5em;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.2em;
+  color: #888;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  outline: none;
+}
+
+.toggle-password-btn:focus {
+  outline: none;
+  box-shadow: none;
+}

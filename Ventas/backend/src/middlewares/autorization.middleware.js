@@ -1,5 +1,5 @@
-import User from "../src/entity/user.entity.js";
-import { AppDataSource } from "../src/config/configDb.js";
+import User from "../entity/user.entity.js";
+import { AppDataSource } from "../config/configDb.js";
 import {
 handleErrorClient,
 handleErrorServer,
@@ -21,12 +21,12 @@ try {
 
     const rolUser = userFound.rol;
 
-    if (rolUser !== "administrador") {
+    if (rolUser !== "Administrador") {
         return handleErrorClient(
             res,
             403,
             "Error al acceder al recurso",
-            "Se requiere un rol de administrador para realizar esta acción."
+            "Se requiere un rol de Administrador para realizar esta acción."
         );
     }
     next();

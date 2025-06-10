@@ -1,14 +1,18 @@
 import { Router } from "express";
-import authRoutes from "./auth.routes.js"; // Asegúrate de que esta ruta es correcta
+import authRoutes from "./auth.routes.js";
+import contactRoutes from "./contact.routes.js"; 
+import userRoutes from "./user.routes.js";
+
 
 const router = Router();
 
-// Ruta básica de prueba
 router.get("/", (req, res) => {
   res.json({ message: "¡API funcionando!" });
 });
 
-// Aquí montas las rutas de autenticación
-router.use("/auth", authRoutes); // Esto habilita /api/auth/register, etc.
+
+router.use(authRoutes);       
+router.use(contactRoutes);  
+router.use('/users',userRoutes);  // IMPORTANTE USAR EL PATH /XXXX ANTES DE LAS RUTAS
 
 export default router;

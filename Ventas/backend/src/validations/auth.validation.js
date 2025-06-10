@@ -91,7 +91,6 @@ export const registerValidation = Joi.object({
 
   rol: Joi.string()
     .valid("Cliente", "Empleado", "Administrador")
-    .default("Cliente")
     .messages({
       "any.only": "El rol debe ser Cliente, Empleado o Administrador.",
     }),

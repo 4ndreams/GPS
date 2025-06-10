@@ -1,9 +1,9 @@
 "use strict";
-import { loginService, registerService, recoverPasswordService } from "../services/auth.service.js";
+import { loginService, registerService, recoverPasswordService, verifyEmailService} from "../services/auth.service.js";
 import {
   authValidation,
   registerValidation,
-} from "../validation/auth.validation.js";
+} from "../validations/auth.validation.js";
 import {
   handleErrorClient,
   handleErrorServer,
@@ -26,6 +26,8 @@ export async function login(req, res) {
     res.cookie("jwt", accessToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax", // o "lax" si tienes problemas
+      secure: false,      // true solo si usas HTTPS
     });
 
     handleSuccess(res, 200, "Inicio de sesión exitoso", { token: accessToken });
@@ -79,5 +81,28 @@ export async function recoverPassword(req, res) {
     handleSuccess(res, 200, "Contraseña actualizada con éxito");
   } catch (error) {
     handleErrorServer(res, 500, error.message);
+  }
+}
+
+export async function verifyEmail(req, res) {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      // Redirige al frontend con error
+      return res.redirect(`http://localhost:5173/verified-email?success=false&message=Token%20de%20verificación%20requerido`);
+    }
+
+    const [success, error] = await verifyEmailService(token);
+
+    if (error) {
+      // Redirige al frontend con error y mensaje
+      return res.redirect(`http://localhost:5173/verified-email?success=false&message=${encodeURIComponent(error)}`);
+    }
+    // Redirige al frontend con éxito
+    return res.redirect(`http://localhost:5173/verified-email?success=true`);
+  } catch (error) {
+    // Redirige al frontend con error inesperado
+    return res.redirect(`http://localhost:5173/verified-email?success=false&message=${encodeURIComponent(error.message)}`);
   }
 }

@@ -1,0 +1,48 @@
+.notification {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  min-width: 240px;
+  padding: 1rem 1.2rem 1rem 1.2rem; /* <--- Cambiado aquí */
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  z-index: 2000;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: fadeIn 0.4s;
+}
+
+.notification.success { background: #43a047; }
+.notification.error   { background: #e53935; }
+.notification.info    { background: #1976d2; }
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  
+  outline: none;
+}
+.close-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px);}
+  to   { opacity: 1; transform: translateY(0);}
+}
+
+.notification.hide {
+  animation: fadeOutUp 0.4s forwards;
+}
+
+@keyframes fadeOutUp {
+  from { opacity: 1; transform: translateY(0);}
+  to   { opacity: 0; transform: translateY(-40px);}
+}
