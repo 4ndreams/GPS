@@ -14,7 +14,6 @@ export function authenticateJwt(req, res, next) {
         "Error de autenticación en el servidor"
       );
     }
-
     if (!user) {
       return handleErrorClient(
         res,

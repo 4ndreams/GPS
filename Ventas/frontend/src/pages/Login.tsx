@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
 import Notification from "../components/Notification";
+<<<<<<< HEAD
 
+=======
+import { loginUser } from "../services/authService";
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 
 const Login: React.FC = () => {
+  const navigate = useNavigate(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,19 +22,13 @@ const Login: React.FC = () => {
 
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:3000/api/login", {
-        method: "POST",
-        credentials: "include", // para cookies JWT
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const data = await loginUser(email, password);
 
+<<<<<<< HEAD
       const data = await response.json();
 
       if (!response.ok) {
@@ -46,8 +45,26 @@ const Login: React.FC = () => {
 
     } finally {
       setLoading(false);
+=======
+    const token = data.data?.token;
+    
+    if (!token) {
+      setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
+      setLoading(false);
+      return;
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
     }
-  };
+
+    setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
+    setTimeout(() => {
+      navigate("/profile");
+    }, 800);
+  } catch (err: any) {
+    setNotification({ message: err.response?.data?.message || "Error en el servidor", type: "error" });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleGoogleLogin = () => {
     window.location.href = "http://localhost:3000/api/auth/google";

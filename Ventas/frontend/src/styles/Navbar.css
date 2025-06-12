@@ -1,24 +1,23 @@
 .navbar {
   background: #FFFFFF;
-  padding: 0.1rem 0;  
+  padding: 0.5rem 0;   /* Aumenta el padding para más altura */
   width: 100vw;
   position: fixed;
+  top: 0;            /* Asegura que esté pegado arriba */
   left: 50%;
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
   box-sizing: border-box;
-    z-index: 1000;
-
-
+  z-index: 1000;
 }
 
 
 .logo-navbar {
   height: 2.8em;
   padding: 1em;
+  transition: all 0.3s ease;
   will-change: filter;
-  transition: filter 300ms;
 }
 
 .navbar-container {
@@ -111,21 +110,48 @@
   background: #f1f1f1;
 }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 .navbar-link {
+  position: relative;
+  overflow: hidden;
   text-decoration: none;
   color: #222;
   margin-left: 2rem;
   font-size: 1rem;
 }
 
+.navbar-link::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: #EC221F;
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+
+.navbar-link:hover,
+.navbar-link:focus {
+  color: #EC221F;
+  transition: color 0.2s;
+}
+
+.navbar-link:hover::after,
+.navbar-link:focus::after {
+  transform: scaleX(1);
+}
+
 .navbar-icons {
-  margin-left: 0;              /* Elimina el margen innecesario */
-  margin-right: 8rem;          /* Opcional: agrega espacio a la derecha */
+  margin-left: 0;              
+  margin-right: 1.5rem;      
   display: flex;
   align-items: center;
-  justify-content: flex-end;   /* Asegura alineación a la derecha */
+  justify-content: flex-end;   
   flex: 1 0 auto;
 } 
 
@@ -136,6 +162,21 @@
   position: relative;
 }
 
+<<<<<<< HEAD
+=======
+.navbar-icons i:hover,
+.navbar-icons i:focus {
+  color: #EC221F;
+  transition: color 0.2s;
+}
+
+.navbar-link:hover i,
+.navbar-link:focus i {
+  color: #EC221F;
+  transition: color 0.2s;
+}
+
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 .cart-icon-wrapper {
   position: relative;
   display: inline-block;
@@ -172,8 +213,14 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 1100;
+  outline: none;
+  box-shadow: none;
 }
 
+.menu-toggle:focus {
+  outline: none;
+  box-shadow: none;
+}
 
 @media (max-width: 1024px) {
   .menu-toggle {
@@ -209,6 +256,7 @@
     transform: translateY(-10px);
     transition: opacity 0.4s ease, transform 0.4s ease;
   }
+  
 
   .navbar-menu.open .navbar-link {
     opacity: 1;
@@ -216,20 +264,13 @@
   }
 }
 
-  .navbar-icons {
-    margin-right: 1.5rem;
-  }
+
 
   .navbar-icons .badge {
     right: 1.2rem;
     top: 2.3rem;
   }
 
-.logo-navbar {
-  height: 2.8em;
-  padding: 1em;
-  transition: all 0.3s ease;
-}
 
 /* Disminuir el tamaño del logo en pantallas más pequeñas */
 @media (max-width: 768px) {
@@ -239,6 +280,7 @@
   }
 }
 
+<<<<<<< HEAD
 .menu-toggle {
   outline: none;
   box-shadow: none;
@@ -248,3 +290,5 @@
   outline: none;
   box-shadow: none;
 }
+=======
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544

@@ -3,7 +3,7 @@ import { loginService, registerService, recoverPasswordService, verifyEmailServi
 import {
   authValidation,
   registerValidation,
-} from "../validation/auth.validation.js";
+} from "../validations/auth.validation.js";
 import {
   handleErrorClient,
   handleErrorServer,
@@ -26,6 +26,8 @@ export async function login(req, res) {
     res.cookie("jwt", accessToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax", // o "lax" si tienes problemas
+      secure: false,      // true solo si usas HTTPS
     });
 
     handleSuccess(res, 200, "Inicio de sesión exitoso", { token: accessToken });

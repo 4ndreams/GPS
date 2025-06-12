@@ -3,11 +3,29 @@ import { Link } from 'react-router-dom';
 import logo from '../assets/LogoTerPlac.svg';
 import '../styles/Navbar.css';
 
+<<<<<<< HEAD
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const cartItemCount = 1; // Reemplaza por lógica dinámica si quieres
+=======
+type User = {
+  nombre: string;
+  apellidos: string;
+  email: string;
+} | null;
+
+interface NavbarProps {
+  user: User;
+  onLogout?: () => void;
+}
+
+function Navbar({user, onLogout}: NavbarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const cartItemCount = 1; 
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
   const userMenuRef = useRef<HTMLDivElement>(null);
 
 
@@ -66,17 +84,49 @@ function Navbar() {
             >
               <i className="bi bi-person"></i>
               <span style={{ lineHeight: "1.1", textAlign: "left" }}>
+<<<<<<< HEAD
                 Ingresar
+=======
+                {user ? user.nombre : "Ingresar"}
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
               </span>
             </button>
             {userMenuOpen && (
               <div className="user-dropdown">
+<<<<<<< HEAD
                 <Link to="/login" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
                   Iniciar sesión
                 </Link>
                 <Link to="/register" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
                   Registrarse
                 </Link>
+=======
+                {user ? (
+                  <>
+                    <Link to="/profile" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                      Perfil
+                    </Link>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        onLogout && onLogout();
+                      }}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                      Iniciar sesión
+                    </Link>
+                    <Link to="/register" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                      Registrarse
+                    </Link>
+                  </>
+                )}
+>>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
               </div>
             )}
           </div>
