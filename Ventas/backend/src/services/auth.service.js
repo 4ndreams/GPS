@@ -176,3 +176,7 @@ export async function recoverPasswordService(token, newPassword) {
     return [null, "Error interno del servidor"];
   }
 }
+
+export const verifyEmail = async (token) => {
+  return axios.get(`${API_BASE_URL}/verify-email`, { params: { token } });
+};

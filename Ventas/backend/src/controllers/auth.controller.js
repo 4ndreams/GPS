@@ -87,17 +87,20 @@ export async function verifyEmail(req, res) {
     const { token } = req.query;
 
     if (!token) {
-      return handleErrorClient(res, 400, "Token de verificación requerido");
+      // Redirige al frontend con error
+      return res.redirect(`http://localhost:5173/verified-email?success=false&message=Token%20de%20verificación%20requerido`);
     }
 
     const [success, error] = await verifyEmailService(token);
 
     if (error) {
-      return handleErrorClient(res, 400, "Error al verificar el correo", error);
+      // Redirige al frontend con error y mensaje
+      return res.redirect(`http://localhost:5173/verified-email?success=false&message=${encodeURIComponent(error)}`);
     }
-
-    handleSuccess(res, 200, "Correo verificado con éxito");
+    // Redirige al frontend con éxito
+    return res.redirect(`http://localhost:5173/verified-email?success=true`);
   } catch (error) {
-    handleErrorServer(res, 500, error.message);
+    // Redirige al frontend con error inesperado
+    return res.redirect(`http://localhost:5173/verified-email?success=false&message=${encodeURIComponent(error.message)}`);
   }
 }
