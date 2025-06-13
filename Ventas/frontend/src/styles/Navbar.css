@@ -110,11 +110,6 @@
   background: #f1f1f1;
 }
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 .navbar-link {
   position: relative;
   overflow: hidden;
@@ -162,8 +157,6 @@
   position: relative;
 }
 
-<<<<<<< HEAD
-=======
 .navbar-icons i:hover,
 .navbar-icons i:focus {
   color: #EC221F;
@@ -176,7 +169,6 @@
   transition: color 0.2s;
 }
 
->>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 .cart-icon-wrapper {
   position: relative;
   display: inline-block;
@@ -279,16 +271,3 @@
     padding: 0.5em 1em;
   }
 }
-
-<<<<<<< HEAD
-.menu-toggle {
-  outline: none;
-  box-shadow: none;
-}
-
-.menu-toggle:focus {
-  outline: none;
-  box-shadow: none;
-}
-=======
->>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544

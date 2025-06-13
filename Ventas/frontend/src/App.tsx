@@ -5,10 +5,7 @@ import Register from './pages/Register';
 import Error404 from './pages/Error404';
 import Login from './pages/Login'
 import VerifiedEmail from './pages/VerifiedEmail';
-<<<<<<< HEAD
-=======
 import ProfilePage from './pages/ProfilePage';
->>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 
 import Navbar from './components/Navbar'
 
@@ -45,12 +42,7 @@ function App() {
         <Route path="*" element={<Error404 />} />
         <Route path="/login" element={<Login />} />
         <Route path="/verified-email" element={<VerifiedEmail />} />
-<<<<<<< HEAD
-
-      </Routes>
-=======
         <Route path="/profile" element={<ProfilePage />} />
->>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 
       </Routes>
     </>

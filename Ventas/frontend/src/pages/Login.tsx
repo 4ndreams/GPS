@@ -4,11 +4,7 @@ import "../styles/Login.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
 import Notification from "../components/Notification";
-<<<<<<< HEAD
-
-=======
 import { loginUser } from "../services/authService";
->>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
 
 const Login: React.FC = () => {
   const navigate = useNavigate(); 
@@ -19,59 +15,38 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const data = await loginUser(email, password);
+    try {
+      const data = await loginUser(email, password);
+      const token = data.data?.token;
 
-<<<<<<< HEAD
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (!token) {
         setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
-        setLoading(false);        
+        setLoading(false);
         return;
       }
 
-      setNotification({ message: "Inicio de sesión exitoso", type: "success" });
+      setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
 
-      // aquí podrías redirigir con navigate("/dashboard") si usas react-router
-    } catch (err) {
-            setNotification({ message: "Error en el servidor", type: "error" });
-
+      setTimeout(() => {
+        navigate("/profile");
+      }, 800);
+    } catch (err: any) {
+      setNotification({ message: err.response?.data?.message || "Error en el servidor", type: "error" });
     } finally {
       setLoading(false);
-=======
-    const token = data.data?.token;
-    
-    if (!token) {
-      setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
-      setLoading(false);
-      return;
->>>>>>> 393ea14fb30c1c9a8a817dfa085850fc349c6544
     }
-
-    setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
-    setTimeout(() => {
-      navigate("/profile");
-    }, 800);
-  } catch (err: any) {
-    setNotification({ message: err.response?.data?.message || "Error en el servidor", type: "error" });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/auth/google`;
   };
 
   const handleFacebookLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/facebook";
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/auth/facebook`;
   };
 
   return (
@@ -146,11 +121,8 @@ const Login: React.FC = () => {
             />
           )}
 
-          <button type="submit" 
-                  className="submit-btn"
-                disabled={!email.trim() || !password.trim() || loading}
-          >
-              Ingresar
+          <button type="submit" className="submit-btn" disabled={!email.trim() || !password.trim() || loading}>
+            Ingresar
           </button>
 
           <div className="divider"><span>o</span></div>
