@@ -21,6 +21,9 @@ function App() {
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   const [user, setUser] = useState(null);
 
+  
+  
+  
   useEffect(() => {
     getUserProfile()
       .then((data) => setUser(data))

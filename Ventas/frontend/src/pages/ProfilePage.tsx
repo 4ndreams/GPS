@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import ProfileInfo from "../components/ProfileInfo";
 import "../styles/ProfileInfo.css";
 import "../styles/animations.css";
@@ -19,6 +20,21 @@ const ProfilePage: React.FC = () => {
     setActiveTab(key);
     setSidebarOpen(false);
   };
+
+
+const location = useLocation();
+
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const token = params.get("token");
+
+  if (token) {
+    localStorage.setItem("token", token);
+    // Limpiar el token de la URL para que no quede visible
+    window.history.replaceState({}, document.title, "/profile");
+  }
+}, [location]);
+
 
   return (
     <div className="profile-page fade-in">
