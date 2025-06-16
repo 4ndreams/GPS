@@ -1,13 +1,10 @@
 .navbar {
   background: #FFFFFF;
-  padding: 0.5rem 0;   /* Aumenta el padding para más altura */
-  width: 100vw;
+  padding: 0.5rem 0;
+  width: 100%;         /* Cambia de 100vw a 100% */
   position: fixed;
-  top: 0;            /* Asegura que esté pegado arriba */
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  top: 0;
+  left: 0;             /* Quita left: 50%, right: 50%, margin-left, margin-right */
   box-sizing: border-box;
   z-index: 1000;
 }
@@ -15,6 +12,8 @@
 
 .logo-navbar {
   height: 2.8em;
+  margin-right: 8px; /* Espacio entre logo y hamburguesa */
+
   padding: 1em;
   transition: all 0.3s ease;
   will-change: filter;
@@ -194,16 +193,15 @@
 }
 
 .menu-toggle {
+  position: static;   /* <-- Esto lo alinea con el flujo normal */
+  margin-left: 0;
+  margin-right: 0.5em; /* Espacio opcional entre logo y hamburguesa */
   color: #222;
   display: none;
   background: transparent;
   border: transparent;
   font-size: 2rem;
   cursor: pointer;
-  position: absolute;
-  top: 1.rem;
-  left: 50%;
-  transform: translateX(-50%);
   z-index: 1100;
   outline: none;
   box-shadow: none;

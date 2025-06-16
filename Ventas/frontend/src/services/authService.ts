@@ -10,8 +10,9 @@ export const loginUser = async (email: string, password: string) => {
     if (response.data.data.token) {
       localStorage.setItem('token', response.data.data.token);
     }
-    return response.data;
+    return response.data.data;
   } catch (error: any) {
+    console.error("Error en el inicio de sesión:", error.response?.data ?? error.message);
     throw error;
   }
 };

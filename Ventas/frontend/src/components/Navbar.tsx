@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/LogoTerPlac.svg';
+import logo from '../assets/logo_terplac.svg';
+import logoMobile from '../assets/TERPLAC_T.png';
 import '../styles/Navbar.css';
 
 type User = {
@@ -19,7 +20,13 @@ function Navbar({user, onLogout}: NavbarProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const cartItemCount = 1; 
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -39,7 +46,11 @@ function Navbar({user, onLogout}: NavbarProps) {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-brand">
-          <img src={logo} alt="Logo" className="logo-navbar" />
+          <img
+            src={isMobile ? logoMobile : logo}
+            alt="Logo"
+            className="logo-navbar"
+          />
         </Link>
 
         {/* Botón hamburguesa solo en pantallas pequeñas */}
