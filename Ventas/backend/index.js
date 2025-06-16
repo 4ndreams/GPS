@@ -24,7 +24,7 @@ async function setupServer() {
 
     // ✅ CORS (solo una vez)
     app.use(cors({
-      origin: ["http://localhost:5173"], 
+      origin: process.env.VITE_API_BASE_URL, // Frontend en Vite
       credentials: true
     }));
 

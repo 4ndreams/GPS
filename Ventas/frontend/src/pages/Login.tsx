@@ -15,40 +15,38 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
-
-
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const data = await loginUser(email, password);
+    try {
+      const data = await loginUser(email, password);
+      const token = data.data?.token;
 
-    const token = data.data?.token;
-    
-    if (!token) {
-      setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
+      if (!token) {
+        setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
+        setLoading(false);
+        return;
+      }
+
+      setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
+
+      setTimeout(() => {
+        navigate("/profile");
+      }, 800);
+    } catch (err: any) {
+      setNotification({ message: err.response?.data?.message || "Error en el servidor", type: "error" });
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
-    setTimeout(() => {
-      navigate("/profile");
-    }, 800);
-  } catch (err: any) {
-    setNotification({ message: err.response?.data?.message || "Error en el servidor", type: "error" });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
   };
 
   const handleFacebookLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/facebook";
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/auth/facebook`;
   };
 
   return (
@@ -123,11 +121,8 @@ const Login: React.FC = () => {
             />
           )}
 
-          <button type="submit" 
-                  className="submit-btn"
-                disabled={!email.trim() || !password.trim() || loading}
-          >
-              Ingresar
+          <button type="submit" className="submit-btn" disabled={!email.trim() || !password.trim() || loading}>
+            Ingresar
           </button>
 
           <div className="divider"><span>o</span></div>

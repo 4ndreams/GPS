@@ -1,4 +1,3 @@
-// src/pages/Register.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -46,7 +45,7 @@ function Register() {
     const formattedRut = formatRut(formData.rut);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/register", {
+      const res = await axios.post(`${import.meta.env.VITE_META_BASE_URL}api/register`, {
         nombre: formData.nombres,
         apellidos: formData.apellidos,
         rut: formattedRut,
