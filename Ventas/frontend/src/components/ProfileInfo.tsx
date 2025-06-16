@@ -21,7 +21,6 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
   useEffect(() => {
     getUserProfile()
       .then((data: UserProfile) => {
-        console.log("🔍 Datos recibidos del backend:", data);
         setUser(data);
         onUserLoaded && onUserLoaded(data);
       })

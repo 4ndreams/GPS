@@ -11,8 +11,8 @@ type User = {
 } | null;
 
 interface NavbarProps {
-  user: User;
-  onLogout?: () => void;
+  readonly user: User;
+  readonly onLogout?: () => void;
 }
 
 function Navbar({user, onLogout}: NavbarProps) {
@@ -97,15 +97,16 @@ function Navbar({user, onLogout}: NavbarProps) {
                     <Link to="/profile" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
                       Perfil
                     </Link>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => {
+                    <Link
+                        to="/"
+                        className="dropdown-item"
+                        onClick={() => {
                         setUserMenuOpen(false);
                         onLogout && onLogout();
                       }}
-                    >
-                      Cerrar sesión
-                    </button>
+                      >
+                        Cerrar sesión
+                    </Link>
                   </>
                 ) : (
                   <>

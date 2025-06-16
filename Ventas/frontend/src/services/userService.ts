@@ -4,7 +4,6 @@ import axios from 'axios';
 export const getUserProfile = async () => {
   try {
     const token = localStorage.getItem('token'); 
-    console.log("Token de autenticación:", token);
     if (!token) throw new Error("No hay token de autenticación");
 
     const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/profile`, {

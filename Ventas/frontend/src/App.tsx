@@ -11,7 +11,7 @@ import Navbar from './components/Navbar'
 
 import './App.css'
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getUserProfile } from './services/userService.ts';
 
 function App() {
@@ -27,14 +27,14 @@ function App() {
   useEffect(() => {
     getUserProfile()
       .then((data) => setUser(data))
-      .catch(() => setUser(null)); 
+      .catch(() => setUser(null));
+      console.log("User profile fetched:", ); 
   }, []);
 
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
-    // Redirige si quieres: window.location.href = "/login";
   };
   return (
     <>
@@ -43,8 +43,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<Error404 />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/verified-email" element={<VerifiedEmail />} />
+        <Route path="/login" element={<Login setUser={setUser} />} />        <Route path="/verified-email" element={<VerifiedEmail />} />
         <Route path="/profile" element={<ProfilePage />} />
 
       </Routes>

@@ -18,14 +18,28 @@ export const loginUser = async (email: string, password: string) => {
 };
 
 // Función para registrar usuarios
-export const registerUser = async (userData: any) => {
-  try {
-    const response = await axios.post(`${import.meta.env.API_BASE_URL}/register`, userData);
-    return response.data;
-  } catch (error: any) {
-    console.error("Error en el registro:", error.response?.data ?? error.message);
-    throw error;
-  }
+export const registerUser = async (userData: {
+  nombres: string;
+  apellidos: string;
+  rut: string;
+  email: string;
+  password: string;
+}) => {
+  const response = await axios.post(
+    `${import.meta.env.VITE_API_BASE_URL}/register`,
+    {
+      nombre: userData.nombres,
+      apellidos: userData.apellidos,
+      rut: userData.rut,
+      email: userData.email,
+      password: userData.password,
+    }
+  );
+  return response.data;
+};
+
+export const getGoogleAuthUrl = () => {
+  return `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
 };
 
 export const loginWithGoogle = async () => {
@@ -33,7 +47,7 @@ export const loginWithGoogle = async () => {
     const response = await axios.get(`${import.meta.env.VITE.API_BASE_URL}/auth/google`, { withCredentials: true });
     return response.data;
   } catch (error: any) {
-    console.error("Error en Google Login:", error.response?.data || error.message);
+    console.error("Error en Google Login:", error.response?.data ?? error.message);
     throw error;
   }
 };
@@ -43,7 +57,7 @@ export const loginWithFacebook = async () => {
     const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/auth/facebook`, { withCredentials: true });
     return response.data;
   } catch (error: any) {
-    console.error("Error en Facebook Login:", error.response?.data || error.message);
+    console.error("Error en Facebook Login:", error.response?.data ?? error.message);
     throw error;
   }
 };
