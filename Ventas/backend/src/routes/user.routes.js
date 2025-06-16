@@ -8,6 +8,7 @@ import {
   getUsers,
   updateUser,
   getProfile,
+  updateProfile
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -15,6 +16,7 @@ const router = Router();
 router.use(authenticateJwt); // Aplica JWT a todas las rutas siguientes
 
 router.get("/profile", getProfile);
+router.patch("/profile/edit", updateProfile); 
 
 router.use(isAdmin); // Solo admin para las siguientes
 

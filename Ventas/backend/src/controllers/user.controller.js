@@ -4,7 +4,8 @@ import {
   getUserService,
   getUsersService,
   updateUserService,
-  getProfileService
+  getProfileService,
+  updateProfileService,
 } from "../services/user.service.js";
 import {
   userBodyValidation,
@@ -149,3 +150,38 @@ export async function getProfile(req, res) {
     handleErrorServer(res, 500, error.message);
   }
 }
+
+
+export async function updateProfile(req, res) {
+  console.log("Query params recibidos:", req.query);
+  console.log("Body recibido:", req.body);
+  try {
+    const userId = req.user?.id_usuario;
+    const { body } = req;
+
+    // Valida el body si tienes validación
+    const { error: bodyError } = userBodyValidation.validate(body);
+    if (bodyError)
+      return handleErrorClient(
+        res,
+        400,
+        "Error de validación en los datos enviados",
+        bodyError.message
+      );
+
+    const [user, userError] = await updateProfileService(userId, body);
+
+    if (userError)
+      return handleErrorClient(
+        res,
+        400,
+        "Error modificando el perfil",
+        userError
+      );
+
+    handleSuccess(res, 200, "Perfil modificado correctamente", user);
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
+
