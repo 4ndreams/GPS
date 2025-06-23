@@ -10,6 +10,7 @@ type UserProfile = {
   nombre: string;
   apellidos: string;
   email: string;
+  rol: string;
   correoVerificado: boolean;
   telefono?: string;
   rut: string;

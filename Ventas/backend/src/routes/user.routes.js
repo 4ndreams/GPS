@@ -18,13 +18,12 @@ router.use(authenticateJwt); // Aplica JWT a todas las rutas siguientes
 router.get("/profile", getProfile);
 router.patch("/profile/edit", updateProfile); 
 
-router.use(isAdmin); // Solo admin para las siguientes
-
+router.use(isAdmin); 
 router
   .get("/", getUsers)
-  .get("/detail/", getUser)
-  .patch("/detail/", updateUser)
-  .delete("/detail/", deleteUser);
+  .get("/detail/:id_usuario", getUser)
+  .patch("/detail/:id_usuario", updateUser)
+  .delete("/detail/:id_usuario", deleteUser);
 
 export default router;
 
