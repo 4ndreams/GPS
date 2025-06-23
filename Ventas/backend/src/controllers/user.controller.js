@@ -153,8 +153,6 @@ export async function getProfile(req, res) {
 
 
 export async function updateProfile(req, res) {
-  console.log("Query params recibidos:", req.query);
-  console.log("Body recibido:", req.body);
   try {
     const userId = req.user?.id_usuario;
     const { body } = req;

@@ -172,7 +172,6 @@ export async function updateProfileService(userId, body) {
       return [null, "Ya existe un usuario con el mismo rut o email"];
     }
 
-    // Si se envía password, compara la contraseña actual
     if (body.password) {
       const matchPassword = await comparePassword(
         body.password,
@@ -189,15 +188,12 @@ export async function updateProfileService(userId, body) {
       updatedAt: new Date(),
     };
 
-    // Si se envía una nueva contraseña, la encripta y la agrega
     if (body.newPassword && body.newPassword.trim() !== "") {
       dataUserUpdate.password = await encryptPassword(body.newPassword);
     }
 
-    // Actualiza el usuario en la base de datos
     await userRepository.update({ id_usuario: userFound.id_usuario }, dataUserUpdate);
 
-    // Busca el usuario actualizado y retorna los datos sin la contraseña
     const userData = await userRepository.findOne({
       where: { id_usuario: userFound.id_usuario },
     });
