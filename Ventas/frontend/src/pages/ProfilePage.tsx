@@ -64,7 +64,7 @@ useEffect(() => {
         {activeTab === "info" && (
           <ProfileInfo onUserLoaded={user => setUserName(user.nombre)} />
         )}
-        {activeTab === "orders" && <div>Mis pedidos aparecerán aquí.</div>}
+        {activeTab === "orders" && <div>No se han realizado compras aún.</div>}
         {activeTab === "settings" && <div>Configuración de usuario.</div>}
       </main>
     </div>

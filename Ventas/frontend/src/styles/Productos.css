@@ -74,6 +74,7 @@
 
 .filtro-group input,
 .filtro-group select {
+  width: 160px;
   padding: 0.8rem 1.2rem;
   border: 1px solid #ddd;
   border-radius: 6px;

@@ -123,19 +123,18 @@ function Productos() {
         
         <div className="filtros-container">
           <div className="filtro-group">
-            <label>Buscar por nombre:</label>
-            <input
+            <label>Buscar por nombre:<input
               type="text"
               placeholder="Ej: Puerta Roble..."
               value={nameFilter}
               onChange={(e) => setNameFilter(e.target.value)}
             />
+            </label>
           </div>
           
           <div className="price-range-group">
             <div className="filtro-group">
-              <label>Precio mínimo($):</label>
-              <input
+              <label>Precio mínimo($):<input
                 type="number"
                 placeholder="Ej: $50000"
                 value={minPrice}
@@ -143,11 +142,11 @@ function Productos() {
                 min="0"
                 className="price-input"
               />
+              </label>
             </div>
             
             <div className="filtro-group">
-              <label>Precio máximo($):</label>
-              <input
+              <label>Precio máximo($):<input
                 type="number"
                 placeholder="Ej: $200000"
                 value={maxPrice}
@@ -155,6 +154,7 @@ function Productos() {
                 min={minPrice || "0"}
                 className="price-input"
               />
+              </label>
             </div>
             
             {priceError && (
@@ -165,16 +165,18 @@ function Productos() {
           </div>
           
           <div className="filtro-group">
-            <label>Categoría:</label>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="categoria-select"
-            >
-              <option value="todos">Todos</option>
-              <option value="puertas">Puertas</option>
-              <option value="molduras">Molduras</option>
-            </select>
+            <label>Categoría:
+              <br/>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="categoria-select"
+              >
+                <option value="todos">Todos</option>
+                <option value="puertas">Puertas</option>
+                <option value="molduras">Molduras</option>
+              </select>
+            </label>
           </div>
         </div>
       </div>
@@ -188,7 +190,7 @@ function Productos() {
                   {product.categoria.toUpperCase()}
                 </div>
                 <img 
-                  src={`/img/${product.categoria}/${product.imagen}`} 
+                  src={`../src/img/${product.categoria}/${product.imagen}`} 
                   alt={product.nombre} 
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
