@@ -167,7 +167,7 @@ function Home() {
             <h1>Puertas</h1>
             <p className="hero-subtitle">Elegancia y seguridad para cada entrada</p>
             <div className="hero-buttons">
-              <button>Ver puertas</button>
+              <button onClick={() => window.location.href = '/productos'}>Ver puertas</button>
             </div>
           </div>
           <div
@@ -177,7 +177,7 @@ function Home() {
             <h1>Marcos y Molduras</h1>
             <p className="hero-subtitle">Detalles que transforman cualquier espacio</p>
             <div className="hero-buttons">
-              <button>Ver marcos y molduras</button>
+              <button onClick={() => window.location.href = '/productos'}>Ver molduras</button>
             </div>
           </div>
         </div>

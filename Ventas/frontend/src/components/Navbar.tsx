@@ -16,11 +16,11 @@ interface NavbarProps {
 }
 
 function Navbar({user, onLogout}: NavbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); 
+  const [userMenuOpen, setUserMenuOpen] = useState(false); 
   const cartItemCount = 1; 
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const userMenuRef = useRef<HTMLDivElement>(null); 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); 
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
