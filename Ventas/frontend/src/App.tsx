@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import VerifiedEmail from './pages/VerifiedEmail';
 import ProfilePage from './pages/ProfilePage';
 import Productos from './pages/Productos';
+import AboutUs from './pages/AboutUs';
 
 import Navbar from './components/Navbar'
 
@@ -38,8 +39,7 @@ function App() {
     setUser(null);
   };
   return (
-    <>
-      {!shouldHideNavbar && <Navbar user={user} onLogout={handleLogout} />}
+    <>      {!shouldHideNavbar && <Navbar user={user} onLogout={handleLogout} />}
         <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
@@ -47,6 +47,7 @@ function App() {
         <Route path="/login" element={<Login setUser={setUser} />} />        <Route path="/verified-email" element={<VerifiedEmail />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/productos" element={<Productos />} />
+        <Route path="/about-us" element={<AboutUs />} />
       </Routes>
     </>
   );

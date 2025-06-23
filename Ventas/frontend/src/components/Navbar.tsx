@@ -58,11 +58,10 @@ function Navbar({user, onLogout}: NavbarProps) {
           <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
         </button>
 
-        {/* Menú de navegación */}
-        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
+        {/* Menú de navegación */}        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
           <li><Link to="/" className="navbar-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
           <li><Link to="/productos" className="navbar-link" onClick={() => setIsOpen(false)}>Productos</Link></li>
-          <li><Link to="/acerca-de" className="navbar-link" onClick={() => setIsOpen(false)}>Acerca de</Link></li>
+          <li><Link to="/about-us" className="navbar-link" onClick={() => setIsOpen(false)}>Sobre Nosotros</Link></li>
           <li><Link to="/contacto" className="navbar-link" onClick={() => setIsOpen(false)}>Contacto</Link></li>
           <li><Link to="/cotizar" className="navbar-link" onClick={() => setIsOpen(false)}>Cotizar</Link></li>
         </ul>
