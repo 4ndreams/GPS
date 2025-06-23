@@ -6,6 +6,7 @@ import Error404 from './pages/Error404';
 import Login from './pages/Login'
 import VerifiedEmail from './pages/VerifiedEmail';
 import ProfilePage from './pages/ProfilePage';
+import Productos from './pages/Productos';
 
 import Navbar from './components/Navbar'
 
@@ -45,7 +46,7 @@ function App() {
         <Route path="*" element={<Error404 />} />
         <Route path="/login" element={<Login setUser={setUser} />} />        <Route path="/verified-email" element={<VerifiedEmail />} />
         <Route path="/profile" element={<ProfilePage />} />
-
+        <Route path="/productos" element={<Productos />} />
       </Routes>
     </>
   );

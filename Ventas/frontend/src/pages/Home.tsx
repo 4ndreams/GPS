@@ -188,7 +188,7 @@ function Home() {
           <hr style={{ borderColor: 'black' }} />
         </div>
         <div className="hero-buttons">
-          <button>Ver todos los productos</button>
+          <button onClick={() => window.location.href = '/productos'}>Ver todos los productos</button>
         </div>
       </section>
       <section className='nosotros-section black-bg'>
