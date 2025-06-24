@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import ProfileInfo from "../components/ProfileInfo";
+import OrdersList from "../components/OrdersList";
 import "../styles/ProfileInfo.css";
 import "../styles/animations.css";
 
@@ -15,26 +16,23 @@ const ProfilePage: React.FC = () => {
   const [userName, setUserName] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-
   const handleTabClick = (key: string) => {
     setActiveTab(key);
     setSidebarOpen(false);
   };
 
+  const location = useLocation();
 
-const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
 
-useEffect(() => {
-  const params = new URLSearchParams(location.search);
-  const token = params.get("token");
-
-  if (token) {
-    localStorage.setItem("token", token);
-    // Limpiar el token de la URL para que no quede visible
-    window.history.replaceState({}, document.title, "/profile");
-  }
-}, [location]);
-
+    if (token) {
+      localStorage.setItem("token", token);
+      // Limpiar el token de la URL para que no quede visible
+      window.history.replaceState({}, document.title, "/profile");
+    }
+  }, [location]);
 
   return (
     <div className="profile-page fade-in">
@@ -47,13 +45,15 @@ useEffect(() => {
       </button>
       <aside className={`profile-sidebar${sidebarOpen ? " open" : ""}`}>
         <h3 className="profile-title">
-        <i className="bi bi-person-badge-fill"></i>
-           Hola, {userName}
+          <i className="bi bi-person-badge-fill"></i>
+          Hola, {userName}
         </h3>
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            className={`sidebar-tab${activeTab === tab.key ? " active" : ""}`}
+            className={`sidebar-tab${
+              activeTab === tab.key ? " active" : ""
+            }`}
             onClick={() => handleTabClick(tab.key)}
           >
             {tab.label}
@@ -62,9 +62,9 @@ useEffect(() => {
       </aside>
       <main className="profile-content">
         {activeTab === "info" && (
-          <ProfileInfo onUserLoaded={user => setUserName(user.nombre)} />
+          <ProfileInfo onUserLoaded={(user) => setUserName(user.nombre)} />
         )}
-        {activeTab === "orders" && <div>No se han realizado compras aún.</div>}
+        {activeTab === "orders" && <OrdersList />}
         {activeTab === "settings" && <div>Configuración de usuario.</div>}
       </main>
     </div>
