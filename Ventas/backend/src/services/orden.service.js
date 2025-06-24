@@ -5,7 +5,7 @@ import { AppDataSource } from "../config/configDb.js";
 export async function getOrdenesService() {
   try {
     const repo = AppDataSource.getRepository(Orden);
-    const ordenes = await repo.find({ relations: ["producto", "usuario", "bodega"] });
+    const ordenes = await repo.find({ relations: ["producto", "usuario"] });
     return [ordenes, null];
   } catch (error) {
     console.error("Error al obtener órdenes:", error);
@@ -16,7 +16,7 @@ export async function getOrdenesService() {
 export async function getOrdenByIdService(id) {
   try {
     const repo = AppDataSource.getRepository(Orden);
-    const orden = await repo.findOne({ where: { id_orden: id }, relations: ["producto", "usuario", "bodega"] });
+    const orden = await repo.findOne({ where: { id_orden: id }, relations: ["producto", "usuario"] });
 
     if (!orden) return [null, "Orden no encontrada"];
     return [orden, null];
@@ -73,7 +73,7 @@ export async function updateOrdenService(id, body) {
 
     const ordenActualizada = await repo.findOne({
       where: { id_orden: id },
-      relations: ["producto", "usuario", "bodega"],
+      relations: ["producto", "usuario"],
     });
 
     return [ordenActualizada, null];
