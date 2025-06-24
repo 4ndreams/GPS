@@ -1,4 +1,3 @@
-// filepath: [UserService.ts](http://_vscodecontentref_/1)
 import axios from 'axios';
 
 export const getUserProfile = async () => {

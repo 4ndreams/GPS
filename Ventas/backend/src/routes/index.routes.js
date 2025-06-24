@@ -10,6 +10,9 @@ import ordenRoutes from "./orden.routes.js";
 import productoRoutes from "./producto.routes.js";
 import ventaRoutes from "./venta.routes.js"; 
 import itemCarritoRoutes from "./item_carrito.routes.js"; 
+import productRoutes from "./product.routes.js";
+import materialRoutes from "./material.routes.js";
+import tipoRoutes from "./tipo.routes.js";
 
 
 const router = Router();
@@ -30,5 +33,8 @@ router.use('/orden', ordenRoutes);
 router.use('/venta', ventaRoutes);
 router.use('/item_carrito', itemCarritoRoutes);
 router.use('/users',userRoutes);  
+router.use('/products', productRoutes); 
+router.use('/materiales', materialRoutes);
+router.use('/tipos', tipoRoutes); // Asegúrate de que este es el nombre correcto del archivo
 
 export default router;
