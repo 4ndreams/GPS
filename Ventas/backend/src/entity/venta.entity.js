@@ -18,6 +18,7 @@ const VentaSchema = new EntitySchema({
        estado_pago: {
             type: "varchar",
             length: 20,
+            default: "Pendiente",
             nullable: false,
         },
         fecha_pago: {
