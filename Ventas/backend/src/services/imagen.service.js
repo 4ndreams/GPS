@@ -16,7 +16,7 @@ export async function getImagenesService() {
 export async function getImagenByIdService(id) {
   try {
     const repo = AppDataSource.getRepository(ImagenSchema);
-    const data = await repo.findOneBy({ id_IXP: parseInt(id) });
+    const data = await repo.findOneBy({ id_img: parseInt(id) });
     if (!data) return [null, "Imagen no encontrada"];
     return [data, null];
   } catch (error) {
@@ -40,10 +40,10 @@ export async function createImagenService(body) {
 export async function updateImagenService(id, body) {
   try {
     const repo = AppDataSource.getRepository(ImagenSchema);
-    const encontrada = await repo.findOneBy({ id_IXP: parseInt(id) });
+    const encontrada = await repo.findOneBy({id_img: parseInt(id) });
     if (!encontrada) return [null, "Imagen no encontrada"];
-    await repo.update({ id_IXP: parseInt(id) }, body);
-    const actualizada = await repo.findOneBy({ id_IXP: parseInt(id) });
+    await repo.update({ id_img: parseInt(id) }, body);
+    const actualizada = await repo.findOneBy({ id_img: parseInt(id) });
     return [actualizada, null];
   } catch (error) {
     console.error("Error al actualizar imagen:", error);
@@ -54,7 +54,7 @@ export async function updateImagenService(id, body) {
 export async function deleteImagenService(id) {
   try {
     const repo = AppDataSource.getRepository(ImagenSchema);
-    const encontrada = await repo.findOneBy({ id_IXP: parseInt(id) });
+    const encontrada = await repo.findOneBy({ id_img: parseInt(id) });
     if (!encontrada) return [null, "Imagen no encontrada"];
     await repo.remove(encontrada);
     return [encontrada, null];
