@@ -58,8 +58,8 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
     setNotification({ message: "Perfil actualizado correctamente", type: "success" });
   } catch (error: any) {
     const msg =
-      error?.response?.data?.message ||
-      error?.message ||
+      error?.response?.data?.details ||
+      error?.details ||
       "Ocurrió un error al actualizar el perfil";
     setNotification({ message: msg, type: "error" });
   }

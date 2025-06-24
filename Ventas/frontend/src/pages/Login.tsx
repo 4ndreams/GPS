@@ -31,7 +31,7 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
       const token = data?.token;
 
       if (!token) {
-        setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
+        setNotification({ message: data.details || "Error al iniciar sesión", type: "error" });
         setLoading(false);
         return;
       }

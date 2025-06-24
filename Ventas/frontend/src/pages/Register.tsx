@@ -56,7 +56,7 @@ function Register() {
 
     setNotification({ message: "Confirma tu correo electrónico para continuar.", type: "success" });
   } catch (err: any) {
-    setNotification({ message: err.response?.data?.message || "Error al registrar. Verifica los campos.", type: "error" });
+    setNotification({ message: err.response?.data?.details || "Error al registrar. Verifica los campos.", type: "error" });
   }
 };
 

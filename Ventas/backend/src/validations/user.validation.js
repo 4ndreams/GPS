@@ -1,5 +1,7 @@
 "use strict";
 import Joi from "joi";
+import RutValidator from "./rut.validation.js";
+
 
 const domainEmailValidator = (value, helper) => {
   const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl"];
@@ -16,9 +18,10 @@ export const userQueryValidation = Joi.object({
     "number.base": "El ID debe ser un número.",
   }),
   rut: Joi.string()
-    .pattern(/^(?:(?:[1-9]\d{0}|[1-2]\d{1})(\.\d{3}){2}|[1-9]\d{6}|[1-2]\d{7}|29\.999\.999|29999999)-[\dkK]$/)
-    .messages({
-      "string.pattern.base": "Formato RUT inválido.",
+    .custom((value, helper) => {
+      const { valid, message, formatted } = RutValidator.validateRut(value);
+      if (!valid) return helper.message(message);
+      return formatted;
     }),
   email: Joi.string().email().custom(domainEmailValidator),
 }).or("id_usuario", "rut", "email").messages({
@@ -39,7 +42,11 @@ export const userBodyValidation = Joi.object({
     }),
   email: Joi.string().email().custom(domainEmailValidator),
   rut: Joi.string()
-    .pattern(/^(?:(?:[1-9]\d{0}|[1-2]\d{1})(\.\d{3}){2}|[1-9]\d{6}|[1-2]\d{7}|29\.999\.999|29999999)-[\dkK]$/),
+    .custom((value, helper) => {
+      const { valid, message, formatted } = RutValidator.validateRut(value);
+      if (!valid) return helper.message(message);
+      return formatted;
+    }),
   password: Joi.string().min(8).max(26).pattern(/^[a-zA-Z0-9]+$/),
   newPassword: Joi.string().min(8).max(26).pattern(/^[a-zA-Z0-9]+$/),
   rol: Joi.string().valid("Cliente", "Empleado", "Administrador"),
