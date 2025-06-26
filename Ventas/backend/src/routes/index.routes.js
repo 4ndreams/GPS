@@ -11,8 +11,7 @@ import productoRoutes from "./producto.routes.js";
 import ventaRoutes from "./venta.routes.js"; 
 import itemCarritoRoutes from "./item_carrito.routes.js"; 
 import productRoutes from "./product.routes.js";
-import materialRoutes from "./material.routes.js";
-import tipoRoutes from "./tipo.routes.js";
+
 
 
 const router = Router();

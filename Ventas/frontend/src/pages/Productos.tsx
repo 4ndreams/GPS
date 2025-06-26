@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/Productos.css";
+import '../img/puertas/1.png';
+import '../img/puertas/2.jpeg';
+import '../img/puertas/3.jpeg';
+import '../img/puertas/4.jpeg';
+import '../img/puertas/5.jpeg';
+import '../img/molduras/m1.jpg';
+import '../img/molduras/m2.jpeg';
+import '../img/molduras/m3.jpg'; 
 
 interface Product {
   id_producto: number;
@@ -12,6 +20,8 @@ interface Product {
 
 function Productos() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,6 +31,23 @@ function Productos() {
   const [categoryFilter, setCategoryFilter] = useState("todos");
 
   const [priceError, setPriceError] = useState("");
+
+   useEffect(() => {
+    const mockProducts: Product[] = [
+      { id_producto: 1, nombre_producto: 'Puerta Geno Enchape Wenge', precio: 105000, imagen: '1.png', tipo: { nombre_tipo: 'puertas' } },
+      { id_producto: 2, nombre_producto: 'Puerta Moderna Vidrio', precio: 210000, imagen: '2.jpeg', tipo: { nombre_tipo: 'puertas' } },
+      { id_producto: 3, nombre_producto: 'Moldura Roble 2m', precio: 45000, imagen: 'm1.jpg', tipo: { nombre_tipo: 'puertas' } },
+      { id_producto: 4, nombre_producto: 'Marco Roble Sólido', precio: 75000, imagen: 'm2.jpeg', tipo: { nombre_tipo: 'puertas' } },
+      { id_producto: 5, nombre_producto: 'Puerta Seguridad Acero', precio: 320000, imagen: '3.jpeg', tipo: { nombre_tipo: 'puertas' } },
+      { id_producto: 6, nombre_producto: 'Moldura Blanca Moderna', precio: 38000, imagen: 'm3.jpg', tipo: { nombre_tipo: 'puertas' } },
+    ];
+
+    setTimeout(() => {
+      setProducts(mockProducts);
+      setFilteredProducts(mockProducts);
+      setLoading(false);
+    }, 800);
+  }, []);
 
   const validatePrices = () => {
     if (minPrice && maxPrice) {

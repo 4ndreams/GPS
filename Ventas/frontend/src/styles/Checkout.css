@@ -1,0 +1,194 @@
+.checkout-page {
+  max-width: 600px;
+  padding: 0 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.checkout-page h1,
+.checkout-page h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.cart-list {
+  margin-bottom: 1rem;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.cart-total {
+  font-size: 1.2rem;
+  text-align: right;
+  margin-bottom: 2rem;
+}
+
+.map-container {
+  margin-bottom: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.payment-link {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.payment-link .btn {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+}
+
+/* New layout for header section */
+.checkout-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.checkout-details {
+  flex: 1;
+}
+
+.checkout-section-title h1 {
+  flex: 1;
+  color: #dc3545;  /* rojo para el título de sección */
+  margin: 0;
+  text-align: right;
+}
+
+/* Wrapper for two checkout panels side by side */
+.checkout-wrapper {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 5rem;
+}
+
+/* Alternate red panel */
+.checkout-page-alt {
+  flex: 1;
+  max-width: 400px;
+  background: #b71c1c;
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  position: sticky;
+  top: 2rem;
+  align-self: flex-start;
+}
+
+.checkout-page-alt h2,
+.checkout-page-alt p {
+  text-align: left;
+}
+
+/* Reusable container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Content sections styling */
+.content-section {
+  padding: 4rem 0;
+  
+}
+
+/* Alternate section background */
+.section-alt {
+  background: #f8f9fa;
+}
+
+/* Section header */
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.section-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #b71c1c, #FF0404);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-top: 0.5rem;
+}
+
+.section-title-alt {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 0.5rem;
+}
+
+/* Make specific section sticky */
+.fixed-section {
+  position: sticky;
+  top: 2rem;
+  z-index: 10;
+  background: #f9f9f9;
+}
+
+/* Styled button similar to Home hero-buttons */
+.checkout-button {
+  margin: 0.5rem 1rem;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 5px;
+  background: #EC221F;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.checkout-button:hover {
+  background: #b71c1c;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transform: translateY(-1px) scale(1.01);
+}
+
+/* Mobile responsiveness: stack panels */
+@media (max-width: 768px) {
+  .checkout-wrapper {
+    flex-direction: column;
+    margin-top: 2rem;
+  }
+  .checkout-page,
+  .checkout-page-alt {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  /* Ensure summary moves below main content */
+  .checkout-page-alt {
+    order: 2;
+    margin-top: 2rem;
+  }
+  .checkout-page {
+    order: 1;
+  }
+}
