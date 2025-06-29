@@ -7,12 +7,13 @@ import { createCompraService } from "../services/compra.service.js";
 
 export async function crearCompXBod(body) {
     try {
+        console.log("Cuerpo de la compra:", body);
         const repoBodega = AppDataSource.getRepository(Bodega);
 
         const productoExistente = await repoBodega.findOne({
             where: { nombre_producto: body.nombre_producto }
         });
-
+        console.log("Producto existente:", productoExistente);
         if (productoExistente) {
             // actualizar bodega
             const aumentar = {
@@ -20,13 +21,18 @@ export async function crearCompXBod(body) {
                 costo_total: Number(productoExistente.costo_total) + Number(body.costo_compra)
             };
 
-            await updateBodegaService(productoExistente.id_bodega, aumentar);
+            const bodega_update = await updateBodegaService(productoExistente.id_bodega, aumentar);
 
             // registrar compra
             body.id_bodega = productoExistente.id_bodega;
-            await createCompraService(body);
+            const nuevaCompra = await createCompraService(body);
 
-            return [null, "Producto ya existe, se actualizó el stock y se registró la compra"];
+            return [{
+                mensaje: "Producto ya existe, se actualizó el stock y se registró la compra",
+                tipo: "actualizacion",
+                bodega_actualizada: bodega_update,
+                compra_registrada: nuevaCompra
+            }, null];
         } else {
             // crear nueva bodega
             const bodyBodega = {
@@ -34,19 +40,29 @@ export async function crearCompXBod(body) {
                 stock: body.stock,
                 costo_total: body.costo_compra
             };
-            await createBodegaService(bodyBodega);
-            const nuevaBodega = await repoBodega.findOne({
+            console.log("Creando nueva bodega con:", bodyBodega);
+
+            const nuevaBodega = await createBodegaService(bodyBodega);
+            console.log("Nueva bodega creada:", nuevaBodega);
+            // buscar para obtener id
+            const bodegaCreada = await repoBodega.findOne({
                 where: { nombre_producto: body.nombre_producto }
             });
-            body.id_bodega = nuevaBodega.id_bodega;
-            // registrar compra con nueva bodega
-            body.id_bodega = nuevaBodega.id_bodega;
-            await createCompraService(body);
 
-            return [null, "Producto nuevo creado y compra registrada"];
+
+            body.id_bodega = bodegaCreada.id_bodega;
+            const nuevaCompra = await createCompraService(body);
+
+            return [{
+                mensaje: "Producto nuevo creado y compra registrada",
+                tipo: "creacion",
+                almacenar_bodega: nuevaBodega,
+                compra_registrada: nuevaCompra
+            }, null];
         }
     } catch (error) {
         console.error(error);
         return [null, "Error al crear o registrar compra"];
     }
 }
+
