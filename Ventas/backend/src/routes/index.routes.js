@@ -34,6 +34,6 @@ router.use('/item_carrito', itemCarritoRoutes);
 router.use('/users',userRoutes);  
 router.use('/products', productRoutes); 
 router.use('/materiales', materialRoutes);
-router.use('/tipos', tipoRoutes); // Asegúrate de que este es el nombre correcto del archivo
+router.use('/tipos', tipoRoutes); 
 
 export default router;

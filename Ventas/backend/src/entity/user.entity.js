@@ -2,6 +2,7 @@
 import { EntitySchema } from "typeorm"
 import ItemCarritoSchema from "./item_carrito.entity.js";
 import VentaSchema from "./venta.entity.js";
+import UserEventSchema from "./userEvent.entity.js";
 
 const UsuarioSchema = new EntitySchema({
     name: "Usuario",
@@ -99,6 +100,11 @@ const UsuarioSchema = new EntitySchema({
                 name: "id_usuario",
             },
             inverseSide: "usuario",
+        },
+        eventos: {
+            type: "one-to-many",
+            target: UserEventSchema,
+            inverseSide: "usuario", 
         },
     },
     indices: [

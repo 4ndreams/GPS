@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import Productos from './pages/Productos';
 import AboutUs from './pages/AboutUs';
 import Checkout from './pages/Checkout';
+import ProductDetail from './pages/ProductDetail.tsx';
 
 import Navbar from './components/Navbar'
 
@@ -50,6 +51,7 @@ function App() {
         <Route path="/productos" element={<Productos />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
     </>
   );

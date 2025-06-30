@@ -57,11 +57,31 @@ export const getProductById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Producto no encontrado" });
     }
 
+    // Si el usuario está autenticado, registra el evento
+    if (req.user && req.user.id_usuario) {
+      const userEventRepo = AppDataSource.getRepository("UserEvent");
+
+      const nuevoEvento = userEventRepo.create({
+        tipo_evento: "PRODUCT_VIEW",
+        usuario: { id_usuario: req.user.id_usuario },
+        producto: { id_producto: producto.id_producto },
+        metadata: {
+          // Puedes agregar detalles útiles aquí
+          userAgent: req.headers["user-agent"],
+          ip: req.ip,
+        },
+      });
+
+      await userEventRepo.save(nuevoEvento);
+    }
+
     res.json({ success: true, data: producto });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: "Error al buscar el producto", error: err.message });
   }
 };
+
 
 // POST /api/products
 export const createProduct = async (req, res) => {
