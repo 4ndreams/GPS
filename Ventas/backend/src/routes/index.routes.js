@@ -12,6 +12,7 @@ import ventaRoutes from "./venta.routes.js";
 import itemCarritoRoutes from "./item_carrito.routes.js"; 
 import comprasRoutes from "./compras.routes.js";
 import compXbogRoutes from "./compXbog.routes.js";
+import com_mesRoutes from "./com_mes.routes.js";
 
 
 const router = Router();
@@ -34,5 +35,6 @@ router.use('/item_carrito', itemCarritoRoutes);
 router.use('/compras', comprasRoutes);
 router.use('/users',userRoutes); 
 router.use('/compXbog', compXbogRoutes); 
+router.use('/com_mes', com_mesRoutes);
 
 export default router;

@@ -7,13 +7,11 @@ import { createCompraService } from "../services/compra.service.js";
 
 export async function crearCompXBod(body) {
     try {
-        console.log("Cuerpo de la compra:", body);
         const repoBodega = AppDataSource.getRepository(Bodega);
 
         const productoExistente = await repoBodega.findOne({
             where: { nombre_producto: body.nombre_producto }
         });
-        console.log("Producto existente:", productoExistente);
         if (productoExistente) {
             // actualizar bodega
             const aumentar = {
@@ -40,10 +38,7 @@ export async function crearCompXBod(body) {
                 stock: body.stock,
                 costo_total: body.costo_compra
             };
-            console.log("Creando nueva bodega con:", bodyBodega);
-
             const nuevaBodega = await createBodegaService(bodyBodega);
-            console.log("Nueva bodega creada:", nuevaBodega);
             // buscar para obtener id
             const bodegaCreada = await repoBodega.findOne({
                 where: { nombre_producto: body.nombre_producto }
