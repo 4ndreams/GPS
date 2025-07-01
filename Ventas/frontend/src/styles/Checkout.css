@@ -1,8 +1,8 @@
+/* Main checkout content panel */
 .checkout-page {
-  max-width: 600px;
-  padding: 0 1rem;
-  background: #f9f9f9;
-  border-radius: 8px;
+  flex: 2;
+  max-width: 800px;
+  min-height: 120vh; /* Altura mínima para generar scroll */
 }
 
 .checkout-page h1,
@@ -64,26 +64,32 @@
   text-align: right;
 }
 
-/* Wrapper for two checkout panels side by side */
+
 .checkout-wrapper {
   display: flex;
   gap: 2rem;
   justify-content: center;
   align-items: flex-start;
   margin-top: 5rem;
+  min-height: 100vh; 
 }
 
-/* Alternate red panel */
+
 .checkout-page-alt {
-  flex: 1;
-  max-width: 400px;
+  flex: 0 0 400px; 
   background: #b71c1c;
   color: white;
-  padding: 2rem;
+  padding: 0;
   border-radius: 8px;
-  position: sticky;
-  top: 2rem;
-  align-self: flex-start;
+  position: relative;
+  height: auto;
+  align-self: flex-start; /* Cambiar de stretch a flex-start */
+}
+
+/* Content section for sticky sidebar */
+.content-section-alt {
+  padding: 2rem !important;
+  position: static !important; /* Ya no sticky aquí */
 }
 
 .checkout-page-alt h2,
@@ -172,8 +178,176 @@
   transform: translateY(-1px) scale(1.01);
 }
 
+/* Contact form styles */
+.contact-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #EC221F;
+  box-shadow: 0 0 0 2px rgba(236, 34, 31, 0.1);
+}
+
+.form-group input::placeholder {
+  color: #888;
+}
+
+.login-suggestion {
+  text-align: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #EC221F;
+}
+
+.login-suggestion a {
+  color: #EC221F;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-suggestion a:hover {
+  text-decoration: underline;
+}
+
+/* Pickup info styles */
+.pickup-info {
+  margin-bottom: 2rem;
+}
+
+.no-delivery-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.notice-icon {
+  color: #856404;
+  font-size: 1.5rem;
+  margin-top: 0.2rem;
+}
+
+.notice-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: #856404;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.notice-content p {
+  margin: 0;
+  color: #856404;
+  line-height: 1.5;
+}
+
+.store-info {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #EC221F;
+}
+
+.store-info h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.store-info p {
+  margin: 0.5rem 0;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.store-info strong {
+  color: #2c3e50;
+}
+
+/* Sticky card inside summary panel */
+.summary-card {
+  background: #d32f2f; /* Rojo más oscuro para la tarjeta */
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
+}
+
+/* Adjustments for content inside sticky card */
+.summary-card .section-header {
+  margin-bottom: 1.5rem;
+}
+
+.summary-card .section-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.summary-card .cart-list {
+  margin-bottom: 1.5rem;
+}
+
+.summary-card .cart-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.summary-card .cart-total {
+  padding-top: 1rem;
+  border-top: 2px solid rgba(255, 255, 255, 0.3);
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+/* Container inside summary section - no padding */
+.content-section-alt .container {
+  padding: 0 !important;
+}
+
 /* Mobile responsiveness: stack panels */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
   .checkout-wrapper {
     flex-direction: column;
     margin-top: 2rem;
@@ -190,5 +364,8 @@
   }
   .checkout-page {
     order: 1;
+  }
+  .form-row {
+    flex-direction: column;
   }
 }

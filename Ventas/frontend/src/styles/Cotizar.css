@@ -1,0 +1,111 @@
+.cotizar-page {
+    margin-top: 2rem;
+  padding: 2rem;
+  background: #f9f9f9;
+  min-height: calc(100vh - 100px);
+}
+
+.cotizar-page h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #000000;
+}
+
+.cotizar-form {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.field-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333333;
+}
+
+.field-group input,
+.field-group select,
+.field-group textarea {
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.field-group select {
+  color: #000;
+  padding: 0.7rem;
+  min-height: 3rem;
+}
+
+.field-group input:focus,
+.field-group select:focus,
+.field-group textarea:focus {
+  outline: none;
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.field-group textarea {
+  font-family: 'Inter', Arial, sans-serif;
+  resize: none;
+  width: 100%;
+  padding: 0.7rem;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: #111;
+  background: #fff;
+  min-height: 200px; /* Aumentar altura */
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #EC221F;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #b71c1c;
+}
+
+/* Restablecer labels arriba e izquierda en todas resoluciones */
+@media (min-width: 768px) {
+  .field-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .field-group label {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    margin-right: 0;
+  }
+
+  .field-group input,
+  .field-group select,
+  .field-group textarea {
+    width: 100%;
+  }
+}
