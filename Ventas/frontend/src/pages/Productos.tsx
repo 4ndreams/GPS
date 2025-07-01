@@ -16,9 +16,14 @@ interface Product {
   precio: number;
   imagen: string;
   categoria: string;
+  quantity: number;
 }
 
-function Productos() {
+interface ProductosProps {
+  addToCart: (product: Product) => void;
+}
+
+function Productos({ addToCart }: ProductosProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [nameFilter, setNameFilter] = useState('');
@@ -29,15 +34,15 @@ function Productos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Datos de super hiper mega prueba
+  // Datos de prueba con stock inicial
   useEffect(() => {
     const mockProducts: Product[] = [
-      { id: 1, nombre: 'Puerta Geno Enchape Wenge', precio: 105000, imagen: '1.png', categoria: 'puertas' },
-      { id: 2, nombre: 'Puerta Moderna Vidrio', precio: 210000, imagen: '2.jpeg', categoria: 'puertas' },
-      { id: 3, nombre: 'Moldura Roble 2m', precio: 45000, imagen: 'm1.jpg', categoria: 'molduras' },
-      { id: 4, nombre: 'Marco Roble Sólido', precio: 75000, imagen: 'm2.jpeg', categoria: 'molduras' },
-      { id: 5, nombre: 'Puerta Seguridad Acero', precio: 320000, imagen: '3.jpeg', categoria: 'puertas' },
-      { id: 6, nombre: 'Moldura Blanca Moderna', precio: 38000, imagen: 'm3.jpg', categoria: 'molduras' },
+      { id: 1, nombre: 'Puerta Geno Enchape Wenge', precio: 105000, imagen: '1.png', categoria: 'puertas', quantity: 10 },
+      { id: 2, nombre: 'Puerta Moderna Vidrio', precio: 210000, imagen: '2.jpeg', categoria: 'puertas', quantity: 5 },
+      { id: 3, nombre: 'Moldura Roble 2m', precio: 45000, imagen: 'm1.jpg', categoria: 'molduras', quantity: 8 },
+      { id: 4, nombre: 'Marco Roble Sólido', precio: 75000, imagen: 'm2.jpeg', categoria: 'molduras', quantity: 12 },
+      { id: 5, nombre: 'Puerta Seguridad Acero', precio: 320000, imagen: '3.jpeg', categoria: 'puertas', quantity: 7 },
+      { id: 6, nombre: 'Moldura Blanca Moderna', precio: 38000, imagen: 'm3.jpg', categoria: 'molduras', quantity: 15 },
     ];
 
     setTimeout(() => {
@@ -94,6 +99,21 @@ function Productos() {
     
     setFilteredProducts(result);
   }, [nameFilter, minPrice, maxPrice, categoryFilter, products]);
+
+  // Función para manejar agregar al carrito con validación de stock
+  const handleAddToCart = (product: Product) => {
+    if (product.quantity > 0) {
+      // Actualizar el stock localmente
+      setProducts(prevProducts => 
+        prevProducts.map(p => 
+          p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p
+        )
+      );
+      
+      // Agregar al carrito
+      addToCart(product);
+    }
+  };
 
   const clearFilters = () => {
     setNameFilter('');
@@ -189,12 +209,18 @@ function Productos() {
                 <div className="producto-categoria-badge">
                   {product.categoria.toUpperCase()}
                 </div>
+                {product.quantity <= 0 && (
+                  <div className="producto-agotado">
+                    AGOTADO
+                  </div>
+                )}
                 <img 
                   src={`../src/img/${product.categoria}/${product.imagen}`} 
                   alt={product.nombre} 
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
                   }}
+                  className={product.quantity <= 0 ? 'img-agotada' : ''}
                 />
               </div>
               <div className="producto-info">
@@ -202,6 +228,22 @@ function Productos() {
                 <p className="producto-precio">
                   ${product.precio.toLocaleString('es-CL')}
                 </p>
+                <p className="producto-stock">
+                  {product.quantity > 0 
+                    ? `Disponibles: ${product.quantity}` 
+                    : 'Producto no disponible'}
+                </p>
+                <div className="producto-acciones">
+                  <button 
+                    className={`add-to-cart-btn ${product.quantity <= 0 ? 'disabled' : ''}`}
+                    onClick={() => handleAddToCart(product)}
+                    disabled={product.quantity <= 0}
+                  >
+                    {product.quantity > 0 
+                      ? <><i className="bi bi-cart-plus"></i> Agregar al carrito</>
+                      : 'Sin stock'}
+                  </button>
+                </div>
               </div>
             </div>
           ))
