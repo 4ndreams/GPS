@@ -13,7 +13,9 @@ import itemCarritoRoutes from "./item_carrito.routes.js";
 import comprasRoutes from "./compras.routes.js";
 import compXbogRoutes from "./compXbog.routes.js";
 import com_mesRoutes from "./com_mes.routes.js";
+import productRoutes from "./product.routes.js";
 
+import rellenoRoutes from "./relleno.routes.js"; // Import relleno routes
 
 const router = Router();
 
@@ -43,5 +45,6 @@ router.use('/products', productRoutes);
 router.use('/materiales', materialRoutes);
 router.use('/tipos', tipoRoutes); 
 
+router.use('/rellenos', rellenoRoutes); 
 
 export default router;
