@@ -13,7 +13,7 @@ const CompraSchema = new EntitySchema({
     },
     id_bodega: {
       type: "int",
-      nullable: false,
+      nullable: true,
     },
     nombre_producto: {
       type: "varchar",
