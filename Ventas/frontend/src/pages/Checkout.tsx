@@ -167,7 +167,7 @@ const Checkout: React.FC = () => {
               <div className="store-info">
                 <h4>Ubicación de la Tienda</h4>
                 <p><strong>Dirección:</strong> Lincoyan 880 - Concepción</p>
-                <p><strong>Horarios de Atención:</strong> Lunes a Viernes 9:00 - 18:00, Sábados 9:00 - 14:00</p>
+                <p><strong>Horarios de Atención:</strong> Lunes a Viernes 9:00 -  - 18:00</p>
                 <p><strong>Teléfono:</strong> +56984184801 / 412223967</p>
               </div>
             </div>
