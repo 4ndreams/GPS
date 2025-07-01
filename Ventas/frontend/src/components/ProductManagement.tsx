@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/productManagement.css"
+import "../styles/productManagement.css";
 import ModalProduct from "./ModalProduct";
 
 interface Tipo {
@@ -36,13 +36,13 @@ interface Props {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function ProductManagement({ userRole, token }: Props) {
-   const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editData, setEditData] = useState<Product | null>(null);
-    const [tipos, setTipos] = useState<Tipo[]>([]);
-    const [materiales, setMateriales] = useState<Material[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editData, setEditData] = useState<Product | null>(null);
+  const [tipos, setTipos] = useState<Tipo[]>([]);
+  const [materiales, setMateriales] = useState<Material[]>([]);
 
   const axiosConfig = {
     headers: { Authorization: `Bearer ${token}` },
@@ -123,10 +123,15 @@ function ProductManagement({ userRole, token }: Props) {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     if (!editData) return;
     const { name, value } = e.target;
-    setEditData({ ...editData, [name]: name === "precio" || name === "stock" ? Number(value) : value });
+    setEditData({
+      ...editData,
+      [name]: name === "precio" || name === "stock" ? Number(value) : value,
+    });
   };
 
   const handleDeleteProduct = async (id: number) => {
@@ -142,58 +147,54 @@ function ProductManagement({ userRole, token }: Props) {
   if (error) return <p>{error}</p>;
 
   return (
-   <div className="product-management">
-  <h2 className="pm-title">Panel de Gestión de Productos</h2>
+    <div className="product-management">
+      <h2 className="pm-title">Panel de Gestión de Productos</h2>
 
-  <div className="pm-form">
-    <button type="button" onClick={openCreateModal}>
-      Crear nuevo producto
-    </button>
-  </div>
+      <div className="pm-form">
+        <button type="button" onClick={openCreateModal}>
+          Crear nuevo producto
+        </button>
+      </div>
 
-  <ul className="pm-list">
-    {products.length > 0 ? (
-      products.map((p) => (
-        <li className="pm-item" key={p.id_producto}>
-          <h4>{p.nombre_producto}</h4>
-          <p>${Number(p.precio).toLocaleString("es-CL")}</p>
-          <p>{p.stock} unidades</p>
-          <div>
-            <button
-              className="edit-btn"
-              onClick={() => openEditModal(p)}
-            >
-              Editar
-            </button>
-            <button
-              className="delete-btn"
-              onClick={() => handleDeleteProduct(p.id_producto!)}
-            >
-              Eliminar
-            </button>
-          </div>
-        </li>
-      ))
-    ) : (
-      <li className="pm-item">
-        <p>No hay productos disponibles.</p>
-      </li>
-    )}
-  </ul>
+      <ul className="pm-list">
+        {products.length > 0 ? (
+          products.map((p) => (
+            <li className="pm-item" key={p.id_producto}>
+              <h4>{p.nombre_producto}</h4>
+              <p>${Number(p.precio).toLocaleString("es-CL")}</p>
+              <p>{p.stock} unidades</p>
+              <div>
+                <button className="edit-btn" onClick={() => openEditModal(p)}>
+                  Editar
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDeleteProduct(p.id_producto!)}
+                >
+                  Eliminar
+                </button>
+              </div>
+            </li>
+          ))
+        ) : (
+          <li className="pm-item">
+            <p>No hay productos disponibles.</p>
+          </li>
+        )}
+      </ul>
 
-  {isModalOpen && editData && (
-    <ModalProduct
-      isOpen={isModalOpen}
-      editData={editData}
-      tipos={tipos}
-      materiales={materiales}
-      onChange={handleChange}
-      onClose={closeModal}
-      onSave={handleSaveProduct}
-    />
-  )}
-</div>
-
+      {isModalOpen && editData && (
+        <ModalProduct
+          isOpen={isModalOpen}
+          editData={editData}
+          tipos={tipos}
+          materiales={materiales}
+          onChange={handleChange}
+          onClose={closeModal}
+          onSave={handleSaveProduct}
+        />
+      )}
+    </div>
   );
 }
 

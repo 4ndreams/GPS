@@ -32,9 +32,16 @@ router.use('/producto', productoRoutes);
 router.use('/orden', ordenRoutes);
 router.use('/venta', ventaRoutes);
 router.use('/item_carrito', itemCarritoRoutes);
+
 router.use('/compras', comprasRoutes);
 router.use('/users',userRoutes); 
 router.use('/compXbog', compXbogRoutes); 
 router.use('/com_mes', com_mesRoutes);
+
+router.use('/users',userRoutes);  
+router.use('/products', productRoutes); 
+router.use('/materiales', materialRoutes);
+router.use('/tipos', tipoRoutes); 
+
 
 export default router;

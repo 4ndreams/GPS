@@ -22,19 +22,16 @@ async function setupServer() {
 
     app.disable("x-powered-by");
 
-    // ✅ CORS (solo una vez)
     app.use(cors({
-      origin: process.env.VITE_API_BASE_URL, // Frontend en Vite
+      origin: process.env.VITE_API_BASE_URL,
       credentials: true
     }));
 
-    // ✅ Middlewares de body y cookies
     app.use(urlencoded({ extended: true, limit: "1mb" }));
     app.use(json({ limit: "1mb" }));
     app.use(cookieParser());
     app.use(morgan("dev"));
 
-    // ✅ Sesiones (para login con Google/Facebook)
     app.use(session({
       secret: cookieKey,
       resave: false,
