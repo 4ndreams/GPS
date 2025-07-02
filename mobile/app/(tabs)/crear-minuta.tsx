@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import styles from '../../styles/crear-minutaStyles'; 
+import { Picker } from '@react-native-picker/picker';
 
 export default function CrearMinutaScreen() {
   const router = useRouter();
@@ -56,12 +58,26 @@ export default function CrearMinutaScreen() {
       <Text style={styles.title}>Nueva Minuta</Text>
 
       <TextInput
-        placeholder="Código *"
+        placeholder="Cantidad *"
         value={codigo}
         onChangeText={setCodigo}
         style={styles.input}
         placeholderTextColor="#999"
       />
+
+      <Picker
+        style={styles.input}>
+        <Picker.Item label="Seleccione origen" value="" />
+        <Picker.Item label="Fábrica" value="fabrica" />
+        <Picker.Item label="Tienda" value="tienda" />
+      </Picker>
+
+      <Picker
+        style={styles.input}>
+        <Picker.Item label="Seleccione destino" value="" />
+        <Picker.Item label="Fábrica" value="tienda1" />
+        <Picker.Item label="Tienda" value="tienda2" />
+      </Picker>
 
       <TextInput
         placeholder="Cliente *"
@@ -88,69 +104,3 @@ export default function CrearMinutaScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-
-  },
-    headerBar: {
-    flexDirection: 'row',
-    height: 60,
-    alignItems: 'center',
-    padding: 15,
-    justifyContent: 'flex-start',
-    backgroundColor: '#FFFFFF',
-  },
-    logo: {
-    width: 150,
-    height: 100,
-    marginRight: 10,
-    resizeMode: 'contain',
-  },  
-  title: {
-    color: '#FFF',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#1F1F1F',
-    color: '#FFF',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
-  },
-  fotoButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#1F1F1F',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  fotoButtonText: {
-    color: '#DC2626',
-    fontSize: 16,
-  },
-  fotoPreview: {
-    width: '100%',
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  botonGuardar: {
-    backgroundColor: '#DC2626',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  botonTexto: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-});
