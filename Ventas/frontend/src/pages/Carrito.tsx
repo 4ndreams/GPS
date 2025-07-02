@@ -15,49 +15,15 @@ interface CartItem extends Product {
   quantity: number;
 }
 
-function Carrito() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
+interface CarritoProps {
+  cartItems: CartItem[];
+  removeFromCart: (productId: number, quantity: number) => void;
+  updateQuantity: (productId: number, newQuantity: number) => void;
+}
+
+function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Cargar carrito desde localStorage al inicio
-  useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        setCartItems(JSON.parse(savedCart));
-      }
-      setLoading(false);
-    } catch (err) {
-      setError('Error al cargar el carrito');
-      setLoading(false);
-    }
-  }, []);
-
-  // Guardar carrito en localStorage cuando cambia
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  // Actualizar cantidad de un producto en el carrito
-  const updateQuantity = (productId: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  // Eliminar producto del carrito y devolver stock
-  const removeFromCart = (productId: number, quantity: number) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-    
-    // Aquí deberías implementar la lógica para devolver el stock al inventario
-    // Esto requeriría acceso a la función setProducts del componente Productos
-    // Una solución más completa sería usar un estado global (como Redux o Context)
-  };
 
   // Calcular subtotal
   const subtotal = cartItems.reduce(

@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Productos.css';
-import '../img/puertas/1.png';
-import '../img/puertas/2.jpeg';
-import '../img/puertas/3.jpeg';
-import '../img/puertas/4.jpeg';
-import '../img/puertas/5.jpeg';
-import '../img/molduras/m1.jpg';
-import '../img/molduras/m2.jpeg';
-import '../img/molduras/m3.jpg';  
+
 
 interface Product {
   id: number;
@@ -20,37 +13,24 @@ interface Product {
 }
 
 interface ProductosProps {
+  products: Product[];
   addToCart: (product: Product) => void;
 }
 
-function Productos({ addToCart }: ProductosProps) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+function Productos({ products, addToCart }: ProductosProps) {
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [nameFilter, setNameFilter] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [priceError, setPriceError] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('todos');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Datos de prueba con stock inicial
+  // Actualizar productos filtrados cuando cambian los productos o los filtros
   useEffect(() => {
-    const mockProducts: Product[] = [
-      { id: 1, nombre: 'Puerta Geno Enchape Wenge', precio: 105000, imagen: '1.png', categoria: 'puertas', quantity: 10 },
-      { id: 2, nombre: 'Puerta Moderna Vidrio', precio: 210000, imagen: '2.jpeg', categoria: 'puertas', quantity: 5 },
-      { id: 3, nombre: 'Moldura Roble 2m', precio: 45000, imagen: 'm1.jpg', categoria: 'molduras', quantity: 8 },
-      { id: 4, nombre: 'Marco Roble Sólido', precio: 75000, imagen: 'm2.jpeg', categoria: 'molduras', quantity: 12 },
-      { id: 5, nombre: 'Puerta Seguridad Acero', precio: 320000, imagen: '3.jpeg', categoria: 'puertas', quantity: 7 },
-      { id: 6, nombre: 'Moldura Blanca Moderna', precio: 38000, imagen: 'm3.jpg', categoria: 'molduras', quantity: 15 },
-    ];
-
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setFilteredProducts(mockProducts);
-      setLoading(false);
-    }, 800);
-  }, []);
+    setFilteredProducts(products);
+  }, [products]);
 
   const validatePrices = () => {
     if (minPrice && maxPrice) {
@@ -69,7 +49,7 @@ function Productos({ addToCart }: ProductosProps) {
   useEffect(() => {
     if (!validatePrices()) return;
 
-    let result = products;
+    let result = [...products];
     
     if (nameFilter) {
       result = result.filter(p => 
@@ -99,21 +79,6 @@ function Productos({ addToCart }: ProductosProps) {
     
     setFilteredProducts(result);
   }, [nameFilter, minPrice, maxPrice, categoryFilter, products]);
-
-  // Función para manejar agregar al carrito con validación de stock
-  const handleAddToCart = (product: Product) => {
-    if (product.quantity > 0) {
-      // Actualizar el stock localmente
-      setProducts(prevProducts => 
-        prevProducts.map(p => 
-          p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p
-        )
-      );
-      
-      // Agregar al carrito
-      addToCart(product);
-    }
-  };
 
   const clearFilters = () => {
     setNameFilter('');
@@ -236,7 +201,7 @@ function Productos({ addToCart }: ProductosProps) {
                 <div className="producto-acciones">
                   <button 
                     className={`add-to-cart-btn ${product.quantity <= 0 ? 'disabled' : ''}`}
-                    onClick={() => handleAddToCart(product)}
+                    onClick={() => addToCart(product)}
                     disabled={product.quantity <= 0}
                   >
                     {product.quantity > 0 
