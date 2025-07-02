@@ -90,6 +90,7 @@ export default function TabLayout() {
           tabBarAccessibilityLabel: 'Información sobre la aplicación',
         }}
       />
+      {/* 
       <Tabs.Screen
         name="list"
         options={{
@@ -97,7 +98,7 @@ export default function TabLayout() {
           tabBarIcon: renderListIcon,
           tabBarAccessibilityLabel: 'Listado de minutas',
         }}
-      />
+      />*/}
       <Tabs.Screen
         name="perfil"
         options={{
