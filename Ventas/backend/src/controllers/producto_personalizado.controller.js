@@ -8,8 +8,29 @@ import{
     updateEstadoProductoPersonalizadoService,
     deleteProductoPersonalizadoService
 } from "../services/producto_personalizado.service.js";
-import { ProductoPersonalizadoQueryValidation, ProductoPersonalizadoBodyValidation, ProductoPersonalizadoEstadoValidation } from "../validations/producto_personalizado.validation.js";
+import { ProductoPersonalizadoQueryValidation, ProductoPersonalizadoBodyValidation, ProductoPersonalizadoBodyValidationLoggedUser, ProductoPersonalizadoEstadoValidation } from "../validations/producto_personalizado.validation.js";
 import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
+
+// Función auxiliar para auto-completar datos del usuario logueado
+function autoCompleteUserData(req) {
+    if (!req.user || !req.user.id_usuario) return;
+    
+    req.body.id_usuario = req.user.id_usuario;
+    
+    if (!req.body.nombre_apellido_contacto && req.user.nombre && req.user.apellidos) {
+        req.body.nombre_apellido_contacto = `${req.user.nombre} ${req.user.apellidos}`;
+    }
+    
+    if (!req.body.rut_contacto && req.user.rut) {
+        req.body.rut_contacto = req.user.rut;
+    }
+    
+    if (!req.body.email_contacto && req.user.email) {
+        req.body.email_contacto = req.user.email;
+    }
+    
+    console.log(`✅ Datos de usuario logueado asignados automáticamente: ${req.user.email}`);
+}
 
 export async function getProductoPersonalizadoController(req, res) {
     try {
@@ -49,13 +70,16 @@ export async function getProductosPersonalizadosController(req, res) {
 
 export async function createProductoPersonalizadoController(req, res) {
     try {
-        // Si el usuario está logueado, asignar automáticamente su ID
-        if (req.user && req.user.id_usuario) {
-            req.body.id_usuario = req.user.id_usuario;
-        } 
+        // Auto-completar datos del usuario si está logueado
+        autoCompleteUserData(req);
 
-
-        const { error } = ProductoPersonalizadoBodyValidation.validate(req.body);
+        // Usar validación diferenciada según si el usuario está logueado
+        const isLoggedUser = req.user && req.user.id_usuario;
+        const validation = isLoggedUser 
+            ? ProductoPersonalizadoBodyValidationLoggedUser 
+            : ProductoPersonalizadoBodyValidation;
+        
+        const { error } = validation.validate(req.body);
         if (error) {
             return handleErrorClient(res, 400, error.details[0].message);
         }
@@ -76,13 +100,16 @@ export async function updateProductoPersonalizadoController(req, res) {
     try {
         const { id_producto_personalizado } = req.params;
         
-        // Si el usuario está logueado, asignar automáticamente su ID
-        if (req.user && req.user.id_usuario) {
-            req.body.id_usuario = req.user.id_usuario;
-        }
+        // Auto-completar datos del usuario si está logueado
+        autoCompleteUserData(req);
 
-        const { error } = ProductoPersonalizadoBodyValidation.validate(req.body);
+        // Usar validación diferenciada según si el usuario está logueado
+        const isLoggedUser = req.user && req.user.id_usuario;
+        const validation = isLoggedUser 
+            ? ProductoPersonalizadoBodyValidationLoggedUser 
+            : ProductoPersonalizadoBodyValidation;
 
+        const { error } = validation.validate(req.body);
         if (error) {
             return handleErrorClient(res, 400, error.details[0].message);
         }
