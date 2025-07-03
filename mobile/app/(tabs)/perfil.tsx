@@ -2,14 +2,19 @@ import { View, Text, Image, Pressable, TextInput, TouchableOpacity } from 'react
 import { Ionicons } from '@expo/vector-icons';
 import * as Google from 'expo-auth-session/providers/google';
 import styles from '../../styles/perfilStyles'; 
+import { useUsuario } from '../../contexts/UsuarioContext'; 
 
 export default function ProfileScreen() {
+  const { usuario, cambiarPerfil, limpiarPerfil } = useUsuario();
 
-   
-    const [request, response, promptAsync] = Google.useAuthRequest({
-        androidClientId: '896102954860-hu7i30kdiughklr1835bcc34ehpg47g5.apps.googleusercontent.com',
-        webClientId: '896102954860-8h3bvdiv6141jhctsegtf55nmv8lam0b.apps.googleusercontent.com',
-        });
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: '896102954860-hu7i30kdiughklr1835bcc34ehpg47g5.apps.googleusercontent.com',
+    webClientId: '896102954860-8h3bvdiv6141jhctsegtf55nmv8lam0b.apps.googleusercontent.com',
+  });
+
+  const seleccionarPerfil = async (perfil: 'fabrica' | 'tienda', nombre: string) => {
+    await cambiarPerfil(perfil, nombre);
+  };
         
 
   return (
@@ -25,6 +30,73 @@ export default function ProfileScreen() {
         <View style={styles.innerContainer}>
         <Text style={[styles.title, {marginTop: -100}]}>Perfil de Usuario</Text>
         <Text style={styles.subtitle}>Gestiona tu información personal</Text>
+        
+        {/* Sección de Selector de Perfiles */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Seleccionar Perfil</Text>
+          <Text style={styles.sectionText}>
+            Perfil actual: {usuario.perfil ? (usuario.perfil === 'fabrica' ? 'Fábrica' : 'Tienda') : 'Ninguno'}
+          </Text>
+        </View>
+
+        {/* Botones de selección de perfil */}
+        <View style={styles.perfilButtonsContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.perfilButton,
+              usuario.perfil === 'fabrica' && styles.perfilButtonActive
+            ]}
+            onPress={() => seleccionarPerfil('fabrica', 'Operador de Fábrica')}
+          >
+            <Ionicons 
+              name="build" 
+              size={24} 
+              color={usuario.perfil === 'fabrica' ? '#FFFFFF' : '#DC2626'} 
+            />
+            <Text style={[
+              styles.perfilButtonText,
+              usuario.perfil === 'fabrica' && styles.perfilButtonTextActive
+            ]}>
+              Fábrica
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.perfilButton,
+              usuario.perfil === 'tienda' && styles.perfilButtonActive
+            ]}
+            onPress={() => seleccionarPerfil('tienda', 'Vendedora de Tienda')}
+          >
+            <Ionicons 
+              name="storefront" 
+              size={24} 
+              color={usuario.perfil === 'tienda' ? '#FFFFFF' : '#DC2626'} 
+            />
+            <Text style={[
+              styles.perfilButtonText,
+              usuario.perfil === 'tienda' && styles.perfilButtonTextActive
+            ]}>
+              Tienda
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Botón de limpiar perfil */}
+        {usuario.perfil && (
+          <TouchableOpacity 
+            style={styles.limpiarPerfilButton}
+            onPress={limpiarPerfil}
+          >
+            <Text style={styles.limpiarPerfilText}>Cambiar Perfil</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Separador */}
+        <View style={styles.separador}>
+          <Text style={styles.separadorText}>Autenticación</Text>
+        </View>
+
         <TextInput 
           placeholder="example@gmail.com"
           style={styles.Textinput}

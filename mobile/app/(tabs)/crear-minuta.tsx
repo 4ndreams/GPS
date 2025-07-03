@@ -12,6 +12,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker'; 
+import { useUsuario } from '../../contexts/UsuarioContext'; 
 
 interface PuertaCatalogo {
   id: string;
@@ -42,6 +43,7 @@ interface Puerta {
 }
 
 export default function CrearMinuta() {
+  const { usuario } = useUsuario();
 
   const [vistaActual, setVistaActual] = useState<'catalogo' | 'personalizado'>('catalogo');
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<'enchapadas' | 'terciadas'>('enchapadas');
@@ -56,7 +58,6 @@ export default function CrearMinuta() {
   // Estado del formulario actual
   const [puertaActual, setPuertaActual] = useState<Puerta>({
     id: '',
-    //codigoProducto: '',
     medidas: { alto: 0, ancho: 0, espesor: 0 },
     material_exterior: 'Seleccionar...',
     relleno_interior: 'Seleccionar...',
@@ -65,6 +66,32 @@ export default function CrearMinuta() {
   // Estados de control de UI
   const [modoFormulario, setModoFormulario] = useState<'agregar' | 'editar'>('agregar');
   const [errores, setErrores] = useState<string[]>([]);
+
+  // Verificación de permisos - renderizado condicional sin afectar hooks
+  if (usuario.perfil !== 'fabrica') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.headerBar}>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={[styles.logo, {marginTop: 15}]}
+            resizeMode="contain"
+          />
+        </View>
+        
+        <View style={styles.noPermissionContainer}>
+          <Ionicons name="ban" size={64} color="#DC2626" />
+          <Text style={styles.noPermissionTitle}>Acceso Denegado</Text>
+          <Text style={styles.noPermissionText}>
+            Esta función solo está disponible para el perfil de Fábrica.
+          </Text>
+          <Text style={styles.noPermissionSubtext}>
+            Ve a la pestaña Perfil para cambiar tu perfil.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   //Opciones de materiales
   const material_exterior = [
@@ -1383,5 +1410,34 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     backgroundColor: '#444',
     opacity: 0.5,
+  },
+  
+  // Estilos para pantalla de sin permisos
+  noPermissionContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  noPermissionTitle: {
+    color: '#DC2626',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  noPermissionText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 10,
+    lineHeight: 24,
+  },
+  noPermissionSubtext: {
+    color: '#A1A1AA',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
