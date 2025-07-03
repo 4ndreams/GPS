@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getProductosPersonalizadosByUserController,
+import { getMyProductosPersonalizadosController,
          getProductoPersonalizadoController,
          getProductosPersonalizadosController,
          createProductoPersonalizadoController,
@@ -12,7 +12,7 @@ import { optionalAuthJwt } from '../middlewares/optionalAuth.middleware.js';
 const router = Router();
 router
     .get('/', getProductosPersonalizadosController) // Permite acceso a todos los usuarios, autenticados o no
-    .get('/my', authenticateJwt, getProductosPersonalizadosByUserController) // Requiere autenticación
+    .get('/my', authenticateJwt, getMyProductosPersonalizadosController) // Requiere autenticación - ENDPOINT ESPECÍFICO para mis cotizaciones
     .get('/:id_producto_personalizado', optionalAuthJwt, getProductoPersonalizadoController) // Opcional
     .post('/', optionalAuthJwt, createProductoPersonalizadoController) // Opcional - permite usuarios logueados y anónimos
     .put('/:id_producto_personalizado', authenticateJwt, updateProductoPersonalizadoController) // Requiere autenticación

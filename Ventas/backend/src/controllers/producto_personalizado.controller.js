@@ -202,3 +202,25 @@ export async function updateEstadoProductoPersonalizadoController(req, res) {
     }
 }
 
+export async function getMyProductosPersonalizadosController(req, res) {
+    try {
+        // Verificar que el usuario esté autenticado
+        if (!req.user || !req.user.id_usuario) {
+            return handleErrorClient(res, 401, "Usuario no autenticado");
+        }
+
+        const { id_usuario } = req.user;
+
+        const [productosPersonalizados, errorMessage] = await getProductosPersonalizadosByUserService(id_usuario, null);
+        
+        if (errorMessage) {
+            return handleErrorClient(res, 404, errorMessage);
+        }
+
+        return handleSuccess(res, 200, "Mis cotizaciones obtenidas exitosamente", productosPersonalizados);
+    } catch (error) {
+        console.error(error);
+        return handleErrorServer(res, 500, "Error interno del servidor");
+    }
+}
+
