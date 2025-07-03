@@ -90,19 +90,19 @@ export async function verifyEmail(req, res) {
 
     if (!token) {
       // Redirige al frontend con error
-      return res.redirect(`http://localhost:5173/verified-email?success=false&message=Token%20de%20verificación%20requerido`);
+      return res.redirect(`${process.env.VITE_API_BASE_URL}/verified-email?success=false&message=Token%20de%20verificación%20requerido`);
     }
 
     const [success, error] = await verifyEmailService(token);
 
     if (error) {
       // Redirige al frontend con error y mensaje
-      return res.redirect(`http://localhost:5173/verified-email?success=false&message=${encodeURIComponent(error)}`);
+      return res.redirect(`${process.env.VITE_API_BASE_URL}/verified-email?success=false&message=${encodeURIComponent(error)}`);
     }
     // Redirige al frontend con éxito
-    return res.redirect(`http://localhost:5173/verified-email?success=true`);
+    return res.redirect(`${process.env.VITE_API_BASE_URL}/verified-email?success=true`);
   } catch (error) {
     // Redirige al frontend con error inesperado
-    return res.redirect(`http://localhost:5173/verified-email?success=false&message=${encodeURIComponent(error.message)}`);
+    return res.redirect(`${process.env.VITE_API_BASE_URL}/verified-email?success=false&message=${encodeURIComponent(error.message)}`);
   }
 }

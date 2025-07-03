@@ -1,5 +1,6 @@
 .home-page h1 {
   font-family: 'Inter', Arial, sans-serif;
+  margin-top: 90px;
 }
 .home-page h2,
 .home-page h3,
@@ -19,6 +20,7 @@
 }
 
 .hero-section {
+  margin-top: 2rem;
   position: relative;
   width: 100vw;
   height: 100vh;
@@ -34,7 +36,7 @@
 
 .hero-image {
   position: absolute;
-  top: 40px; /* Ajustar según el tamaño del navbar */
+  top: 90px; /* Ajustar según el tamaño del navbar */
   left: 0;
   width: 100vw;
   height: 100vh;
@@ -67,7 +69,7 @@
 }
 
 .hero-buttons button {
-  margin: 0 1rem;
+  margin: 0.5rem 1rem;
   padding: 0.75rem 2rem;
   font-size: 1.1rem;
   border: none;
@@ -441,5 +443,14 @@
     max-width: 100%;
     align-items: center;
     text-align: center;
+  }
+  .hero-section,
+  .products-section,
+  .nosotros-section,
+  .footer-section,
+  .contacto-section {
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
   }
 }

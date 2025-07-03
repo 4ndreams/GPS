@@ -1,12 +1,11 @@
 import jwt from "jsonwebtoken";
 import transporter from "../config/mailer.config.js";
-import { RESET_PASSWORD_URL, VERIFY_EMAIL_URL, ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
+import { HOST, PORT, ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
 
 export async function sendLoginAlertEmail(email) {
   const token = jwt.sign({ email }, ACCESS_TOKEN_SECRET, { expiresIn: "2m" });
 
-  const resetLink = `${RESET_PASSWORD_URL}?token=${token}`;
-
+  const resetLink = `http://${process.env.HOST}:${process.env.PORT}/api/recover-password?token=${token}`;
   // HTML de prueba
   const htmlContent = `
     <!DOCTYPE html>
@@ -89,7 +88,7 @@ export async function sendLoginAlertEmail(email) {
 }
 
 export async function sendVerificationEmail(to, token) {
-  const verificationLink = `${VERIFY_EMAIL_URL}?token=${(token)}`;
+  const verificationLink = `http://${process.env.HOST}:${process.env.PORT}/api/verify-email?token=${token}`;
   
   await transporter.sendMail({
     to,

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/LogoTerPlac.svg';
+import logo from '../assets/logo_terplac.svg';
+import logoMobile from '../assets/TERPLAC_T.png';
 import '../styles/Navbar.css';
 
 type User = {
@@ -10,16 +11,22 @@ type User = {
 } | null;
 
 interface NavbarProps {
-  user: User;
-  onLogout?: () => void;
+  readonly user: User;
+  readonly onLogout?: () => void;
 }
 
 function Navbar({user, onLogout}: NavbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false); 
+  const [userMenuOpen, setUserMenuOpen] = useState(false); 
   const cartItemCount = 1; 
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null); 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); 
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -39,7 +46,11 @@ function Navbar({user, onLogout}: NavbarProps) {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-brand">
-          <img src={logo} alt="Logo" className="logo-navbar" />
+          <img
+            src={isMobile ? logoMobile : logo}
+            alt="Logo"
+            className="logo-navbar"
+          />
         </Link>
 
         {/* Botón hamburguesa solo en pantallas pequeñas */}
@@ -47,11 +58,10 @@ function Navbar({user, onLogout}: NavbarProps) {
           <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
         </button>
 
-        {/* Menú de navegación */}
-        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
+        {/* Menú de navegación */}        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
           <li><Link to="/" className="navbar-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
           <li><Link to="/productos" className="navbar-link" onClick={() => setIsOpen(false)}>Productos</Link></li>
-          <li><Link to="/acerca-de" className="navbar-link" onClick={() => setIsOpen(false)}>Acerca de</Link></li>
+          <li><Link to="/about-us" className="navbar-link" onClick={() => setIsOpen(false)}>Sobre Nosotros</Link></li>
           <li><Link to="/contacto" className="navbar-link" onClick={() => setIsOpen(false)}>Contacto</Link></li>
           <li><Link to="/cotizar" className="navbar-link" onClick={() => setIsOpen(false)}>Cotizar</Link></li>
         </ul>
@@ -86,15 +96,16 @@ function Navbar({user, onLogout}: NavbarProps) {
                     <Link to="/profile" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
                       Perfil
                     </Link>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => {
+                    <Link
+                        to="/"
+                        className="dropdown-item"
+                        onClick={() => {
                         setUserMenuOpen(false);
                         onLogout && onLogout();
                       }}
-                    >
-                      Cerrar sesión
-                    </button>
+                      >
+                        Cerrar sesión
+                    </Link>
                   </>
                 ) : (
                   <>

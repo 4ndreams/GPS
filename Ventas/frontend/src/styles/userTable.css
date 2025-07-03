@@ -1,0 +1,31 @@
+/* styles/UsersTable.css */
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.users-table th,
+.users-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.users-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.users-table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.users-table tr:hover {
+  background-color: #ffe6e6;
+  transition: background-color 0.2s ease;
+}
