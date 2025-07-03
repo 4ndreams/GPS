@@ -93,7 +93,65 @@ export default StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     borderRadius: 8,
-    
+  },
+  
+  // Estilos para selector de perfiles
+  perfilButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginVertical: 20,
+    gap: 15,
+  },
+  perfilButton: {
+    flex: 1,
+    backgroundColor: '#1F1F1F',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#DC2626',
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 100,
+  },
+  perfilButtonActive: {
+    backgroundColor: '#DC2626',
+    borderColor: '#FFFFFF',
+  },
+  perfilButtonText: {
+    color: '#DC2626',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  perfilButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  limpiarPerfilButton: {
+    backgroundColor: '#444',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  limpiarPerfilText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  separador: {
+    width: '100%',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  separadorText: {
+    color: '#A1A1AA',
+    fontSize: 16,
+    fontWeight: 'bold',
+    backgroundColor: '#000000',
+    paddingHorizontal: 20,
+    position: 'relative',
   },
 
 });
