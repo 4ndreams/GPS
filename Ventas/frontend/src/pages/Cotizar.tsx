@@ -24,7 +24,7 @@ const VALIDATION_RULES = {
     pattern: /^\d{8}$/
   },
   rut: {
-    pattern: /^\d+[-|‐]\d[kK\d]$/
+    pattern: /^\d{1,8}-[\dkK]$/
   },
   email: {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
