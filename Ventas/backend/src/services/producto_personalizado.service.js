@@ -1,5 +1,6 @@
 "use strict";
 import { AppDataSource } from "../config/configDb.js";
+import { sendCotizacionConfirmationEmail, sendCotizacionStatusChangeEmail } from "../helpers/email.helper.js";
 
 export async function getProductosPersonalizadosService() {
     try {
@@ -73,6 +74,14 @@ export async function createProductoPersonalizadoService(body) {
             where: { id_producto_personalizado: saved.id_producto_personalizado },
             relations: ["relleno", "material", "usuario"]
         });
+        
+        // Enviar email de confirmación de cotización
+        try {
+            await sendCotizacionConfirmationEmail(completo);
+        } catch (emailError) {
+            console.error(`❌ Error al enviar email de confirmación para cotización #${completo.id_producto_personalizado}:`, emailError.message);
+            // No fallar la creación si el email falla, solo registrar el error
+        }
         
         return [completo, null];
     } catch (error) {
@@ -172,11 +181,16 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
     try {
         const repository = AppDataSource.getRepository("ProductoPersonalizado");
         
-        // Verificar que el producto personalizado existe
-        const exists = await repository.findOneBy({ id_producto_personalizado });
+        // Verificar que el producto personalizado existe y obtener el estado anterior
+        const exists = await repository.findOne({
+            where: { id_producto_personalizado },
+            relations: ["relleno", "material", "usuario"]
+        });
         if (!exists) {
             return [null, "Producto personalizado / cotización no encontrado"];
         }
+        
+        const estadoAnterior = exists.estado;
         
         // Actualizar solo el estado
         await repository.update({ id_producto_personalizado }, { estado });
@@ -186,6 +200,17 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
             where: { id_producto_personalizado },
             relations: ["relleno", "material", "usuario"]
         });
+        
+        // Enviar email de cambio de estado solo si el estado realmente cambió
+        if (estadoAnterior !== estado) {
+            try {
+                await sendCotizacionStatusChangeEmail(updated, estadoAnterior);
+                console.log(`✅ Email de cambio de estado enviado para cotización #${updated.id_producto_personalizado}: ${estadoAnterior} → ${estado}`);
+            } catch (emailError) {
+                console.error(`❌ Error al enviar email de cambio de estado para cotización #${updated.id_producto_personalizado}:`, emailError.message);
+                // No fallar la actualización si el email falla, solo registrar el error
+            }
+        }
         
         return [updated, null];
     } catch (error) {
