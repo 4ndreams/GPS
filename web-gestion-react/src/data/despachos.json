@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "productos": 25,
+    "origen": "Fábrica",
+    "destino": "Tienda",
+    "fecha": "21-05-2025",
+    "estado": "Recibido",
+    "alerta": false
+  },
+  {
+    "id": 2,
+    "productos": 30,
+    "origen": "Fábrica",
+    "destino": "Tienda",
+    "fecha": "21-05-2025",
+    "estado": "Alerta",
+    "alerta": true
+  },
+  {
+    "id": 3,
+    "productos": 40,
+    "origen": "Fábrica",
+    "destino": "Tienda",
+    "fecha": "21-05-2025",
+    "estado": "En tránsito",
+    "alerta": false
+  }
+]
