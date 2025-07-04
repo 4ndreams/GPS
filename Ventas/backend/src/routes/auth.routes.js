@@ -30,7 +30,11 @@ router.get("/auth/google",
 router.get("/auth/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    res.json({ message: "Autenticación con Google exitosa", user: req.user });
+  
+    const user = req.user;
+    const token = user.token;
+    res.redirect(`${process.env.VITE_API_BASE_URL}/profile?token=${token}`);
+
   }
 );
 

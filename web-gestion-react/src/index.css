@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* Blanco */
+    --foreground: 0 0% 0%; /* Negro */
+    --card: 0 0% 100%; /* Blanco */
+    --card-foreground: 0 0% 0%; /* Negro */
+    --popover: 0 0% 100%; /* Blanco */
+    --popover-foreground: 0 0% 0%; /* Negro */
+    --primary: 0 82% 41%; /* Rojo #b71c1c */
+    --primary-foreground: 0 0% 100%; /* Blanco */
+    --secondary: 0 0% 96%; /* Gris muy claro */
+    --secondary-foreground: 0 0% 0%; /* Negro */
+    --muted: 0 0% 96%; /* Gris muy claro */
+    --muted-foreground: 0 0% 45%; /* Gris medio */
+    --accent: 0 82% 41%; /* Rojo #b71c1c */
+    --accent-foreground: 0 0% 100%; /* Blanco */
+    --destructive: 0 82% 41%; /* Rojo #b71c1c */
+    --destructive-foreground: 0 0% 100%; /* Blanco */
+    --border: 0 0% 90%; /* Gris claro para bordes */
+    --input: 0 0% 90%; /* Gris claro para inputs */
+    --ring: 0 82% 41%; /* Rojo #b71c1c para focus */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 0%; /* Negro */
+    --foreground: 0 0% 100%; /* Blanco */
+    --card: 0 0% 4%; /* Negro casi puro */
+    --card-foreground: 0 0% 100%; /* Blanco */
+    --popover: 0 0% 4%; /* Negro casi puro */
+    --popover-foreground: 0 0% 100%; /* Blanco */
+    --primary: 0 82% 41%; /* Rojo #b71c1c */
+    --primary-foreground: 0 0% 100%; /* Blanco */
+    --secondary: 0 0% 10%; /* Gris muy oscuro */
+    --secondary-foreground: 0 0% 100%; /* Blanco */
+    --muted: 0 0% 10%; /* Gris muy oscuro */
+    --muted-foreground: 0 0% 65%; /* Gris claro */
+    --accent: 0 82% 41%; /* Rojo #b71c1c */
+    --accent-foreground: 0 0% 100%; /* Blanco */
+    --destructive: 0 82% 41%; /* Rojo #b71c1c */
+    --destructive-foreground: 0 0% 100%; /* Blanco */
+    --border: 0 0% 15%; /* Gris oscuro para bordes */
+    --input: 0 0% 15%; /* Gris oscuro para inputs */
+    --ring: 0 82% 41%; /* Rojo #b71c1c para focus */
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

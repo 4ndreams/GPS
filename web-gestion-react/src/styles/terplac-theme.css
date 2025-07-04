@@ -1,0 +1,150 @@
+/* Paleta de colores TERPLAC - Mundo Puertas */
+:root {
+  --terplac-primary: #EC221F;
+  --terplac-primary-hover: #b71c1c;
+  --terplac-white: #FFFFFF;
+  --terplac-text: #222;
+  --terplac-text-light: #666;
+  --terplac-background: #f5f5f5;
+  --terplac-border: #ddd;
+}
+
+/* Estilos para tabs activos */
+.terplac-tabs [data-state="active"] {
+  background-color: var(--terplac-primary) !important;
+  color: white !important;
+}
+
+.terplac-tabs [data-state="active"] svg {
+  color: white !important;
+}
+
+/* Botones primarios */
+.terplac-button-primary {
+  background-color: var(--terplac-primary);
+  color: white;
+  border-color: var(--terplac-primary);
+}
+
+.terplac-button-primary:hover {
+  background-color: var(--terplac-primary-hover);
+  border-color: var(--terplac-primary-hover);
+}
+
+/* Botones outline */
+.terplac-button-outline {
+  border-color: var(--terplac-primary);
+  color: var(--terplac-primary);
+}
+
+.terplac-button-outline:hover {
+  background-color: var(--terplac-primary);
+  color: white;
+}
+
+/* Badges y etiquetas */
+.terplac-badge-primary {
+  background-color: var(--terplac-primary);
+  color: white;
+}
+
+/* Estados de órdenes */
+.terplac-estado-completado {
+  background-color: #22c55e;
+  color: white;
+}
+
+.terplac-estado-alerta {
+  background-color: var(--terplac-primary);
+  color: white;
+}
+
+.terplac-estado-pendiente {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.terplac-estado-revision {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.terplac-estado-rechazado {
+  background-color: #ef4444;
+  color: white;
+}
+
+/* Colores de iconos */
+.terplac-icon-primary {
+  color: var(--terplac-primary);
+}
+
+.terplac-icon-success {
+  color: #22c55e;
+}
+
+.terplac-icon-warning {
+  color: #f59e0b;
+}
+
+.terplac-icon-error {
+  color: #ef4444;
+}
+
+/* Progress bars */
+.terplac-progress-primary [data-state="complete"] {
+  background-color: var(--terplac-primary);
+}
+
+/* Text colors */
+.terplac-text-primary {
+  color: var(--terplac-primary);
+}
+
+.terplac-text-main {
+  color: var(--terplac-text);
+}
+
+.terplac-text-light {
+  color: var(--terplac-text-light);
+}
+
+/* Hover effects */
+.terplac-hover-primary:hover {
+  color: var(--terplac-primary);
+}
+
+.terplac-hover-bg:hover {
+  background-color: var(--terplac-background);
+}
+
+/* Borders */
+.terplac-border {
+  border-color: var(--terplac-border);
+}
+
+/* User menu specific styles */
+.terplac-user-menu .dropdown-item:hover {
+  background-color: var(--terplac-background);
+}
+
+/* Notification styles */
+.terplac-notification-dot {
+  background-color: var(--terplac-primary);
+}
+
+/* Card headers */
+.terplac-card-header {
+  border-bottom: 1px solid var(--terplac-border);
+}
+
+/* Link styles */
+.terplac-link {
+  color: var(--terplac-primary);
+  text-decoration: none;
+}
+
+.terplac-link:hover {
+  color: var(--terplac-primary-hover);
+  text-decoration: underline;
+}

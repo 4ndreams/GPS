@@ -1,4 +1,3 @@
-// src/pages/Register.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -6,6 +5,7 @@ import Notification from "../components/Notification";
 import "../styles/Register.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
+import { registerUser } from "../services/authService";
 
 
 function formatRut(rut: string) {
@@ -30,7 +30,7 @@ function Register() {
   const [success, setSuccess] = useState("");
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -38,28 +38,27 @@ function Register() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-    const formattedRut = formatRut(formData.rut);
+  const formattedRut = formatRut(formData.rut);
 
-    try {
-      const res = await axios.post("http://localhost:3000/api/register", {
-        nombre: formData.nombres,
-        apellidos: formData.apellidos,
-        rut: formattedRut,
-        email: formData.email,
-        password: formData.password,
-      });
+  try {
+    await registerUser({
+      nombres: formData.nombres,
+      apellidos: formData.apellidos,
+      rut: formattedRut,
+      email: formData.email,
+      password: formData.password,
+    });
 
-      setNotification({ message: "Confirma tu correo electrónico para continuar.", type: "success" });
-    } catch (err) {
-      console.error(err);
-      setNotification({ message: "Error al registrar. Verifica los campos.", type: "error" });
-    }
-  };
+    setNotification({ message: "Confirma tu correo electrónico para continuar.", type: "success" });
+  } catch (err: any) {
+    setNotification({ message: err.response?.data?.details || "Error al registrar. Verifica los campos.", type: "error" });
+  }
+};
 
   return (
     <div className="register-page fade-in-left">
