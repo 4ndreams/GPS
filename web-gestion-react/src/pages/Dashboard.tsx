@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useContext } from "react"
+import { useNavigate } from "react-router-dom"
+import { AuthContext } from "../contexts/AuthContext"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,6 +37,8 @@ import {
   DoorOpen,
   TreePine,
   Phone,
+  User,
+  LogOut,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -247,6 +251,15 @@ const getPrioridadBadge = (prioridad: string) => {
 }
 
 export default function TerplacMundoPuertas() {
+  const navigate = useNavigate()
+  const authContext = useContext(AuthContext)
+  
+  if (!authContext) {
+    throw new Error('Dashboard debe usarse dentro de AuthProvider')
+  }
+  
+  const { usuario, logout: authLogout } = authContext
+  
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("dashboard")
   const [selectedFilters, setSelectedFilters] = useState({
@@ -261,6 +274,15 @@ export default function TerplacMundoPuertas() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
   const [refreshing, setRefreshing] = useState(false)
+  
+  // Estados para el menú de usuario
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  
+  // Usar datos del usuario del contexto
+  const user = usuario ? {
+    name: usuario.nombre,
+    email: usuario.email
+  } : { name: "Usuario", email: "usuario@terplac.com" }
 
   // Simulación de datos en tiempo real desde la app móvil
   useEffect(() => {
@@ -360,6 +382,22 @@ export default function TerplacMundoPuertas() {
     console.log(`Exportando órdenes en formato: ${format}`)
   }
 
+  const handleLogout = () => {
+    // Mostrar confirmación antes de cerrar sesión
+    const confirmarLogout = window.confirm("¿Estás seguro de que quieres cerrar sesión?")
+    
+    if (confirmarLogout) {
+      // Usar la función logout del AuthContext
+      authLogout()
+      
+      // Redirigir al login
+      navigate('/login')
+      
+      // Mostrar mensaje de confirmación
+      console.log("Sesión cerrada exitosamente")
+    }
+  }
+
   const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
 
@@ -457,6 +495,33 @@ export default function TerplacMundoPuertas() {
                   <DropdownMenuItem onClick={() => exportData("csv")}>
                     <FileText className="h-4 w-4 mr-2" />
                     CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Menú de Usuario */}
+              <DropdownMenu open={showUserMenu} onOpenChange={setShowUserMenu}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">{user.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                    <div className="font-medium">{user.name}</div>
+                    <div className="text-xs">{user.email}</div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Configuración
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Cerrar Sesión
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
