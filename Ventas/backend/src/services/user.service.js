@@ -148,3 +148,64 @@ export async function getProfileService(userId) {
     return [null, "Error interno del servidor"];
   }
 }
+
+export async function updateProfileService(userId, body) {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+
+    // Busca el usuario por su ID
+    const userFound = await userRepository.findOne({
+      where: { id_usuario: userId },
+    });
+
+    if (!userFound) return [null, "Usuario no encontrado"];
+
+    // Verifica si ya existe otro usuario con el mismo rut o email
+    const existingUser = await userRepository.findOne({
+      where: [
+        { rut: body.rut },
+        { email: body.email }
+      ],
+    });
+
+    if (existingUser && existingUser.id_usuario !== userFound.id_usuario) {
+      return [null, "Ya existe un usuario con el mismo rut o email"];
+    }
+
+    if (body.password) {
+      const matchPassword = await comparePassword(
+        body.password,
+        userFound.password,
+      );
+      if (!matchPassword) return [null, "La contraseña no coincide"];
+    }
+
+    const dataUserUpdate = {
+      nombre: body.nombre,
+      apellidos: body.apellidos,
+      email: body.email,
+      rut: body.rut,
+      updatedAt: new Date(),
+    };
+
+    if (body.newPassword && body.newPassword.trim() !== "") {
+      dataUserUpdate.password = await encryptPassword(body.newPassword);
+    }
+
+    await userRepository.update({ id_usuario: userFound.id_usuario }, dataUserUpdate);
+
+    const userData = await userRepository.findOne({
+      where: { id_usuario: userFound.id_usuario },
+    });
+
+    if (!userData) {
+      return [null, "Usuario no encontrado después de actualizar"];
+    }
+
+    const { password, ...userUpdated } = userData;
+    return [userUpdated, null];
+  } catch (error) {
+    console.error("Error al modificar el perfil del usuario:", error);
+    return [null, "Error interno del servidor"];
+  }
+}

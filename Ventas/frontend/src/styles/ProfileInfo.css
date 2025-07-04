@@ -53,10 +53,8 @@ button:focus,
   align-items: flex-start;
   padding: 2rem;
   width: 100%;
-  min-height: 100%;
 }
 
-/* ...existing code... */
 .profile-info {
   text-align: left;
   align-items: flex-start;

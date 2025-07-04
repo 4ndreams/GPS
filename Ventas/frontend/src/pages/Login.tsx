@@ -4,9 +4,14 @@ import "../styles/Login.css";
 import "../styles/animations.css";
 import puertaImg from "../assets/TerplacFoto1.png";
 import Notification from "../components/Notification";
-import { loginUser } from "../services/authService";
+import { loginUser, getGoogleAuthUrl } from "../services/authService";
+import { getUserProfile } from "../services/userService";
 
-const Login: React.FC = () => {
+interface LoginProps {
+  setUser: (user: any) => void;
+}
+
+const Login: React.FC<LoginProps> = ({ setUser }) => {
   const navigate = useNavigate(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,40 +20,55 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
-
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const data = await loginUser(email, password);
+    try {
+      const data = await loginUser(email, password);
+      const token = data?.token;
 
-    const token = data.data?.token;
-    
-    if (!token) {
-      setNotification({ message: data.message || "Error al iniciar sesión", type: "error" });
+      if (!token) {
+        setNotification({ message: data.details || "Error al iniciar sesión", type: "error" });
+        setLoading(false);
+        return;
+      }
+
+      const user = await getUserProfile();
+      setUser(user);
+
+      setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
+
+      setTimeout(() => {
+        navigate("/profile");
+      }, 800);
+    } catch (err: any) {
+        const apiError = err.response?.data;
+        let detailMsg = "";
+          if (typeof apiError?.details === "string") {
+            detailMsg = apiError.details;
+          } else if (typeof apiError?.details === "object" && apiError.details?.message) {
+            detailMsg = apiError.details.message;
+          }
+        const mainMsg = apiError?.message;
+        console.log("Error de api: ", apiError,"Error mensaje: ", detailMsg,"Mensaje principal", mainMsg);
+          setNotification({
+            message: detailMsg || mainMsg || "Error en el servidor",
+            type: "error"
+          });
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setNotification({ message: "Inicio de sesión exitoso, redirigiendo...", type: "success" });
-    setTimeout(() => {
-      navigate("/profile");
-    }, 800);
-  } catch (err: any) {
-    setNotification({ message: err.response?.data?.message || "Error en el servidor", type: "error" });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/google";
+    window.location.href = getGoogleAuthUrl();
   };
 
   const handleFacebookLogin = () => {
-    window.location.href = "http://localhost:3000/api/auth/facebook";
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/facebook`;
   };
 
   return (
@@ -123,11 +143,8 @@ const Login: React.FC = () => {
             />
           )}
 
-          <button type="submit" 
-                  className="submit-btn"
-                disabled={!email.trim() || !password.trim() || loading}
-          >
-              Ingresar
+          <button type="submit" className="submit-btn" disabled={!email.trim() || !password.trim() || loading}>
+            Ingresar
           </button>
 
           <div className="divider"><span>o</span></div>

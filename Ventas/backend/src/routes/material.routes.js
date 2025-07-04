@@ -10,3 +10,4 @@ router
     .delete("/:id_material", deleteMaterialController);
 
 export default router;
+

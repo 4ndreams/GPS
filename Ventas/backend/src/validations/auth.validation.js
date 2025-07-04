@@ -1,5 +1,17 @@
 "use strict";
 import Joi from "joi";
+import RutValidator from "./rut.validation.js";
+
+// Configuración global de mensajes en español para Joi
+Joi.defaults(schema => schema.options({ messages: {
+  'string.base': 'El campo {#label} debe ser un texto válido.',
+  'string.empty': 'El campo {#label} no puede estar vacío.',
+  'string.min': 'El campo {#label} debe tener al menos {#limit} caracteres.',
+  'string.max': 'El campo {#label} debe tener como máximo {#limit} caracteres.',
+  'string.email': 'Debe ser un email válido.',
+  'string.pattern.base': 'Formato inválido en {#label}.',
+  'any.required': 'El campo {#label} es obligatorio.',
+}}));
 
 // Valida dominio de email
 const domainEmailValidator = (value, helper) => {
@@ -61,10 +73,15 @@ export const registerValidation = Joi.object({
     .min(9)
     .max(12)
     .required()
-    .pattern(/^(?:(?:[1-9]\d{0}|[1-2]\d{1})(\.\d{3}){2}|[1-9]\d{6}|[1-2]\d{7}|29\.999\.999|29999999)-[\dkK]$/)
+    .custom((value, helper) => {
+      if (!RutValidator.isValidRut(value)) {
+        return helper.message(`RUT inválido: ${value}`);
+      }
+      // Devuelve el RUT formateado para el frontend
+      return RutValidator.formatRut(value);
+    })
     .messages({
       "string.empty": "El RUT no puede estar vacío.",
-      "string.pattern.base": "Formato RUT inválido.",
     }),
 
   email: Joi.string()

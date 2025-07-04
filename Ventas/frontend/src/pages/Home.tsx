@@ -40,7 +40,7 @@ function Home() {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:3000/api/contacto', {
+      const res = await fetch(`${import.meta.env.VITE_BASE}/api/contacto`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -167,7 +167,7 @@ function Home() {
             <h1>Puertas</h1>
             <p className="hero-subtitle">Elegancia y seguridad para cada entrada</p>
             <div className="hero-buttons">
-              <button>Ver puertas</button>
+              <button onClick={() => window.location.href = '/productos'}>Ver puertas</button>
             </div>
           </div>
           <div
@@ -177,7 +177,7 @@ function Home() {
             <h1>Marcos y Molduras</h1>
             <p className="hero-subtitle">Detalles que transforman cualquier espacio</p>
             <div className="hero-buttons">
-              <button>Ver marcos y molduras</button>
+              <button onClick={() => window.location.href = '/productos'}>Ver molduras</button>
             </div>
           </div>
         </div>
@@ -188,7 +188,7 @@ function Home() {
           <hr style={{ borderColor: 'black' }} />
         </div>
         <div className="hero-buttons">
-          <button>Ver todos los productos</button>
+          <button onClick={() => window.location.href = '/productos'}>Ver todos los productos</button>
         </div>
       </section>
       <section className='nosotros-section black-bg'>
