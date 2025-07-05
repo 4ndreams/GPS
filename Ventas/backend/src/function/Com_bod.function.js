@@ -36,7 +36,8 @@ export async function crearCompXBod(body) {
             const bodyBodega = {
                 nombre_producto: body.nombre_producto,
                 stock: body.stock,
-                costo_total: body.costo_compra
+                costo_total: body.costo_compra,
+                tipo_producto: body.tipo_producto
             };
             const nuevaBodega = await createBodegaService(bodyBodega);
             // buscar para obtener id
