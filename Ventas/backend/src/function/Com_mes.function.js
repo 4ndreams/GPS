@@ -2,36 +2,7 @@
 import compras from "../entity/compra.entity.js";
 import { AppDataSource } from "../config/configDb.js";
 
-export async function compras_totales(body) {
-    try {
-        
-        const { fecha_inicial, fecha_final } = body;
 
-        if (!fecha_inicial || !fecha_final) {
-            return [null, "Se requieren 'fecha_inicial' y 'fecha_final' en formato YYYY-MM-DD"];
-        }
-
-        const repoCompras = AppDataSource.getRepository(compras);
-        
-        const comprasTotales = await repoCompras
-            .createQueryBuilder("compra")
-            .where("compra.createdAt BETWEEN :inicio AND :fin", {
-                inicio: new Date(fecha_inicial),
-                fin: new Date(fecha_final)
-            })
-            .getMany();
-        if (comprasTotales.length === 0) {
-            return [null, "No se encontraron compras en el rango de fechas especificado"];
-        }
-
-        const totalCompras = comprasTotales.reduce((total, compra) => Number(total) + Number(compra.costo_compra), 0);
-        return [{ compras: comprasTotales, total: totalCompras }, null];
-
-    } catch (error) {
-        console.error("Error al obtener compras totales:", error);
-        return [null, "Error al obtener compras totales"];
-    }
-}
 
 export async function compras_totales_filtradas(body) {
     try {
@@ -42,11 +13,11 @@ export async function compras_totales_filtradas(body) {
         const fechaInicio = new Date(fecha_inicial);
         const fechaFin = new Date(fecha_final);
         const hoy = new Date();
-
+        const fechaFinOriginal = new Date(fecha_final);
+        fechaFin.setDate(fechaFin.getDate() + 1);
 // Eliminar la parte de la hora para comparar solo fechas
-        hoy.setHours(0, 0, 0, 0);
-        fechaInicio.setHours(0, 0, 0, 0);
-        fechaFin.setHours(0, 0, 0, 0);
+    
+    console.log("Fecha inicio:", fechaInicio, "Fecha fin:", fechaFin, "Hoy:", hoy);
 
         if (isNaN(fechaInicio) || isNaN(fechaFin)) {
             return [null, "Formato de fecha inválido"];
@@ -56,7 +27,7 @@ export async function compras_totales_filtradas(body) {
             return [null, "La fecha final no puede ser anterior a la fecha inicial"];
     }
 
-        if (fechaInicio > hoy || fechaFin > hoy) {
+        if (fechaInicio > hoy || fechaFinOriginal > hoy) {
             return [null, "Las fechas no pueden ser mayores a la fecha actual"];
         }
 
@@ -67,10 +38,12 @@ export async function compras_totales_filtradas(body) {
 
         const comprasPorFecha = todasLasCompras.filter((compra) => {
             const creada = new Date(compra.createdAt);
+            console.log("Fecha de compra:", creada, "Fecha inicio:", fechaInicio, "Fecha fin:", fechaFin);
             return creada >= fechaInicio && creada <= fechaFin;
         });
-
+        console.log("Compras filtradas por fecha:", comprasPorFecha);
         let comprasFinales = [...comprasPorFecha];
+
 
         if (id_bodega) {
             if (Array.isArray(id_bodega)) {
@@ -125,7 +98,7 @@ export async function compras_totales_filtradas(body) {
             (total, compra) => Number(total) + Number(compra.costo_compra),
             0
         );
-
+        
         return [{ compras: comprasFinales, total: totalCompras }, null];
 
     } catch (error) {
