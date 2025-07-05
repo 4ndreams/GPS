@@ -15,8 +15,11 @@ import compXbogRoutes from "./compXbog.routes.js";
 import com_mesRoutes from "./com_mes.routes.js";
 import productRoutes from "./product.routes.js";
 
+
 import rellenoRoutes from "./relleno.routes.js"; // Import relleno routes
 import productoPersonalizadoRoutes from "./producto_personalizado.routes.js"; // Import producto personalizado routes
+import tiendaRoutes from "./tienda.routes.js";
+import imagenesRoutes from "./imagenes.routes.js"; 
 
 const router = Router();
 
@@ -48,5 +51,7 @@ router.use('/tipos', tipoRoutes);
 
 router.use('/rellenos', rellenoRoutes); 
 router.use('/productos-personalizados', productoPersonalizadoRoutes); // Rutas para cotizaciones/productos personalizados
+router.use('/tienda', tiendaRoutes);
+router.use('/imagenes', imagenesRoutes);
 
 export default router;
