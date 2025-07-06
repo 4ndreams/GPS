@@ -1,12 +1,13 @@
 "use strict";
 import compras from "../entity/compra.entity.js";
+import Bodega from "../entity/bodega.entity.js";
 import { AppDataSource } from "../config/configDb.js";
 
 
 
 export async function compras_totales_filtradas(body) {
     try {
-        let { fecha_inicial, fecha_final, id_bodega } = body || {};
+        let { fecha_inicial, fecha_final, id_bodega , tipo_producto} = body || {};
 
         const añoActual = new Date().getFullYear();
 
@@ -17,7 +18,7 @@ export async function compras_totales_filtradas(body) {
         fechaFin.setDate(fechaFin.getDate() + 1);
 // Eliminar la parte de la hora para comparar solo fechas
     
-    console.log("Fecha inicio:", fechaInicio, "Fecha fin:", fechaFin, "Hoy:", hoy);
+   
 
         if (isNaN(fechaInicio) || isNaN(fechaFin)) {
             return [null, "Formato de fecha inválido"];
@@ -38,11 +39,41 @@ export async function compras_totales_filtradas(body) {
 
         const comprasPorFecha = todasLasCompras.filter((compra) => {
             const creada = new Date(compra.createdAt);
-            console.log("Fecha de compra:", creada, "Fecha inicio:", fechaInicio, "Fecha fin:", fechaFin);
+           
             return creada >= fechaInicio && creada <= fechaFin;
         });
-        console.log("Compras filtradas por fecha:", comprasPorFecha);
+        
         let comprasFinales = [...comprasPorFecha];
+
+       if (tipo_producto) {
+    const repoBodega = AppDataSource.getRepository(Bodega);
+    const bodegas = await repoBodega.find();
+
+    let bodegasFiltradas = [];
+
+    if (Array.isArray(tipo_producto)) {
+        bodegasFiltradas = bodegas.filter(b =>
+            tipo_producto.includes(b.tipo_producto)
+        );
+    } else if (typeof tipo_producto === "string") {
+        const tipos = tipo_producto.split(",").map(t => t.trim()).filter(t => t !== "");
+        bodegasFiltradas = bodegas.filter(b =>
+            tipos.includes(String(b.tipo_producto))
+        );
+    } else {
+        bodegasFiltradas = bodegas.filter(b =>
+            b.tipo_producto === tipo_producto
+        );
+    }
+
+    if (bodegasFiltradas.length > 0) {
+        comprasFinales = comprasFinales.filter(compra =>
+            bodegasFiltradas.some(bod => bod.id_bodega === compra.id_bodega)
+        );
+    } else {
+        return [null, `No se encontraron bodegas con el tipo de producto: ${tipo_producto}`];
+    }
+}
 
 
         if (id_bodega) {
@@ -93,6 +124,7 @@ export async function compras_totales_filtradas(body) {
 
             return [null, "No se encontraron compras con los filtros aplicados"];
         }
+
 
         const totalCompras = comprasFinales.reduce(
             (total, compra) => Number(total) + Number(compra.costo_compra),
