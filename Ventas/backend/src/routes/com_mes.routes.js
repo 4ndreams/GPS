@@ -1,7 +1,13 @@
-import { Router }   from "express";
-import { compras_totales , compras_totales_filtradas} from "../function/Com_mes.function.js";
+import { Router } from "express";
+import { compras_totales, compras_totales_filtradas } from "../function/Com_mes.function.js";
+import { authenticateJwt } from "../middlewares/authentication.middleware.js";
+import { isFabricaOrAdmin } from "../middlewares/autorization.middleware.js";
 
 const router = Router();
+
+router.use(authenticateJwt);
+router.use(isFabricaOrAdmin);
+
 router.get("/", async (req, res) => {
     const body = req.body;
     const [compras, error] = await compras_totales(body);
@@ -10,6 +16,7 @@ router.get("/", async (req, res) => {
     }
     return res.status(200).json(compras);
 });
+
 router.get("/filtradas", async (req, res) => {
     const body = req.body;
     const [compras, error] = await compras_totales_filtradas(body);
