@@ -59,8 +59,8 @@ const UsuarioSchema = new EntitySchema({
         },
         rol: {
             type: "enum",
-            enum: ["Cliente", "Empleado", "Administrador"],
-            default: "Cliente",
+            enum: ["cliente", "fabrica", "tienda", "administrador"], // Diferenciamos fabrica y tienda
+            default: "cliente",
             nullable: false,
         },
         intentosFallidos: {

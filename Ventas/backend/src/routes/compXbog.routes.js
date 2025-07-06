@@ -1,7 +1,13 @@
 import { Router } from "express";
 import { crearCompXBod } from "../function/Com_bod.function.js";
+import { authenticateJwt } from "../middlewares/authentication.middleware.js";
+import { isFabricaOrAdmin } from "../middlewares/autorization.middleware.js";
 
 const router = Router();
+
+router.use(authenticateJwt);
+router.use(isFabricaOrAdmin);
+
 router.post("/", async (req, res) => {
     const body = req.body;
     const [message, error] = await crearCompXBod(body);
