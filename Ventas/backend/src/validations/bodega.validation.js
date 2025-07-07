@@ -52,4 +52,35 @@ export const bodegaBodyValidation = Joi.object({
             "number.positive": "El costo total debe ser un número positivo.",
             "any.required": "El costo total es obligatorio."
         }),
+    tipo_producto: Joi.string()
+        .valid("Material", "Relleno", "Producto personalizado","Materia prima", "producto tienda")
+        .required()
+        .messages({
+            "string.base": "El tipo de producto debe ser una cadena de texto.",
+            "string.empty": "El tipo de producto es obligatorio.",
+            "string.min": "El tipo de producto debe tener al menos 3 caracteres.",
+            "string.max": "El tipo de producto no puede exceder los 100 caracteres.",
+            "string.pattern.base": "El tipo de producto solo puede contener letras, números y espacios."
+        }),
+    medida_ancho: Joi.number()
+        .precision(2)
+        .optional()
+        .messages({
+            "number.base": "El ancho debe ser un número.",
+            "number.precision": "El ancho debe tener hasta 2 decimales."
+        }),
+    medida_alto: Joi.number()
+        .precision(2)
+        .optional()
+        .messages({
+            "number.base": "El alto debe ser un número.",
+            "number.precision": "El alto debe tener hasta 2 decimales."
+        }),
+    medida_espesor: Joi.number()
+        .precision(2)
+        .optional()
+        .messages({
+            "number.base": "El espesor debe ser un número.",
+            "number.precision": "El espesor debe tener hasta 2 decimales."
+        })
     });
