@@ -17,20 +17,14 @@ const TiendaSchema = new EntitySchema({
     },
     medida_ancho: {
       type: "int",
-      precision: 10,
-      scale: 2,
       nullable: true,
     },
     medida_espesor: {
       type: "int",
-      precision: 10,
-      scale: 2,
       nullable: true,
     },
     medida_alto: {
       type: "int",
-      precision: 10,
-      scale: 2,
       nullable: true,
     },
     nombre: {
