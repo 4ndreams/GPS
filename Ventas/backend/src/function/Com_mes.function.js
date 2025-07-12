@@ -130,6 +130,10 @@ export async function compras_totales_filtradas(body) {
             (total, compra) => Number(total) + Number(compra.costo_compra),
             0
         );
+        const totalCantidades = comprasFinales.reduce(
+            (total, compra) => Number(total) + Number(compra.stock),
+            0
+        );
         
         return [{ compras: comprasFinales, total: totalCompras }, null];
 
@@ -138,6 +142,7 @@ export async function compras_totales_filtradas(body) {
         return [null, "Error al obtener compras totales filtradas"];
     }
 }
+
 
 
 

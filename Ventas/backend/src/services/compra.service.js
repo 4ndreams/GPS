@@ -24,8 +24,13 @@ export async function getCompraByIdService(id) {
 
 export async function createCompraService(body) {
   try {
+    console.log("Cuerpo de la compra:", body);
     const repo = AppDataSource.getRepository(Compra);
-    const nueva = repo.create(body);
+    const nueva = repo.create({
+      ...body,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
     await repo.save(nueva);
     return [nueva, null];
   } catch (err) {

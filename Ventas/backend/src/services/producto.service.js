@@ -25,9 +25,33 @@ export async function getProductoByIdService(id_producto) {
 export async function createProductoService(body) {
   try {
     const repository = AppDataSource.getRepository(Producto);
-    const nuevo = repository.create(body);
+    
+
+    const Material = await AppDataSource.getRepository("Material");
+    const Tipo = await AppDataSource.getRepository("Tipo");
+    const Relleno = await AppDataSource.getRepository("Relleno");
+  
+    const material = await Material.findOneBy({ id_material: body.id_material });
+    const tipo = await Tipo.findOneBy({ id_tipo: body.id_tipo });
+    const relleno = await Relleno.findOneBy({ id_relleno: body.id_relleno });
+      
+    const nuevo = repository.create(
+      {
+        ...body,
+        material: material ? { id_material: material.id_material } : null,
+        tipo: tipo ? { id_tipo: tipo.id_tipo } : null,
+        relleno: relleno ? { id_relleno: relleno.id_relleno } : null,
+        createdAt: new Date(), 
+        updatedAt: new Date()
+      });
     await repository.save(nuevo);
-    return [nuevo, null];
+    
+const productoCompleto = await repository.findOne({
+  where: { id_producto: nuevo.id_producto },
+  relations: ["material", "tipo", "relleno"]
+});
+
+return [productoCompleto, null];
   } catch (error) {
     return [null, "Error al crear producto"];
   }

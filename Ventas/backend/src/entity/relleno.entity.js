@@ -30,6 +30,27 @@ const RellenoSchema = new EntitySchema({
             nullable: false,
         },
     },
+    indices: [
+        {
+            name: "idx_relleno_id",
+            columns: ["id_relleno"],
+            unique: true,
+        },
+    ],
+    relations: {
+        bodega: {
+            type: "one-to-many",
+            target: "Bodega",
+            inverseSide: "relleno",
+            cascade: true,
+        },
+        producto: {
+            type: "one-to-many",
+            target: "Producto",
+            inverseSide: "relleno",
+            cascade: true,
+        },
+    },
 });
 
 export default RellenoSchema;
