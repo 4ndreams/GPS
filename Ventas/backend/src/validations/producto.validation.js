@@ -115,6 +115,15 @@ export const ProductoBodyValidation = Joi.object({
             "number.integer": "El ID del tipo debe ser un número entero.",
             "number.positive": "El ID del tipo debe ser un número positivo.",
             "any.required": "El ID del tipo es obligatorio."
+        }),
+    id_relleno: Joi.number()
+        .integer()
+        .positive()
+        .optional()
+        .messages({
+            "number.base": "El ID del relleno debe ser un número entero positivo.",
+            "number.integer": "El ID del relleno debe ser un número entero.",
+            "number.positive": "El ID del relleno debe ser un número positivo."
         })
 }).required().messages({
     "object.base": "El cuerpo de la solicitud debe ser un objeto.",

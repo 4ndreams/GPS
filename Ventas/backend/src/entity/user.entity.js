@@ -99,6 +99,7 @@ const UsuarioSchema = new EntitySchema({
             joinColumn: {
                 name: "id_usuario",
             },
+            nullable: true, // Permite que un usuario no tenga ventas
             inverseSide: "usuario",
         },
         eventos: {
