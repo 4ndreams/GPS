@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { crearCompXBod } from "../function/Com_bod.function.js";
+import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
 import { authenticateJwt } from "../middlewares/authentication.middleware.js";
 import { isFabricaOrAdmin } from "../middlewares/autorization.middleware.js";
 
@@ -13,15 +14,15 @@ router.post("/", async (req, res) => {
     const [message, error] = await crearCompXBod(body);
     if (error) {
         if (error.includes("El tipo de la compra debe" || "Debe especificar un material o un relleno")) {
-            return res.status(400).json({ error: error });
+            return handleErrorClient(res, 400, error);
         } else if (error.includes("No se pudo crear la compra")) {
-            return res.status(404).json({ error: error });
+            return handleErrorClient(res, 404, error);
         } else {
-            return res.status(500).json({ error: error });
+            return handleErrorServer(res, 500, error);
         }
         
     }
-    return res.status(200).json({ message });
+    return handleSuccess(res, 200, "Compra creada y almacenada en bodega correctamente", message);
 });
 
 export default router;

@@ -66,6 +66,8 @@ export async function añadir_puertas(body) {
                 producto_aumentado: producto_aumentado
             }, null];
         
+        }else {
+            return [null, "Producto no existente , debe crear el producto primero"];
         }
     }catch (error) {
         console.error("Error al añadir puertas:", error);
