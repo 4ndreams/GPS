@@ -205,10 +205,8 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
         if (estadoAnterior !== estado) {
             try {
                 await sendCotizacionStatusChangeEmail(updated, estadoAnterior);
-                console.log(`✅ Email de cambio de estado enviado para cotización #${updated.id_producto_personalizado}: ${estadoAnterior} → ${estado}`);
             } catch (emailError) {
                 console.error(`❌ Error al enviar email de cambio de estado para cotización #${updated.id_producto_personalizado}:`, emailError.message);
-                // No fallar la actualización si el email falla, solo registrar el error
             }
         }
         

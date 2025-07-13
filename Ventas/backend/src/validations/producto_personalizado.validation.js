@@ -245,22 +245,22 @@ export const ProductoPersonalizadoBodyValidation = Joi.object({
             "string.max": "El mensaje no puede exceder los 500 caracteres."
         }),
     estado: Joi.string()
-        .valid("Solicitud Recibida", "En Proceso", "Lista para retirar")
+        .valid("Solicitud Recibida", "En Proceso", "Lista para retirar", "Cancelada", "Producto Entregado")
         .optional()
         .messages({
             "string.base": "El estado debe ser una cadena de texto.",
-            "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar'."
+            "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar', 'Cancelada', 'Producto Entregado'."
         })
 });
 
 // Validación específica para actualizar solo el estado
 export const ProductoPersonalizadoEstadoValidation = Joi.object({
     estado: Joi.string()
-        .valid("Solicitud Recibida", "En Proceso", "Lista para retirar")
+        .valid("Solicitud Recibida", "En Proceso", "Lista para retirar", "Cancelada", "Producto Entregado")
         .required()
         .messages({
             "string.base": "El estado debe ser una cadena de texto.",
-            "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar'.",
+            "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar', 'Cancelada', 'Producto Entregado'.",
             "any.required": "El estado es obligatorio."
         })
 });
@@ -386,10 +386,10 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
             "string.max": "El mensaje no puede exceder los 500 caracteres."
         }),
     estado: Joi.string()
-        .valid("Solicitud Recibida", "En Proceso", "Lista para retirar")
+        .valid("Solicitud Recibida", "En Proceso", "Lista para retirar", "Cancelada", "Producto Entregado")
         .optional()
         .messages({
             "string.base": "El estado debe ser una cadena de texto.",
-            "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar'."
+            "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar', 'Cancelada', 'Producto Entregado'."
         })
 });

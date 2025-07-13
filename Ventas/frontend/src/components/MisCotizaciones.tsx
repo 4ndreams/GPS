@@ -67,6 +67,10 @@ const MisCotizaciones: React.FC = () => {
         return '#f39c12'; // Naranja
       case 'Lista para retirar':
         return '#27ae60'; // Verde
+      case 'Cancelada':
+        return '#e74c3c'; // Rojo
+      case 'Producto Entregado':
+        return '#2ecc71'; // Verde más brillante
       default:
         return '#95a5a6'; // Gris
     }
@@ -80,6 +84,10 @@ const MisCotizaciones: React.FC = () => {
         return 'bi-gear-fill';
       case 'Lista para retirar':
         return 'bi-check-circle-fill';
+      case 'Cancelada':
+        return 'bi-x-circle-fill';
+      case 'Producto Entregado':
+        return 'bi-truck';
       default:
         return 'bi-question-circle';
     }
