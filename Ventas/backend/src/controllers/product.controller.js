@@ -33,7 +33,6 @@ export const getProducts = async (req, res) => {
     const productos = await query.getMany();
 
     
-
     return res.json({
       status: "success",
       data: productos,
