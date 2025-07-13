@@ -5,6 +5,7 @@ import OrdersList from "../components/OrdersList";
 import UsersTable from "../components/UserTable";
 import UserInfo from "../components/UserInfo";
 import ProductManagement from "../components/ProductManagement";
+import MisCotizaciones from "../components/MisCotizaciones.tsx";
 import "../styles/ProfileInfo.css";
 import "../styles/animations.css";
 
@@ -12,7 +13,8 @@ const dinamicTabs = (role: string) => {
   if (role.toLowerCase() === "administrador") {
     return [
       { key: "info", label: "Mi Perfil" },
-      { key: "orders", label: "Historial de Compras" },
+      { key: "orders", label: "Mis Compras" },
+      { key: "cotizaciones", label: "Mis Cotizaciones" },
       { key: "usersInfo", label: "Información de usuarios" },
       { key: "products", label: "Gestión de Productos" },
     ];
@@ -20,7 +22,8 @@ const dinamicTabs = (role: string) => {
 
   return [
     { key: "info", label: "Mi Perfil" },
-    { key: "orders", label: "Historial de Compras" },
+    { key: "orders", label: "Mis Compras" },
+    { key: "cotizaciones", label: "Mis Cotizaciones" },
     { key: "usersInfo", label: "Mi información" },
   ];
 };
@@ -96,6 +99,8 @@ const ProfilePage: React.FC = () => {
           )}
 
         {activeTab === "orders" && <div>No se han realizado compras aún.</div>}
+
+        {activeTab === "cotizaciones" && <MisCotizaciones />}
 
         {activeTab === "usersInfo" &&
           (userRole.toLowerCase() === "administrador" ? (

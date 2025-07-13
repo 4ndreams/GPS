@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import Productos from './pages/Productos';
 import AboutUs from './pages/AboutUs';
 import Checkout from './pages/Checkout';
+import Cotizar from './pages/Cotizar';
 import ProductDetail from './pages/ProductDetail.tsx';
 
 import Navbar from './components/Navbar'
@@ -32,7 +33,6 @@ function App() {
     getUserProfile()
       .then((data) => setUser(data))
       .catch(() => setUser(null));
-      console.log("User profile fetched:", ); 
   }, []);
 
 
@@ -51,6 +51,7 @@ function App() {
         <Route path="/productos" element={<Productos />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/cotizar" element={<Cotizar />} />
         <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
     </>

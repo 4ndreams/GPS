@@ -11,6 +11,16 @@ export async function getComprasService() {
     return [null, "Error al obtener compras"];
   }
 }
+export async function getCompraByIdService(id) {
+  try {
+    const repo = AppDataSource.getRepository(Compra);
+    const found = await repo.findOneBy({ id_compra: id });
+    if (!found) return [null, "Compra no encontrada"];
+    return [found, null];
+  } catch (err) {
+    return [null, "Error al obtener compra"];
+  }
+}
 
 export async function createCompraService(body) {
   try {
@@ -27,7 +37,10 @@ export async function updateCompraService(id, body) {
   try {
     const repo = AppDataSource.getRepository(Compra);
     await repo.update({ id_compra: id }, body);
-    const updated = await repo.findOneBy({ id_compra: id });
+    const updated = await repo.findOne({
+      where: { id_compra: id },
+      relations: ["bodega"] 
+    }); 
     return [updated, null];
   } catch (err) {
     return [null, "Error al actualizar compra"];
