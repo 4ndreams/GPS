@@ -33,6 +33,12 @@ const ProductoPersonalizadoSchema = new EntitySchema({
         type: "float",  
         nullable: false,
         },
+        tipo_puerta: {
+        type: "varchar",
+        length: 20,
+        nullable: false,
+        comment: "Tipo de puerta: 'puertaPaso' o 'puertaCloset'"
+        },
         nombre_apellido_contacto: {
         type: "varchar",
         length: 255,

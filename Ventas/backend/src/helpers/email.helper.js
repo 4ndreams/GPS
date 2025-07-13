@@ -2,6 +2,18 @@ import jwt from "jsonwebtoken";
 import transporter from "../config/mailer.config.js";
 import { ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
 
+// Función auxiliar para mostrar el tipo de puerta de forma legible
+function formatTipoPuerta(tipo_puerta) {
+  switch (tipo_puerta) {
+    case 'puertaPaso':
+      return 'Puerta de paso';
+    case 'puertaCloset':
+      return 'Puerta de closet';
+    default:
+      return 'No especificado';
+  }
+}
+
 export async function sendLoginAlertEmail(email) {
   const token = jwt.sign({ email }, ACCESS_TOKEN_SECRET, { expiresIn: "2m" });
 
@@ -146,6 +158,7 @@ export async function sendCotizacionConfirmationEmail(cotizacion) {
     medida_ancho, 
     medida_alto, 
     medida_largo,
+    tipo_puerta,
     mensaje,
     estado,
     material, 
@@ -187,6 +200,10 @@ export async function sendCotizacionConfirmationEmail(cotizacion) {
                       
                       <table style="width: 100%; color: #ccc; font-size: 0.95rem;">
                         <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Tipo de puerta:</td>
+                          <td style="padding: 0.3rem 0;">${formatTipoPuerta(tipo_puerta)}</td>
+                        </tr>
+                        <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Material:</td>
                           <td style="padding: 0.3rem 0;">${material?.nombre_material || 'No especificado'}</td>
                         </tr>
@@ -196,7 +213,7 @@ export async function sendCotizacionConfirmationEmail(cotizacion) {
                         </tr>
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
-                          <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}cm</td>
+                          <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
                         </tr>
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Estado:</td>
@@ -248,6 +265,7 @@ export async function sendCotizacionStatusChangeEmail(cotizacion, estadoAnterior
     medida_ancho, 
     medida_alto, 
     medida_largo,
+    tipo_puerta,
     estado,
     material, 
     relleno,
@@ -316,6 +334,10 @@ export async function sendCotizacionStatusChangeEmail(cotizacion, estadoAnterior
                       
                       <table style="width: 100%; color: #ccc; font-size: 0.95rem;">
                         <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Tipo de puerta:</td>
+                          <td style="padding: 0.3rem 0;">${formatTipoPuerta(tipo_puerta)}</td>
+                        </tr>
+                        <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Material:</td>
                           <td style="padding: 0.3rem 0;">${material?.nombre_material || 'No especificado'}</td>
                         </tr>
@@ -325,7 +347,7 @@ export async function sendCotizacionStatusChangeEmail(cotizacion, estadoAnterior
                         </tr>
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
-                          <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}cm</td>
+                          <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
                         </tr>
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Teléfono:</td>

@@ -19,6 +19,64 @@ const rutValidator = (value, helper) => {
   return value;
 };
 
+// Validador personalizado para medidas según el tipo de puerta
+const validateAncho = (ancho, tipoPuerta) => {
+  if (tipoPuerta === 'puertaPaso') {
+    return ancho >= 60 && ancho <= 90;
+  } else if (tipoPuerta === 'puertaCloset') {
+    return ancho >= 40 && ancho <= 60;
+  }
+  return false;
+};
+
+const validateAlto = (alto) => {
+  return alto >= 200 && alto <= 240;
+};
+
+const validateEspesor = (espesor, tipoPuerta) => {
+  if (tipoPuerta === 'puertaPaso') {
+    return espesor === 45;
+  } else if (tipoPuerta === 'puertaCloset') {
+    return espesor === 18;
+  }
+  return false;
+};
+
+const medidasValidator = (value, helper) => {
+  const { medida_ancho, medida_alto, medida_largo, tipo_puerta } = helper.state.ancestors[0];
+  const fieldPath = helper.state.path.join('.');
+  
+  // Solo validar si tipo_puerta está presente
+  if (!tipo_puerta) {
+    return value; // No validar si no hay tipo_puerta
+  }
+  
+  // Validar según el campo específico
+  if (fieldPath === 'medida_ancho' && medida_ancho && !validateAncho(medida_ancho, tipo_puerta)) {
+    const ranges = tipo_puerta === 'puertaPaso' ? '60-90 cm' : '40-60 cm';
+    return helper.message(`El ancho para ${tipo_puerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'} debe estar entre ${ranges}.`);
+  }
+  
+  if (fieldPath === 'medida_alto' && medida_alto && !validateAlto(medida_alto)) {
+    return helper.message("El alto debe estar entre 200 y 240 cm.");
+  }
+  
+  if (fieldPath === 'medida_largo' && medida_largo && !validateEspesor(medida_largo, tipo_puerta)) {
+    const espesorCorrect = tipo_puerta === 'puertaPaso' ? '45mm' : '18mm';
+    return helper.message(`El espesor para ${tipo_puerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'} debe ser ${espesorCorrect}.`);
+  }
+  
+  return value;
+};
+
+// Validador personalizado para teléfono (exactamente 8 dígitos)
+const telefonoValidator = (value, helper) => {
+  if (!/^\d{8}$/.test(value)) {
+    return helper.message("El teléfono debe tener exactamente 8 dígitos.");
+  }
+  return value;
+};
+
 export const ProductoPersonalizadoQueryValidation = Joi.object({
     id_producto_personalizado: Joi.number()
         .integer()
@@ -95,41 +153,50 @@ export const ProductoPersonalizadoBodyValidation = Joi.object({
             "number.integer": "El ID del usuario debe ser un número entero.",
             "number.positive": "El ID del usuario debe ser un número positivo."
         }),
-    medida_ancho: Joi.number()
-        .precision(2)
-        .min(10)
-        .max(150)
+    tipo_puerta: Joi.string()
+        .valid("puertaPaso", "puertaCloset")
         .required()
         .messages({
+            "string.base": "El tipo de puerta debe ser una cadena de texto.",
+            "any.only": "El tipo de puerta debe ser 'puertaPaso' o 'puertaCloset'.",
+            "any.required": "El tipo de puerta es obligatorio."
+        }),
+    medida_ancho: Joi.number()
+        .precision(2)
+        .min(40)
+        .max(90)
+        .required()
+        .custom(medidasValidator)
+        .messages({
             "number.base": "El ancho debe ser un número.",
-            "number.min": "El ancho debe ser al menos 10 centímetros.",
-            "number.max": "El ancho no puede exceder 150 centímetros.",
+            "number.min": "El ancho debe ser al menos 40 centímetros.",
+            "number.max": "El ancho no puede exceder 90 centímetros.",
             "number.precision": "El ancho puede tener máximo 2 decimales.",
             "any.required": "El ancho es obligatorio."
         }),
     medida_alto: Joi.number()
         .precision(2)
-        .min(10)
-        .max(225)
+        .min(200)
+        .max(240)
         .required()
+        .custom(medidasValidator)
         .messages({
             "number.base": "El alto debe ser un número.",
-            "number.min": "El alto debe ser al menos 10 centímetros.",
-            "number.max": "El alto no puede exceder 225 centímetros.",
+            "number.min": "El alto debe ser al menos 200 centímetros.",
+            "number.max": "El alto no puede exceder 240 centímetros.",
             "number.precision": "El alto puede tener máximo 2 decimales.",
             "any.required": "El alto es obligatorio."
         }),
     medida_largo: Joi.number()
         .precision(2)
-        .min(10)
-        .max(300)
+        .valid(18, 45)
         .required()
+        .custom(medidasValidator)
         .messages({
-            "number.base": "El largo debe ser un número.",
-            "number.min": "El largo debe ser al menos 10 centímetros.",
-            "number.max": "El largo no puede exceder 300 centímetros.",
-            "number.precision": "El largo puede tener máximo 2 decimales.",
-            "any.required": "El largo es obligatorio."
+            "number.base": "El espesor debe ser un número.",
+            "any.only": "El espesor debe ser 18mm o 45mm.",
+            "number.precision": "El espesor puede tener máximo 2 decimales.",
+            "any.required": "El espesor es obligatorio."
         }),
     nombre_apellido_contacto: Joi.string()
         .min(4)
@@ -160,24 +227,22 @@ export const ProductoPersonalizadoBodyValidation = Joi.object({
             "any.required": "El email de contacto es obligatorio."
         }),
     telefono_contacto: Joi.string()
-        .pattern(/^\d+$/)
-        .max(8)
+        .length(8)
+        .custom(telefonoValidator)
         .required()
         .messages({
             "string.base": "El teléfono de contacto debe ser una cadena de texto.",
-            "string.pattern.base": "El teléfono de contacto solo puede contener números sin espacios.",
-            "string.max": "El teléfono de contacto no puede exceder los 8 caracteres.",
+            "string.length": "El teléfono de contacto debe tener exactamente 8 dígitos.",
             "any.required": "El teléfono de contacto es obligatorio."
         }),
     mensaje: Joi.string()
-        .min(5)
+        .min(0)
         .max(500)
-        .required()
+        .optional()
         .messages({
             "string.base": "El mensaje debe ser una cadena de texto.",
-            "string.min": "El mensaje debe tener al menos 5 caracteres.",
-            "string.max": "El mensaje no puede exceder los 500 caracteres.",
-            "any.required": "El mensaje es obligatorio."
+            "string.min": "El mensaje debe tener al menos 0 caracteres.",
+            "string.max": "El mensaje no puede exceder los 500 caracteres."
         }),
     estado: Joi.string()
         .valid("Solicitud Recibida", "En Proceso", "Lista para retirar")
@@ -231,41 +296,50 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
             "number.integer": "El ID del usuario debe ser un número entero.",
             "number.positive": "El ID del usuario debe ser un número positivo."
         }),
-    medida_ancho: Joi.number()
-        .precision(2)
-        .min(10)
-        .max(150)
+    tipo_puerta: Joi.string()
+        .valid("puertaPaso", "puertaCloset")
         .required()
         .messages({
+            "string.base": "El tipo de puerta debe ser una cadena de texto.",
+            "any.only": "El tipo de puerta debe ser 'puertaPaso' o 'puertaCloset'.",
+            "any.required": "El tipo de puerta es obligatorio."
+        }),
+    medida_ancho: Joi.number()
+        .precision(2)
+        .min(40)
+        .max(90)
+        .required()
+        .custom(medidasValidator)
+        .messages({
             "number.base": "El ancho debe ser un número.",
-            "number.min": "El ancho debe ser al menos 10 centímetros.",
-            "number.max": "El ancho no puede exceder 150 centímetros.",
+            "number.min": "El ancho debe ser al menos 40 centímetros.",
+            "number.max": "El ancho no puede exceder 90 centímetros.",
             "number.precision": "El ancho puede tener máximo 2 decimales.",
             "any.required": "El ancho es obligatorio."
         }),
     medida_alto: Joi.number()
         .precision(2)
-        .min(10)
-        .max(225)
+        .min(200)
+        .max(240)
         .required()
+        .custom(medidasValidator)
         .messages({
             "number.base": "El alto debe ser un número.",
-            "number.min": "El alto debe ser al menos 10 centímetros.",
-            "number.max": "El alto no puede exceder 225 centímetros.",
+            "number.min": "El alto debe ser al menos 200 centímetros.",
+            "number.max": "El alto no puede exceder 240 centímetros.",
             "number.precision": "El alto puede tener máximo 2 decimales.",
             "any.required": "El alto es obligatorio."
         }),
     medida_largo: Joi.number()
         .precision(2)
-        .min(10)
-        .max(300)
+        .valid(18, 45)
         .required()
+        .custom(medidasValidator)
         .messages({
-            "number.base": "El largo debe ser un número.",
-            "number.min": "El largo debe ser al menos 10 centímetros.",
-            "number.max": "El largo no puede exceder 300 centímetros.",
-            "number.precision": "El largo puede tener máximo 2 decimales.",
-            "any.required": "El largo es obligatorio."
+            "number.base": "El espesor debe ser un número.",
+            "any.only": "El espesor debe ser 18mm o 45mm.",
+            "number.precision": "El espesor puede tener máximo 2 decimales.",
+            "any.required": "El espesor es obligatorio."
         }),
     nombre_apellido_contacto: Joi.string()
         .min(4)
@@ -294,24 +368,22 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
             "string.email": "El email debe tener un formato válido."
         }),
     telefono_contacto: Joi.string()
-        .pattern(/^\d+$/)
-        .max(8)
+        .length(8)
+        .custom(telefonoValidator)
         .required()
         .messages({
             "string.base": "El teléfono de contacto debe ser una cadena de texto.",
-            "string.pattern.base": "El teléfono de contacto solo puede contener números sin espacios.",
-            "string.max": "El teléfono de contacto no puede exceder los 8 caracteres.",
+            "string.length": "El teléfono de contacto debe tener exactamente 8 dígitos.",
             "any.required": "El teléfono de contacto es obligatorio."
         }),
     mensaje: Joi.string()
-        .min(5)
+        .min(0)
         .max(500)
-        .required()
+        .optional()
         .messages({
             "string.base": "El mensaje debe ser una cadena de texto.",
-            "string.min": "El mensaje debe tener al menos 5 caracteres.",
-            "string.max": "El mensaje no puede exceder los 500 caracteres.",
-            "any.required": "El mensaje es obligatorio."
+            "string.min": "El mensaje debe tener al menos 0 caracteres.",
+            "string.max": "El mensaje no puede exceder los 500 caracteres."
         }),
     estado: Joi.string()
         .valid("Solicitud Recibida", "En Proceso", "Lista para retirar")

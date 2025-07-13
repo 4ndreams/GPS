@@ -15,9 +15,15 @@ import '../styles/Cotizar.css';
 // Constantes de validación
 const VALIDATION_RULES = {
   medidas: {
-    ancho: { min: 10, max: 150 }, // 10-150 cm
-    alto: { min: 10, max: 225 },  // 10-225 cm
-    largo: { min: 10, max: 300 }, // 10-300 cm
+    ancho: {
+      puertaPaso: { min: 60, max: 90 }, // 60-90 cm para puertas de paso
+      puertaCloset: { min: 40, max: 60 }, // 40-60 cm para puertas de closet
+    },
+    alto: { min: 200, max: 240 }, // 200-240 cm para todas las puertas
+  },
+  espesor: {
+    puertaPaso: { value: 45, label: "45mm - Puertas de paso" },
+    puertaCloset: { value: 18, label: "18mm - Puertas de closet" }
   },
   telefono: {
     length: 8,
@@ -65,7 +71,7 @@ function Cotizar() {
   const [cargandoMateriales, setCargandoMateriales] = useState(false);
   
   // Total de pasos según si está logueado o no
-  const totalSteps = isLoggedIn ? 3 : 4;
+  const totalSteps = isLoggedIn ? 4 : 5;
   
   // Datos temporales - en el futuro se pueden cargar desde la API
   const [formData, setFormData] = useState({
@@ -73,7 +79,8 @@ function Cotizar() {
     id_relleno: '',
     medida_ancho: '',
     medida_alto: '',
-    medida_largo: '',
+    medida_espesor: '',
+    tipo_puerta: '', // 'puertaPaso' o 'puertaCloset'
     telefono_contacto: '',
     mensaje: '',
     // Campos para usuarios no logueados
@@ -132,7 +139,8 @@ function Cotizar() {
     currentStep, 
     formData.medida_ancho, 
     formData.medida_alto, 
-    formData.medida_largo,
+    formData.medida_espesor,
+    formData.tipo_puerta,
     formData.id_material,
     formData.id_relleno,
     formData.telefono_contacto,
@@ -143,18 +151,58 @@ function Cotizar() {
   ]);
 
   // Funciones de validación
-  const validateMedida = (value: string, fieldName: string, dimension: 'ancho' | 'alto' | 'largo'): string | null => {
+  const validateMedida = (value: string, fieldName: string, dimension: 'ancho' | 'alto'): string | null => {
     const numValue = parseFloat(value);
     if (!value || isNaN(numValue)) {
       return `${fieldName} es requerido`;
     }
     
-    const limits = VALIDATION_RULES.medidas[dimension];
-    if (numValue < limits.min) {
-      return `${fieldName} debe ser mayor a ${limits.min} cm`;
+    if (dimension === 'ancho') {
+      // Para el ancho, necesitamos verificar el tipo de puerta
+      if (!formData.tipo_puerta) {
+        return 'Primero debe seleccionar el tipo de puerta';
+      }
+      
+      const limits = VALIDATION_RULES.medidas.ancho[formData.tipo_puerta as 'puertaPaso' | 'puertaCloset'];
+      if (numValue < limits.min) {
+        return `${fieldName} debe ser mayor a ${limits.min} cm para ${formData.tipo_puerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'}`;
+      }
+      if (numValue > limits.max) {
+        return `${fieldName} debe ser menor a ${limits.max} cm para ${formData.tipo_puerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'}`;
+      }
+    } else if (dimension === 'alto') {
+      const limits = VALIDATION_RULES.medidas.alto;
+      if (numValue < limits.min) {
+        return `${fieldName} debe ser mayor a ${limits.min} cm`;
+      }
+      if (numValue > limits.max) {
+        return `${fieldName} debe ser menor a ${limits.max} cm`;
+      }
     }
-    if (numValue > limits.max) {
-      return `${fieldName} debe ser menor a ${limits.max} cm`;
+    
+    return null;
+  };
+
+  const validateTipoPuerta = (value: string): string | null => {
+    if (!value || value.trim() === '') {
+      return 'Debe seleccionar un tipo de puerta';
+    }
+    if (value !== 'puertaPaso' && value !== 'puertaCloset') {
+      return 'Tipo de puerta no válido';
+    }
+    return null;
+  };
+
+  const validateEspesor = (value: string): string | null => {
+    if (!value || value.trim() === '') {
+      return 'Debe seleccionar un espesor';
+    }
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) {
+      return 'El espesor debe ser un número válido';
+    }
+    if (numValue !== 18 && numValue !== 45) {
+      return 'El espesor debe ser 18mm o 45mm';
     }
     return null;
   };
@@ -214,8 +262,10 @@ function Cotizar() {
         return validateMedida(value, 'El ancho', 'ancho');
       case 'medida_alto':
         return validateMedida(value, 'El alto', 'alto');
-      case 'medida_largo':
-        return validateMedida(value, 'El largo', 'largo');
+      case 'tipo_puerta':
+        return validateTipoPuerta(value);
+      case 'medida_espesor':
+        return validateEspesor(value);
       case 'telefono_contacto':
         return validateTelefono(value);
       case 'rut_contacto':
@@ -235,6 +285,14 @@ function Cotizar() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // Manejar cambio de tipo de puerta - resetear espesor
+    if (name === 'tipo_puerta') {
+      handleTipoPuertaChange(value);
+      return;
+    }
+    
+    // Actualizar el campo normalmente
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Validar el campo en tiempo real
@@ -244,80 +302,121 @@ function Cotizar() {
       [name]: error
     }));
     
-    // Manejar selección de material o relleno para mostrar características
-    if (name === 'id_material' && value) {
-      obtenerMaterialPorId(parseInt(value))
-        .then(material => setMaterialSeleccionado(material))
-        .catch(() => setMaterialSeleccionado(null));
-    } else if (name === 'id_material' && !value) {
-      setMaterialSeleccionado(null);
+    // Manejar selecciones especiales
+    handleMaterialRelleno(name, value);
+  };
+
+  const handleTipoPuertaChange = (value: string) => {
+    let espesorAutomatico = '';
+    if (value === 'puertaPaso') {
+      espesorAutomatico = '45';
+    } else if (value === 'puertaCloset') {
+      espesorAutomatico = '18';
     }
     
-    if (name === 'id_relleno' && value) {
-      obtenerRellenoPorId(parseInt(value))
-        .then(relleno => setRellenoSeleccionado(relleno))
-        .catch(() => setRellenoSeleccionado(null));
-    } else if (name === 'id_relleno' && !value) {
-      setRellenoSeleccionado(null);
+    setFormData(prev => ({ ...prev, tipo_puerta: value, medida_espesor: espesorAutomatico }));
+    
+    // Validar inmediatamente
+    const tipoPuertaError = validateTipoPuerta(value);
+    const espesorError = validateEspesor(espesorAutomatico);
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      tipo_puerta: tipoPuertaError,
+      medida_espesor: espesorError
+    }));
+  };
+
+  const handleMaterialRelleno = (name: string, value: string) => {
+    if (name === 'id_material') {
+      if (value) {
+        obtenerMaterialPorId(parseInt(value))
+          .then(material => setMaterialSeleccionado(material))
+          .catch(() => setMaterialSeleccionado(null));
+      } else {
+        setMaterialSeleccionado(null);
+      }
+    }
+    
+    if (name === 'id_relleno') {
+      if (value) {
+        obtenerRellenoPorId(parseInt(value))
+          .then(relleno => setRellenoSeleccionado(relleno))
+          .catch(() => setRellenoSeleccionado(null));
+      } else {
+        setRellenoSeleccionado(null);
+      }
     }
   };
 
   const validateStep = (step: number): { isValid: boolean; errors: ValidationErrors } => {
-    let isValid = true;
     const errors: ValidationErrors = {};
-
+    
     switch (step) {
-      case 1: {
-        // Medidas
-        const anchoError = validateMedida(formData.medida_ancho, 'El ancho', 'ancho');
-        const altoError = validateMedida(formData.medida_alto, 'El alto', 'alto');
-        const largoError = validateMedida(formData.medida_largo, 'El largo', 'largo');
-        
-        if (anchoError) errors.medida_ancho = anchoError;
-        if (altoError) errors.medida_alto = altoError;
-        if (largoError) errors.medida_largo = largoError;
-        
-        isValid = !anchoError && !altoError && !largoError;
-        break;
-      }
-        
-      case 2: {
-        // Materiales y relleno
-        isValid = !!(formData.id_material && formData.id_relleno);
-        if (!formData.id_material) errors.id_material = 'Debe seleccionar un material';
-        if (!formData.id_relleno) errors.id_relleno = 'Debe seleccionar un relleno';
-        break;
-      }
-        
-      case 3: {
-        // Contacto básico
-        const telefonoError = validateTelefono(formData.telefono_contacto);
-        if (telefonoError) errors.telefono_contacto = telefonoError;
-        isValid = !telefonoError;
-        break;
-      }
-        
-      case 4: {
-        // Información adicional (solo para usuarios no logueados)
-        if (!isLoggedIn) {
-          const nombreError = validateNombre(formData.nombre_apellido_contacto);
-          const rutError = validateRut(formData.rut_contacto);
-          const emailError = validateEmail(formData.email_contacto);
-          
-          if (nombreError) errors.nombre_apellido_contacto = nombreError;
-          if (rutError) errors.rut_contacto = rutError;
-          if (emailError) errors.email_contacto = emailError;
-          
-          isValid = !nombreError && !rutError && !emailError;
-        }
-        break;
-      }
-        
+      case 1:
+        return validateStepTipoPuerta(errors);
+      case 2:
+        return validateStepMedidas(errors);
+      case 3:
+        return validateStepMateriales(errors);
+      case 4:
+        return validateStepContacto(errors);
+      case 5:
+        return validateStepInfoContacto(errors);
       default:
-        break;
+        return { isValid: true, errors };
     }
+  };
 
+  const validateStepTipoPuerta = (errors: ValidationErrors) => {
+    const tipoPuertaError = validateTipoPuerta(formData.tipo_puerta);
+    const espesorError = validateEspesor(formData.medida_espesor);
+    
+    if (tipoPuertaError) errors.tipo_puerta = tipoPuertaError;
+    if (espesorError) errors.medida_espesor = espesorError;
+    
+    return { isValid: !tipoPuertaError && !espesorError, errors };
+  };
+
+  const validateStepMedidas = (errors: ValidationErrors) => {
+    const anchoError = validateMedida(formData.medida_ancho, 'El ancho', 'ancho');
+    const altoError = validateMedida(formData.medida_alto, 'El alto', 'alto');
+    
+    if (anchoError) errors.medida_ancho = anchoError;
+    if (altoError) errors.medida_alto = altoError;
+    
+    return { isValid: !anchoError && !altoError, errors };
+  };
+
+  const validateStepMateriales = (errors: ValidationErrors) => {
+    const isValid = !!(formData.id_material && formData.id_relleno);
+    if (!formData.id_material) errors.id_material = 'Debe seleccionar un material';
+    if (!formData.id_relleno) errors.id_relleno = 'Debe seleccionar un relleno';
+    
     return { isValid, errors };
+  };
+
+  const validateStepContacto = (errors: ValidationErrors) => {
+    const telefonoError = validateTelefono(formData.telefono_contacto);
+    if (telefonoError) errors.telefono_contacto = telefonoError;
+    
+    return { isValid: !telefonoError, errors };
+  };
+
+  const validateStepInfoContacto = (errors: ValidationErrors) => {
+    if (!isLoggedIn) {
+      const nombreError = validateNombre(formData.nombre_apellido_contacto);
+      const rutError = validateRut(formData.rut_contacto);
+      const emailError = validateEmail(formData.email_contacto);
+      
+      if (nombreError) errors.nombre_apellido_contacto = nombreError;
+      if (rutError) errors.rut_contacto = rutError;
+      if (emailError) errors.email_contacto = emailError;
+      
+      return { isValid: !nombreError && !rutError && !emailError, errors };
+    }
+    
+    return { isValid: true, errors };
   };
 
   const nextStep = () => {
@@ -341,20 +440,22 @@ function Cotizar() {
 
   const getStepTitle = (step: number): string => {
     switch (step) {
-      case 1: return 'Medidas del Producto';
-      case 2: return 'Material y Relleno';
-      case 3: return isLoggedIn ? 'Contacto y Mensaje' : 'Teléfono y Mensaje';
-      case 4: return 'Información de Contacto';
+      case 1: return 'Tipo de Puerta y Espesor';
+      case 2: return 'Medidas del Producto';
+      case 3: return 'Material y Relleno';
+      case 4: return isLoggedIn ? 'Contacto y Mensaje' : 'Teléfono y Mensaje';
+      case 5: return 'Información de Contacto';
       default: return '';
     }
   };
 
   const getStepIcon = (step: number): string => {
     switch (step) {
-      case 1: return 'bi-rulers';
-      case 2: return 'bi-palette';
-      case 3: return 'bi-telephone';
-      case 4: return 'bi-person-badge';
+      case 1: return 'bi-door-open';
+      case 2: return 'bi-rulers';
+      case 3: return 'bi-palette';
+      case 4: return 'bi-telephone';
+      case 5: return 'bi-person-badge';
       default: return 'bi-circle';
     }
   };
@@ -363,11 +464,35 @@ function Cotizar() {
     e.preventDefault();
     
     // Validar todos los pasos antes de enviar
-    const allStepsValid = Array.from({ length: totalSteps }, (_, i) => i + 1)
-      .every(step => validateStep(step).isValid);
+    let allErrors: ValidationErrors = {};
+    let hasErrors = false;
     
-    if (!allStepsValid) {
+    for (let step = 1; step <= totalSteps; step++) {
+      const validation = validateStep(step);
+      if (!validation.isValid) {
+        hasErrors = true;
+        allErrors = { ...allErrors, ...validation.errors };
+      }
+    }
+    
+    if (hasErrors) {
+      setValidationErrors(allErrors);
       showNotification('Por favor, corrija todos los errores en el formulario', 'error');
+      
+      // Ir al primer paso con errores
+      for (let step = 1; step <= totalSteps; step++) {
+        if (!validateStep(step).isValid) {
+          setCurrentStep(step);
+          break;
+        }
+      }
+      return;
+    }
+    
+    // Validar que el tipo_puerta no esté vacío
+    if (!formData.tipo_puerta || formData.tipo_puerta.trim() === '') {
+      showNotification('El tipo de puerta es obligatorio', 'error');
+      setCurrentStep(1);
       return;
     }
     
@@ -382,10 +507,14 @@ function Cotizar() {
         id_relleno: parseInt(formData.id_relleno),
         medida_ancho: parseFloat(formData.medida_ancho),
         medida_alto: parseFloat(formData.medida_alto),
-        medida_largo: parseFloat(formData.medida_largo),
+        medida_largo: parseFloat(formData.medida_espesor),
+        tipo_puerta: formData.tipo_puerta,
         telefono_contacto: formData.telefono_contacto,
         mensaje: formData.mensaje,
       };
+      
+      // Logging para debugging
+      console.log('Enviando cotización con tipo_puerta:', cotizacionData.tipo_puerta);
 
       // Para usuarios no logueados, agregar campos adicionales
       if (!isLoggedIn) {
@@ -409,7 +538,8 @@ function Cotizar() {
         id_relleno: '',
         medida_ancho: '',
         medida_alto: '',
-        medida_largo: '',
+        medida_espesor: '',
+        tipo_puerta: '',
         telefono_contacto: isLoggedIn ? user?.telefono ?? '' : '',
         mensaje: '',
         nombre_apellido_contacto: '',
@@ -488,8 +618,68 @@ function Cotizar() {
 
         {/* Contenido del paso */}
         <div className="step-content">
-          {/* Paso 1: Medidas */}
+          {/* Paso 1: Tipo de puerta y espesor */}
           {currentStep === 1 && (
+            <div className="step-section">
+              <p className="step-description">
+                Selecciona el tipo de puerta y espesor que necesitas.
+              </p>
+              
+              <div className="form-row">
+                <div className="field-group">
+                  <label htmlFor="tipo_puerta">Tipo de puerta *</label>
+                  <select 
+                    id="tipo_puerta"
+                    name="tipo_puerta" 
+                    value={formData.tipo_puerta} 
+                    onChange={handleChange} 
+                    className={validationErrors.tipo_puerta ? 'error' : ''}
+                    required 
+                  >
+                    <option value="">Selecciona un tipo</option>
+                    <option value="puertaPaso">Puerta de paso</option>
+                    <option value="puertaCloset">Puerta de closet</option>
+                  </select>
+                  {validationErrors.tipo_puerta && (
+                    <span className="error-text">{validationErrors.tipo_puerta}</span>
+                  )}
+                  <small className="help-text">
+                    Selecciona si es una puerta de paso o de closet
+                  </small>
+                </div>
+
+                <div className="field-group">
+                  <label htmlFor="medida_espesor">Espesor *</label>
+                  <select 
+                    id="medida_espesor"
+                    name="medida_espesor" 
+                    value={formData.medida_espesor} 
+                    onChange={handleChange} 
+                    className={validationErrors.medida_espesor ? 'error' : ''}
+                    required 
+                    disabled={!formData.tipo_puerta}
+                  >
+                    <option value="">Selecciona un espesor</option>
+                    {formData.tipo_puerta === 'puertaPaso' && (
+                      <option value="45">45mm - Puertas de paso</option>
+                    )}
+                    {formData.tipo_puerta === 'puertaCloset' && (
+                      <option value="18">18mm - Puertas de closet</option>
+                    )}
+                  </select>
+                  {validationErrors.medida_espesor && (
+                    <span className="error-text">{validationErrors.medida_espesor}</span>
+                  )}
+                  <small className="help-text">
+                    El espesor se selecciona automáticamente según el tipo de puerta
+                  </small>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Paso 2: Medidas */}
+          {currentStep === 2 && (
             <div className="step-section">
               <p className="step-description">
                 Especifica las dimensiones exactas del producto que deseas cotizar.
@@ -505,8 +695,6 @@ function Cotizar() {
                     value={formData.medida_ancho} 
                     onChange={handleChange} 
                     step="0.1"
-                    min={VALIDATION_RULES.medidas.ancho.min}
-                    max={VALIDATION_RULES.medidas.ancho.max}
                     className={validationErrors.medida_ancho ? 'error' : ''}
                     required 
                   />
@@ -514,7 +702,15 @@ function Cotizar() {
                     <span className="error-text">{validationErrors.medida_ancho}</span>
                   )}
                   <small className="help-text">
-                    Entre {VALIDATION_RULES.medidas.ancho.min} y {VALIDATION_RULES.medidas.ancho.max} cm
+                    {(() => {
+                      if (formData.tipo_puerta === 'puertaPaso') {
+                        return 'Entre 60 y 90 cm para puertas de paso';
+                      } else if (formData.tipo_puerta === 'puertaCloset') {
+                        return 'Entre 40 y 60 cm para puertas de closet';
+                      } else {
+                        return 'Primero selecciona el tipo de puerta';
+                      }
+                    })()}
                   </small>
                 </div>
 
@@ -539,34 +735,12 @@ function Cotizar() {
                     Entre {VALIDATION_RULES.medidas.alto.min} y {VALIDATION_RULES.medidas.alto.max} cm
                   </small>
                 </div>
-
-                <div className="field-group">
-                  <label htmlFor="medida_largo">Largo (cm) *</label>
-                  <input 
-                    id="medida_largo"
-                    type="number" 
-                    name="medida_largo" 
-                    value={formData.medida_largo} 
-                    onChange={handleChange} 
-                    step="0.1"
-                    min={VALIDATION_RULES.medidas.largo.min}
-                    max={VALIDATION_RULES.medidas.largo.max}
-                    className={validationErrors.medida_largo ? 'error' : ''}
-                    required 
-                  />
-                  {validationErrors.medida_largo && (
-                    <span className="error-text">{validationErrors.medida_largo}</span>
-                  )}
-                  <small className="help-text">
-                    Entre {VALIDATION_RULES.medidas.largo.min} y {VALIDATION_RULES.medidas.largo.max} cm
-                  </small>
-                </div>
               </div>
             </div>
           )}
 
-          {/* Paso 2: Material y Relleno */}
-          {currentStep === 2 && (
+          {/* Paso 3: Material y Relleno */}
+          {currentStep === 3 && (
             <div className="step-section">
               <p className="step-description">
                 Selecciona el material y tipo de relleno para tu producto personalizado.
@@ -655,7 +829,7 @@ function Cotizar() {
           )}
 
           {/* Paso 3: Contacto básico y mensaje */}
-          {currentStep === 3 && (
+          {currentStep === 4 && (
             <div className="step-section">
               <p className="step-description">
                 {isLoggedIn 
@@ -707,8 +881,8 @@ function Cotizar() {
             </div>
           )}
 
-          {/* Paso 4: Información de contacto (solo para usuarios no logueados) */}
-          {currentStep === 4 && !isLoggedIn && (
+          {/* Paso 5: Información de contacto (solo para usuarios no logueados) */}
+          {currentStep === 5 && !isLoggedIn && (
             <div className="step-section">
               <p className="step-description">
                 Como no has iniciado sesión, necesitamos tus datos de contacto para procesar la cotización.

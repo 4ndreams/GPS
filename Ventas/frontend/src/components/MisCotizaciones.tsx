@@ -96,7 +96,18 @@ const MisCotizaciones: React.FC = () => {
   };
 
   const formatearMedidas = (ancho: number, alto: number, largo: number): string => {
-    return `${ancho} × ${alto} × ${largo} cm`;
+    return `${ancho} cm × ${alto} cm × ${largo} mm`;
+  };
+
+  const formatearTipoPuerta = (tipo: string): string => {
+    switch (tipo) {
+      case 'puertaPaso':
+        return 'Puerta de paso';
+      case 'puertaCloset':
+        return 'Puerta de closet';
+      default:
+        return 'Tipo no especificado';
+    }
   };
 
   if (loading) {
@@ -238,6 +249,12 @@ const MisCotizaciones: React.FC = () => {
 
             {/* Contenido principal */}
             <div className="cotizacion-content">
+              <div className="cotizacion-details">
+                <h3 className="cotizacion-title">
+                  <i className="bi bi-door-open-fill"></i>
+                  {formatearTipoPuerta(cotizacion.tipo_puerta)}
+                </h3>
+                </div>
               <div className="cotizacion-info">
                 <div className="info-section">
                   <h4>

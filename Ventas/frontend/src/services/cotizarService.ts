@@ -9,6 +9,7 @@ export interface CotizacionData {
   medida_ancho: number;
   medida_alto: number;
   medida_largo: number;
+  tipo_puerta: string; // 'puertaPaso' o 'puertaCloset'
   telefono_contacto: string;
   mensaje: string;
   // Campos opcionales para usuarios no logueados
@@ -27,6 +28,7 @@ export interface CotizacionResponse {
   medida_ancho: number;
   medida_alto: number;
   medida_largo: number;
+  tipo_puerta: string;
   estado: string;
   createdAt: string;
   updatedAt: string;
