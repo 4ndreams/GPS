@@ -4,8 +4,8 @@ import '../styles/Productos.css';
 import axios from "axios";
 
 interface Product {
-  id_producto: number;
-  nombre_producto: string;
+  id: number;
+  nombre: string;
   precio: number;
   imagen: string;
   categoria: string;
@@ -71,6 +71,7 @@ function Productos({ products, addToCart }: ProductosProps) {
     }
     
     if (categoryFilter !== 'todos') {
+      console.log("Filtrando por categoría:", categoryFilter);
       result = result.filter(p => 
         p.categoria.toLowerCase() === categoryFilter.toLowerCase()
       );
@@ -162,8 +163,8 @@ function Productos({ products, addToCart }: ProductosProps) {
                 className="categoria-select"
               >
                 <option value="todos">Todos</option>
-                <option value="puerta">Puertas</option>
-                <option value="moldura">Molduras</option>
+                <option value="puertas">Puertas</option>
+                <option value="molduras">Molduras</option>
               </select>
             </label>
           </div>
