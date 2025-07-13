@@ -1,14 +1,25 @@
 "use strict";
 import { Router } from "express";
 import passport from "../auth/passport.auth.js";
-import { login, logout, register, recoverPassword, verifyEmail } from "../controllers/auth.controller.js";
+import { authenticateJwt } from "../middlewares/authentication.middleware.js";
+import { 
+  login, 
+  logout, 
+  register, 
+  recoverPassword, 
+  verifyEmail, 
+  refreshToken, 
+  getTokenInfo 
+} from "../controllers/auth.controller.js";
 
 const router = Router();
 
 router
   .post("/login", login)
   .post("/register", register)
-  .post("/logout", logout)
+  .post("/logout", authenticateJwt, logout)
+  .post("/refresh-token", refreshToken)
+  .get("/token-info", getTokenInfo)
   .post("/recover-password", recoverPassword)
   .get("/verify-email", verifyEmail);
 

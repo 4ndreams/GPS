@@ -46,9 +46,11 @@ export interface CotizacionResponse {
   };
 }
 
+import { TokenService } from './tokenService';
+
 // Función para obtener el token del localStorage
 const getAuthToken = (): string | null => {
-  return localStorage.getItem('token');
+  return TokenService.getToken();
 };
 
 // Función para crear headers con o sin autenticación
@@ -213,5 +215,5 @@ export const eliminarCotizacion = async (id: number): Promise<void> => {
 
 // Verificar si el usuario está logueado
 export const estaLogueado = (): boolean => {
-  return !!getAuthToken();
+  return TokenService.isTokenValid();
 };

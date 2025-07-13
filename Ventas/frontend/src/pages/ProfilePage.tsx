@@ -6,6 +6,7 @@ import UsersTable from "../components/UserTable";
 import UserInfo from "../components/UserInfo";
 import ProductManagement from "../components/ProductManagement";
 import MisCotizaciones from "../components/MisCotizaciones.tsx";
+import { TokenService } from '../services/tokenService';
 import "../styles/ProfileInfo.css";
 import "../styles/animations.css";
 
@@ -33,7 +34,7 @@ const ProfilePage: React.FC = () => {
   const [userName, setUserName] = useState<string>("");
   const [userRole, setUserRole] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [tokenInfo, setTokenInfo] = useState<{timeRemaining: string} | null>(null);
 
   const handleTabClick = (key: string) => {
     setActiveTab(key);
@@ -47,10 +48,20 @@ const ProfilePage: React.FC = () => {
       const urlToken = params.get("token");
 
     if (urlToken) {
-      localStorage.setItem("token", urlToken);
-      setToken(urlToken);
+      TokenService.setToken(urlToken);
       window.history.replaceState({}, document.title, "/profile");
     }
+
+    // Actualizar información del token periódicamente
+    const updateTokenInfo = () => {
+      const timeRemaining = TokenService.getTimeRemainingFormatted();
+      setTokenInfo(timeRemaining ? { timeRemaining } : null);
+    };
+
+    updateTokenInfo();
+    const interval = setInterval(updateTokenInfo, 60000); // Actualizar cada minuto
+
+    return () => clearInterval(interval);
   }, [location]);
 
   return (
@@ -95,7 +106,7 @@ const ProfilePage: React.FC = () => {
 
         {activeTab === "products" &&
           userRole.toLowerCase() === "administrador" && (
-            <ProductManagement userRole={userRole} token={token ?? ""} />
+            <ProductManagement userRole={userRole} token={TokenService.getToken() ?? ""} />
           )}
 
         {activeTab === "orders" && <div>No se han realizado compras aún.</div>}
