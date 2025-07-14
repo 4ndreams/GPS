@@ -46,7 +46,7 @@ export const getGoogleAuthUrl = () => {
 
 export const loginWithGoogle = async () => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE.API_BASE_URL}/auth/google`, { withCredentials: true });
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/auth/google`, { withCredentials: true });
     return response.data;
   } catch (error: any) {
     console.error("Error en Google Login:", error.response?.data ?? error.message);
