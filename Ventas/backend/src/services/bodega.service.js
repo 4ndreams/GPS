@@ -28,7 +28,14 @@ export async function getBodegasService() {
 export async function createBodegaService(body) {
   try {
     const repo = AppDataSource.getRepository(Bodega);
-    const nueva = repo.create({ ...body, createdAt: new Date(), updatedAt: new Date() });
+    const nueva = repo.create({
+  ...body,
+  id_material: body.material ? body.material.id_material : null,
+  id_relleno: body.relleno ? body.relleno.id_relleno : null,
+  id_producto: body.producto ? body.producto.id_producto : null,
+  createdAt: new Date(),
+  updatedAt: new Date()
+});
     await repo.save(nueva);
     return [nueva, null];
   } catch (error) {
@@ -40,9 +47,11 @@ export async function createBodegaService(body) {
 export async function updateBodegaService(id, body) {
   try {
     const repo = AppDataSource.getRepository(Bodega);
-    const existente = await repo.findOne({ where: { id_bodega:id }});
+    const existente = await repo.findOne({ where: { id_bodega:id },relations: ["material", "relleno", "producto"] });
     if (!existente) return [null, "Bodega no encontrada"];
-    await repo.update(id, { ...body, updatedAt: new Date() });
+    await repo.update(id, 
+      { ...body,
+          updatedAt: new Date() });
     const actualizada = await repo.findOne({ where: { id_bodega:id } });
     return [actualizada, null];
   } catch (error) {

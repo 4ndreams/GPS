@@ -43,9 +43,10 @@ const CompraSchema = new EntitySchema({
   relations: {
     bodega: {
       type: "many-to-one",
-      target: BodegaSchema,
+      target: "Bodega", // nombre del schema relacionado
       joinColumn: {
         name: "id_bodega",
+        referencedColumnName: "id_bodega",
       },
       nullable: false,
     },

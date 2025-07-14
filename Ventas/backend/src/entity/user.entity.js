@@ -59,8 +59,8 @@ const UsuarioSchema = new EntitySchema({
         },
         rol: {
             type: "enum",
-            enum: ["Cliente", "Empleado", "Administrador"],
-            default: "Cliente",
+            enum: ["cliente", "fabrica", "tienda", "administrador"], // Diferenciamos fabrica y tienda
+            default: "cliente",
             nullable: false,
         },
         intentosFallidos: {
@@ -99,6 +99,7 @@ const UsuarioSchema = new EntitySchema({
             joinColumn: {
                 name: "id_usuario",
             },
+            nullable: true, // Permite que un usuario no tenga ventas
             inverseSide: "usuario",
         },
         eventos: {
@@ -107,6 +108,7 @@ const UsuarioSchema = new EntitySchema({
             inverseSide: "usuario", 
         },
     },
+    
     indices: [
         {
             name: "idx_usuario_id",

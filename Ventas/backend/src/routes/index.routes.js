@@ -14,9 +14,13 @@ import comprasRoutes from "./compras.routes.js";
 import compXbogRoutes from "./compXbog.routes.js";
 import com_mesRoutes from "./com_mes.routes.js";
 import productRoutes from "./product.routes.js";
+import produccion from "./produccion.routes.js"; // Import produccion routes
+
 
 import rellenoRoutes from "./relleno.routes.js"; // Import relleno routes
 import productoPersonalizadoRoutes from "./producto_personalizado.routes.js"; // Import producto personalizado routes
+import tiendaRoutes from "./tienda.routes.js";
+import imagenesRoutes from "./imagenes.routes.js"; 
 
 const router = Router();
 
@@ -40,6 +44,7 @@ router.use('/compras', comprasRoutes);
 router.use('/users',userRoutes); 
 router.use('/compXbog', compXbogRoutes); 
 router.use('/com_mes', com_mesRoutes);
+router.use('/produccion', produccion); // Rutas para produccion
 
 router.use('/users',userRoutes);  
 router.use('/products', productRoutes); 
@@ -48,5 +53,7 @@ router.use('/tipos', tipoRoutes);
 
 router.use('/rellenos', rellenoRoutes); 
 router.use('/productos-personalizados', productoPersonalizadoRoutes); // Rutas para cotizaciones/productos personalizados
+router.use('/tienda', tiendaRoutes);
+router.use('/imagenes', imagenesRoutes);
 
 export default router;

@@ -1,6 +1,6 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-import ProductoSchema from "./producto.entity.js";
+import BodegaSchema from "./bodega.entity.js";
 import UsuarioSchema from "./user.entity.js";
 
 const OrdenSchema = new EntitySchema({
@@ -37,6 +37,11 @@ const OrdenSchema = new EntitySchema({
       default: "Pendiente",
       nullable: false,
     },
+    observaciones: {
+      type: "varchar",
+      length: 500,
+      nullable: true
+    },
     createdAt: {
       type: "timestamp with time zone",
       default: () => "CURRENT_TIMESTAMP",
@@ -48,29 +53,29 @@ const OrdenSchema = new EntitySchema({
       onUpdate: "CURRENT_TIMESTAMP",
       nullable: false,
     },
-    id_producto: {
+     id_usuario: {
       type: "int",
       nullable: false,
     },
-     id_usuario: {
+    id_bodega: {
       type: "int",
       nullable: false,
     },
   },
   relations: {
-    producto: {
-      type: "many-to-one",
-      target: ProductoSchema,
-      joinColumn: {
-        name: "id_producto",
-      },
-      nullable: false,
-    },
     usuario: {
       type: "many-to-one",
       target: UsuarioSchema,
       joinColumn: {
         name: "id_usuario",
+      },
+      nullable: false,
+    },
+    bodega: {
+      type: "many-to-one",
+      target: BodegaSchema, 
+      joinColumn: {
+        name: "id_bodega",
       },
       nullable: false,
     },
@@ -82,8 +87,8 @@ const OrdenSchema = new EntitySchema({
       unique: true,
     },
     {
-      name: "idx_orden_producto",
-      columns: ["id_producto"],
+      name: "idx_orden_bodega",
+      columns: ["id_bodega"],
     },
     {
       name: "idx_orden_usuario",
