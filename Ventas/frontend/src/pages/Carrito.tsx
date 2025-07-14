@@ -24,6 +24,7 @@ interface CarritoProps {
 function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
 
   // Calcular subtotal
   const subtotal = cartItems.reduce(
@@ -84,17 +85,25 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
                   
                   <div className="item-cantidad">
                     <button 
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => {
+                        updateQuantity(item.id, item.quantity - 1);
+                      }}
                       disabled={item.quantity <= 1}
                     >
                       -
                     </button>
                     <span>{item.quantity}</span>
                     <button 
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => {
+                        const productStock = products.find(p => p.id === item.id)?.quantity || 0;
+                        if(productStock>0){
+                          updateQuantity(item.id, item.quantity + 1);
+                        }
+                      }}
+                      disabled={products.find(p => p.id === item.id)?.quantity === 0}
                     >
                       +
-                    </button>
+                      </button>
                   </div>
                   
                   <p className="item-total">

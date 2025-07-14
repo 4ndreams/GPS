@@ -7,7 +7,7 @@ interface CartItem {
   id: number;
   nombre: string;
   precio: number;
-  cantidad: number;
+  quantity: number;
 }
 
 interface ContactInfo {
@@ -26,25 +26,60 @@ const Checkout: React.FC = () => {
     telefono: "",
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Cargar carrito simulado (o desde localStorage)
+  // Cargar carrito y perfil de usuario
   useEffect(() => {
-    const stored = localStorage.getItem("cart");
-    if (stored) {
-      setCart(JSON.parse(stored));
-    } else {
-      // aqui van los productos
-      setCart([
-        { id: 1, nombre: "Puerta Geno Enchape Wenge", precio: 105000, cantidad: 1 },
-        { id: 3, nombre: "Moldura Roble 2m", precio: 45000, cantidad: 2 },
-      ]);
-    }
-    
-    // Cargar información del usuario si está logueado
-    loadUserProfile();
+    const loadCartAndProfile = async () => {
+      try {
+        // Cargar carrito desde localStorage
+        const storedCart = localStorage.getItem("cart");
+        if (storedCart) {
+          const parsedCart = JSON.parse(storedCart);
+          
+          // Validar formato del carrito
+          if (Array.isArray(parsedCart)){
+            const isValidCart = parsedCart.every(item => 
+              item.id && item.nombre && item.precio && item.quantity
+            );
+            
+            if (isValidCart) {
+              setCart(parsedCart);
+            } else {
+              console.error("Formato de carrito inválido");
+              setCart([]);
+            }
+          }
+        }
+
+        // Cargar información del usuario
+        await loadUserProfile();
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCartAndProfile();
   }, []);
 
-  // Función para obtener información del usuario logueado
+  // Escuchar cambios en el carrito desde otras pestañas
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "cart") {
+        const storedCart = localStorage.getItem("cart");
+        if (storedCart) {
+          setCart(JSON.parse(storedCart));
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+
   const loadUserProfile = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -72,7 +107,28 @@ const Checkout: React.FC = () => {
     });
   };
 
-  const total = cart.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Cargando carrito...</p>
+      </div>
+    );
+  }
+
+  if (cart.length === 0) {
+    return (
+      <div className="empty-cart-message">
+        <h2>Tu carrito está vacío</h2>
+        <p>No hay productos para mostrar en el checkout</p>
+        <Link to="/productos" className="continue-shopping-btn">
+          Volver a la tienda
+        </Link>
+      </div>
+    );
+  }
+
+  const total = cart.reduce((sum, item) => sum + item.precio * item.quantity, 0);
 
   return (
     <div className="checkout-wrapper">
@@ -217,8 +273,8 @@ const Checkout: React.FC = () => {
               <div className="cart-list">
                 {cart.map(item => (
                   <div key={item.id} className="cart-item">
-                    <span className="item-name">{item.nombre} (x{item.cantidad})</span>
-                    <span className="item-price">${(item.precio * item.cantidad).toLocaleString("es-CL")}</span>
+                    <span className="item-name">{item.nombre} (x{item.quantity})</span>
+                    <span className="item-price">${(item.precio * item.quantity).toLocaleString("es-CL")}</span>
                   </div>
                 ))}
               </div>

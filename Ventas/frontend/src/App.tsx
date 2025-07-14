@@ -95,7 +95,7 @@ function App() {
           p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p
         )
       );
-      
+
       // Agregar al carrito
       setCartItems(prevItems => {
         const existingItem = prevItems.find(item => item.id === product.id);
@@ -106,7 +106,9 @@ function App() {
               : item
           );
         } else {
-          return [...prevItems, { ...product, quantity: 1 }];
+          return [...prevItems, {
+            quantity: 1
+          }];
         }
       });
     }
@@ -127,14 +129,31 @@ function App() {
 
   // Función para actualizar cantidad en el carrito
   const updateCartItemQuantity = (productId: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
     
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
+  const product = products.find(p => p.id === productId);
+  const cartItem = cartItems.find(item => item.id === productId);
+  
+  const availableStock = (product?.quantity || 0) + (cartItem?.quantity || 0);
+  
+  if (newQuantity > availableStock) {
+    newQuantity = availableStock;
+  }
+  
+  if (newQuantity < 1) return;
+  
+  setProducts(prevProducts => 
+    prevProducts.map(p => 
+      p.id === productId ? { ...p, quantity: p.quantity } : p
+    )
+  );
+
+  setCartItems(prevItems => 
+    prevItems.map(item => 
+      item.id === productId ? { ...item, quantity: newQuantity } : item
+    )
+  );
+
+};
 
   const cartItemCount = cartItems.reduce(
     (total, item) => total + item.quantity, 
