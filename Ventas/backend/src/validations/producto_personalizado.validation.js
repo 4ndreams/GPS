@@ -3,6 +3,11 @@ import Joi from "joi";
 import RutValidator from "./rut.validation.js";
 
 const domainEmailValidator = (value, helper) => {
+  // Si el valor está vacío o es null/undefined, es válido para campos opcionales
+  if (!value || value.trim() === '') {
+    return value;
+  }
+  
   const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl"];
   
   if (!allowedDomains.some(domain => value.endsWith(domain))) {
@@ -13,6 +18,11 @@ const domainEmailValidator = (value, helper) => {
 };
 
 const rutValidator = (value, helper) => {
+  // Si el valor está vacío o es null/undefined, es válido para campos opcionales
+  if (!value || value.trim() === '') {
+    return value;
+  }
+  
   if (!RutValidator.isValidRut(value)) {
     return helper.message("El RUT ingresado no es válido.");
   }
@@ -346,6 +356,8 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
         .max(255)
         .pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/)
         .optional()
+        .allow('')
+        .allow(null)
         .messages({
             "string.base": "El nombre y apellido de contacto debe ser una cadena de texto.",
             "string.min": "El nombre y apellido de contacto debe tener al menos 4 caracteres.",
@@ -356,6 +368,8 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
         .pattern(/^\d{1,8}-[\dkK]$/)
         .custom(rutValidator)
         .optional()
+        .allow('')
+        .allow(null)
         .messages({
             "string.base": "El RUT debe ser una cadena de texto.",
             "string.pattern.base": "El RUT debe tener el formato correcto (ej: 12345678-9)."
@@ -364,6 +378,8 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
         .email()
         .custom(domainEmailValidator)
         .optional()
+        .allow('')
+        .allow(null)
         .messages({
             "string.email": "El email debe tener un formato válido."
         }),

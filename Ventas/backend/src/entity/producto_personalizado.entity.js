@@ -47,7 +47,7 @@ const ProductoPersonalizadoSchema = new EntitySchema({
         rut_contacto: {
         type: "varchar",
         length: 12,
-        nullable: false,
+        nullable: true,
         },
         email_contacto: {
         type: "varchar",    
