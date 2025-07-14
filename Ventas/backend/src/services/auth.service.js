@@ -141,7 +141,7 @@ export async function verifyEmailService(token) {
       rut: payload.rut,
       email: payload.email,
       password: payload.password,
-      rol: payload.rol || "Cliente", // Default role if not provided
+      rol: payload.rol || "cliente", // Default role if not provided
     });
 
     await userRepository.save(newUser);
