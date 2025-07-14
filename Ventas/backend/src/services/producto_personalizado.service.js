@@ -31,43 +31,32 @@ export async function getProductoPersonalizadoByIdService(id_producto_personaliz
 
 export async function createProductoPersonalizadoService(body) {
     try {
-        console.log('🔧 Iniciando servicio createProductoPersonalizadoService');
-        console.log('📦 Datos recibidos en el servicio:', JSON.stringify(body, null, 2));
-        
         const repository = AppDataSource.getRepository("ProductoPersonalizado");
         
         // Verificar que el material existe
         if (body.id_material) {
-            console.log('🔍 Verificando material ID:', body.id_material);
             const materialRepository = AppDataSource.getRepository("Material");
             const materialExists = await materialRepository.findOneBy({ id_material: body.id_material });
             if (!materialExists) {
-                console.error(`❌ Material ${body.id_material} no encontrado`);
                 return [null, `El material con ID ${body.id_material} no existe en la base de datos`];
             }
-            console.log(`✅ Material ${body.id_material} verificado correctamente`);
         }
         
         // Verificar que el relleno existe
         if (body.id_relleno) {
-            console.log('🔍 Verificando relleno ID:', body.id_relleno);
             const rellenoRepository = AppDataSource.getRepository("Relleno");
             const rellenoExists = await rellenoRepository.findOneBy({ id_relleno: body.id_relleno });
             if (!rellenoExists) {
-                console.error(`❌ Relleno ${body.id_relleno} no encontrado`);
                 return [null, `El relleno con ID ${body.id_relleno} no existe en la base de datos`];
             }
-            console.log(`✅ Relleno ${body.id_relleno} verificado correctamente`);
         }
         
         // Verificar que el usuario existe (solo si se proporciona)
         if (body.id_usuario) {
-            console.log('🔍 Verificando usuario ID:', body.id_usuario);
             const usuarioRepository = AppDataSource.getRepository("Usuario");
             try {
                 const usuarioExists = await usuarioRepository.findOneBy({ id_usuario: body.id_usuario });
                 if (!usuarioExists) {
-                    console.error(`❌ Usuario ${body.id_usuario} no encontrado`);
                     return [null, `El usuario con ID ${body.id_usuario} no existe en la base de datos`];
                 }
                 console.log(`✅ Usuario ${body.id_usuario} verificado correctamente`);
@@ -75,37 +64,28 @@ export async function createProductoPersonalizadoService(body) {
                 console.error(`❌ Error al verificar usuario ${body.id_usuario}:`, error);
                 return [null, `Error al verificar la existencia del usuario: ${error.message}`];
             }
-        } else {
-            console.log('ℹ️ No se proporcionó ID de usuario (cotización anónima)');
         }
         
-        console.log('💾 Creando registro en la base de datos...');
         const nuevo = repository.create(body);
         const saved = await repository.save(nuevo);
-        console.log('✅ Registro guardado con ID:', saved.id_producto_personalizado);
         
         // Obtener el registro completo con relaciones
-        console.log('🔗 Obteniendo registro completo con relaciones...');
         const completo = await repository.findOne({
             where: { id_producto_personalizado: saved.id_producto_personalizado },
             relations: ["relleno", "material", "usuario"]
         });
         
         // Enviar email de confirmación de cotización
-        console.log('📧 Enviando email de confirmación...');
         try {
             await sendCotizacionConfirmationEmail(completo);
-            console.log('✅ Email de confirmación enviado exitosamente');
         } catch (emailError) {
             console.error(`❌ Error al enviar email de confirmación para cotización #${completo.id_producto_personalizado}:`, emailError.message);
             // No fallar la creación si el email falla, solo registrar el error
         }
         
-        console.log('🎉 Servicio completado exitosamente');
         return [completo, null];
     } catch (error) {
-        console.error('💥 Error inesperado en createProductoPersonalizadoService:', error);
-        return [null, "Error al crear producto personalizado: " + error.message];
+        return [error, "Error al crear producto personalizado"];
     }
 }
 
