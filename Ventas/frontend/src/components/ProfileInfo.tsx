@@ -38,7 +38,8 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditData({ ...editData!, [e.target.name]: e.target.value });
+    if (!editData) return;
+    setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
@@ -49,7 +50,6 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
       nombre: editData.nombre,
       apellidos: editData.apellidos,
       email: editData.email,
-      telefono: editData.telefono,
       rut: editData.rut,
       /*aqui van mas weas pa los campos*/ 
     };
