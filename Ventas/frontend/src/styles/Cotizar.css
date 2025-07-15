@@ -225,9 +225,9 @@ hr {
 .steps-indicator::before {
   content: '';
   position: absolute;
-  top: 20px;
-  left: 0;
-  right: 0;
+  top: 20px; /* Centrado verticalmente con los círculos de 40px */
+  left: 60px; /* Comienza después del primer círculo */
+  right: 60px; /* Termina antes del último círculo */
   height: 2px;
   background: #e9ecef;
   z-index: 1;
@@ -241,6 +241,7 @@ hr {
   z-index: 2;
   min-width: 120px;
   text-align: center;
+  min-height: 70px; /* Altura mínima fija para todos los items */
 }
 
 .step-circle {
@@ -277,6 +278,9 @@ hr {
   color: #6c757d;
   font-weight: 500;
   line-height: 1.2;
+  margin-top: auto; /* Empuja el texto hacia abajo para mantener los círculos alineados */
+  max-width: 100px; /* Limita el ancho para evitar desbordamiento */
+  word-wrap: break-word;
 }
 
 .step-item.active .step-label {

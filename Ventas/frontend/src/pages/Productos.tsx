@@ -1,53 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import '../styles/Productos.css';
 import axios from "axios";
+import { Link } from "react-router-dom";
+import { getImagePath } from "../utils/getImagePath";
 import "../styles/Productos.css";
-import '../img/puertas/1.png';
-import '../img/puertas/2.jpeg';
-import '../img/puertas/3.jpeg';
-import '../img/puertas/4.jpeg';
-import '../img/puertas/5.jpeg';
-import '../img/molduras/m1.jpg';
-import '../img/molduras/m2.jpeg';
-import '../img/molduras/m3.jpg'; 
 
 interface Product {
-  id_producto: number;
-  nombre_producto: string;
+  id: number;
+  nombre: string;
   precio: number;
-  imagen?: string; // Asegúrate de cómo manejas imagenes
-  tipo?: { nombre_tipo: string }; // Relación con tipo (categoría)
+  imagen?: string;
+  tipo?: { nombre_tipo: string };
+  imagen: string;
+  categoria: string;
+  quantity: number;
 }
 
-function Productos() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+interface ProductosProps {
+  products: Product[];
+  addToCart: (product: Product) => void;
+}
 
-  const [loading, setLoading] = useState(true);
+function Productos({ products, addToCart }: ProductosProps) {
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const [nameFilter, setNameFilter] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [priceError, setPriceError] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('todos');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [nameFilter, setNameFilter] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("todos");
-
-  const [priceError, setPriceError] = useState("");
-
-   useEffect(() => {
-    const mockProducts: Product[] = [
-      { id_producto: 1, nombre_producto: 'Puerta Geno Enchape Wenge', precio: 105000, imagen: '1.png', tipo: { nombre_tipo: 'puertas' } },
-      { id_producto: 2, nombre_producto: 'Puerta Moderna Vidrio', precio: 210000, imagen: '2.jpeg', tipo: { nombre_tipo: 'puertas' } },
-      { id_producto: 3, nombre_producto: 'Moldura Roble 2m', precio: 45000, imagen: 'm1.jpg', tipo: { nombre_tipo: 'puertas' } },
-      { id_producto: 4, nombre_producto: 'Marco Roble Sólido', precio: 75000, imagen: 'm2.jpeg', tipo: { nombre_tipo: 'puertas' } },
-      { id_producto: 5, nombre_producto: 'Puerta Seguridad Acero', precio: 320000, imagen: '3.jpeg', tipo: { nombre_tipo: 'puertas' } },
-      { id_producto: 6, nombre_producto: 'Moldura Blanca Moderna', precio: 38000, imagen: 'm3.jpg', tipo: { nombre_tipo: 'puertas' } },
-    ];
-
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setFilteredProducts(mockProducts);
-      setLoading(false);
-    }, 800);
-  }, []);
+  // Actualizar productos filtrados cuando cambian los productos o los filtros
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
 
   const validatePrices = () => {
     if (minPrice && maxPrice) {
@@ -65,34 +53,37 @@ function Productos() {
   useEffect(() => {
     if (!validatePrices()) return;
 
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/products`,
-          {
-            params: {
-              nombre: nameFilter || undefined,
-              minPrecio: minPrice || undefined,
-              maxPrecio: maxPrice || undefined,
-              categoria:
-                categoryFilter !== "todos" ? categoryFilter : undefined,
-            },
-          }
-        );
-
-        setProducts(response.data.data);
-      } catch (error) {
-        setError("Error al cargar productos");
-      } finally {
-        setLoading(false);
+    let result = [...products];
+    
+    if (nameFilter) {
+      result = result.filter(p => 
+        p.nombre.toLowerCase().includes(nameFilter.toLowerCase())
+      );
+    }
+    
+    if (minPrice) {
+      const min = Number(minPrice);
+      if (!isNaN(min) && min > 0) {
+        result = result.filter(p => p.precio >= min);
       }
-    };
-
-    fetchProducts();
-  }, [nameFilter, minPrice, maxPrice, categoryFilter]);
+    }
+    
+    if (maxPrice) {
+      const max = Number(maxPrice);
+      if (!isNaN(max) && max > 0) {
+        result = result.filter(p => p.precio <= max);
+      }
+    }
+    
+    if (categoryFilter !== 'todos') {
+      console.log("Filtrando por categoría:", categoryFilter);
+      result = result.filter(p => 
+        p.categoria.toLowerCase() === categoryFilter.toLowerCase()
+      );
+    }
+    
+    setFilteredProducts(result);
+  }, [nameFilter, minPrice, maxPrice, categoryFilter, products]);
 
   const clearFilters = () => {
     setNameFilter("");
@@ -102,24 +93,34 @@ function Productos() {
     setPriceError("");
   };
 
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Cargando productos...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="error-message">Error: {error}</div>;
-  }
+  // Agregar al carrito en localStorage
+  const handleAddToCart = (product: Product) => {
+    const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const exists = storedCart.find((item: any) => item.id === product.id_producto);
+    if (exists) {
+      const updatedCart = storedCart.map((item: any) =>
+        item.id === product.id_producto
+          ? { ...item, cantidad: item.cantidad + 1 }
+          : item
+      );
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+    } else {
+      const newItem = {
+        id: product.id_producto,
+        nombre: product.nombre_producto,
+        precio: product.precio,
+        cantidad: 1,
+        imagen: product.imagen,
+      };
+      localStorage.setItem("cart", JSON.stringify([...storedCart, newItem]));
+    }
+    alert("Producto agregado al carrito.");
+  };
 
   return (
     <div className="productos-page">
       <div className="productos-header">
         <h1 className="main-title">Nuestros Productos</h1>
-
         <div className="filtros-container">
           <div className="filtro-group">
             <label>
@@ -139,7 +140,6 @@ function Productos() {
                 Precio mínimo($):
                 <input
                   type="number"
-                  placeholder="Ej: $50000"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   min="0"
@@ -153,7 +153,6 @@ function Productos() {
                 Precio máximo($):
                 <input
                   type="number"
-                  placeholder="Ej: $200000"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
                   min={minPrice || "0"}
@@ -162,9 +161,7 @@ function Productos() {
               </label>
             </div>
 
-            {priceError && (
-              <div className="price-error-message">{priceError}</div>
-            )}
+            {priceError && <div className="price-error-message">{priceError}</div>}
           </div>
 
           <div className="filtro-group">
@@ -177,8 +174,8 @@ function Productos() {
                 className="categoria-select"
               >
                 <option value="todos">Todos</option>
-                <option value="puerta">Puertas</option>
-                <option value="moldura">Molduras</option>
+                <option value="puertas">Puertas</option>
+                <option value="molduras">Molduras</option>
               </select>
             </label>
           </div>
@@ -186,37 +183,51 @@ function Productos() {
       </div>
 
       <div className="productos-grid">
-        {Array.isArray(products) && products.length > 0 ? (
-          products.map((product) => {
-            const categoria = product.tipo?.nombre_tipo
-              ? product.tipo.nombre_tipo.toUpperCase()
-              : "OTROS";
-
-            return (
-              <div key={product.id_producto} className="producto-card">
-                <div className="producto-imagen-container">
-                  <div className="producto-categoria-badge">{categoria}</div>
-                  <img
-                    src={
-                      product.tipo?.nombre_tipo && product.imagen
-                        ? `../src/img/${product.tipo.nombre_tipo}/${product.imagen}`
-                        : "/img/puertas/default.jpeg"
-                    }
-                    alt={product.nombre_producto}
-                    onError={(e) => {
-                      e.currentTarget.src = "/img/puertas/default.jpeg";
-                    }}
-                  />
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map(product => (
+            <div key={product.id} className="producto-card">
+              <div className="producto-imagen-container">
+                <div className="producto-categoria-badge">
+                  {product.categoria.toUpperCase()}
                 </div>
-                <div className="producto-info">
-                  <h3>{product.nombre_producto}</h3>
-                  <p className="producto-precio">
-                    ${Number(product.precio).toLocaleString("es-CL")}
-                  </p>
+                {product.quantity <= 0 && (
+                  <div className="producto-agotado">
+                    AGOTADO
+                  </div>
+                )}
+                <img 
+                  src={`../src/img/${product.categoria}/${product.imagen}`} 
+                  alt={product.nombre} 
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
+                  }}
+                  className={product.quantity <= 0 ? 'img-agotada' : ''}
+                />
+              </div>
+              <div className="producto-info">
+                <h3>{product.nombre}</h3>
+                <p className="producto-precio">
+                  ${product.precio.toLocaleString('es-CL')}
+                </p>
+                <p className="producto-stock">
+                  {product.quantity > 0 
+                    ? `Disponibles: ${product.quantity}` 
+                    : 'Producto no disponible'}
+                </p>
+                <div className="producto-acciones">
+                  <button 
+                    className={`add-to-cart-btn ${product.quantity <= 0 ? 'disabled' : ''}`}
+                    onClick={() => addToCart(product)}
+                    disabled={product.quantity <= 0}
+                  >
+                    {product.quantity > 0 
+                      ? <><i className="bi bi-cart-plus"></i> Agregar al carrito</>
+                      : 'Sin stock'}
+                  </button>
                 </div>
               </div>
-            );
-          })
+            </div>
+          ))
         ) : (
           <div className="no-resultados">
             <p>No se encontraron productos con los filtros seleccionados</p>

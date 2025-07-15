@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { TokenService } from './tokenService';
 
 // Función para iniciar sesión con email y contraseña
 export const loginUser = async (email: string, password: string) => {
@@ -8,7 +9,8 @@ export const loginUser = async (email: string, password: string) => {
         password 
       });
     if (response.data.data.token) {
-      localStorage.setItem('token', response.data.data.token);
+      // Usar el nuevo sistema de gestión de tokens
+      TokenService.setToken(response.data.data.token);
     }
     return response.data.data;
   } catch (error: any) {
@@ -44,7 +46,7 @@ export const getGoogleAuthUrl = () => {
 
 export const loginWithGoogle = async () => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE.API_BASE_URL}/auth/google`, { withCredentials: true });
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/auth/google`, { withCredentials: true });
     return response.data;
   } catch (error: any) {
     console.error("Error en Google Login:", error.response?.data ?? error.message);

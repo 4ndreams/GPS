@@ -6,6 +6,9 @@ export async function getProductosService() {
   try {
     const repository = AppDataSource.getRepository(Producto);
     const productos = await repository.find();
+    
+    if (!productos || productos.length === 0) return [null, "No se encontraron productos"];
+
     return [productos, null];
   } catch (error) {
     return [null, "Error al obtener productos"];

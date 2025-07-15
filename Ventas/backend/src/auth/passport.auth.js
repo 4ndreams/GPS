@@ -67,7 +67,7 @@ export function passportOAuthSetup() {
               apellidos: "", // vacío porque Facebook no da apellido separado aquí
               email,
               provider: "facebook",
-              rol: "Cliente", // asignar rol por defecto
+              rol: "cliente", // asignar rol por defecto
             });
           }
 
@@ -104,7 +104,7 @@ export function passportOAuthSetup() {
               apellidos,
               email,
               provider: "google",
-              rol: "Cliente",
+              rol: "cliente",
             });
           }
 

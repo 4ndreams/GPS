@@ -13,12 +13,12 @@ type User = {
 interface NavbarProps {
   readonly user: User;
   readonly onLogout?: () => void;
+  readonly cartItemCount: number;
 }
 
-function Navbar({user, onLogout}: NavbarProps) {
+function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false); 
   const [userMenuOpen, setUserMenuOpen] = useState(false); 
-  const cartItemCount = 1; 
   const userMenuRef = useRef<HTMLDivElement>(null); 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); 
 
@@ -58,7 +58,8 @@ function Navbar({user, onLogout}: NavbarProps) {
           <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
         </button>
 
-        {/* Menú de navegación */}        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
+        {/* Menú de navegación */}
+        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
           <li><Link to="/" className="navbar-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
           <li><Link to="/productos" className="navbar-link" onClick={() => setIsOpen(false)}>Productos</Link></li>
           <li><Link to="/about-us" className="navbar-link" onClick={() => setIsOpen(false)}>Sobre Nosotros</Link></li>
@@ -78,7 +79,7 @@ function Navbar({user, onLogout}: NavbarProps) {
               )}
             </Link>
           </div>
-           <div className="user-menu-wrapper" ref={userMenuRef}>
+          <div className="user-menu-wrapper" ref={userMenuRef}>
             <button
               className="btn btn-outline-primary d-flex align-items-center user-menu-btn"
               onClick={() => setUserMenuOpen((open) => !open)}
@@ -97,14 +98,14 @@ function Navbar({user, onLogout}: NavbarProps) {
                       Perfil
                     </Link>
                     <Link
-                        to="/"
-                        className="dropdown-item"
-                        onClick={() => {
+                      to="/"
+                      className="dropdown-item"
+                      onClick={() => {
                         setUserMenuOpen(false);
                         onLogout && onLogout();
                       }}
-                      >
-                        Cerrar sesión
+                    >
+                      Cerrar sesión
                     </Link>
                   </>
                 ) : (

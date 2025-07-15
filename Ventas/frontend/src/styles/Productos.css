@@ -302,6 +302,61 @@ input[type="number"] {
   text-align: center;
 }
 
+.producto-acciones {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  padding: 0.7rem;
+  background-color: #f01010;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.add-to-cart-btn:hover {
+  background-color: #d00e0e;
+}
+
+.producto-agotado {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(240, 16, 16, 0.8);
+  color: white;
+  text-align: center;
+  padding: 0.5rem;
+  font-weight: bold;
+  z-index: 2;
+}
+
+.img-agotada {
+  filter: grayscale(80%) brightness(0.7);
+}
+
+.producto-stock {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0.3rem 0;
+}
+
+.add-to-cart-btn.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+
 /* Ajustes para responsive jejejeje */
 @media (max-width: 768px) {
   .filtros-container {
