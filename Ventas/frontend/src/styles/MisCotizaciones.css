@@ -3,6 +3,8 @@
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Header */
@@ -37,27 +39,65 @@
 /* Grid de cotizaciones */
 .cotizaciones-container .cotizaciones-grid {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
   gap: 20px;
   margin-top: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Responsive design para diferentes tamaños de pantalla */
-@media (min-width: 768px) {
+@media (min-width: 576px) {
   .cotizaciones-container .cotizaciones-grid {
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: 18px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .cotizaciones-container .cotizaciones-grid {
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)) !important;
+    gap: 20px;
+  }
+}
+
+@media (min-width: 992px) {
+  .cotizaciones-container .cotizaciones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)) !important;
+    gap: 22px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .cotizaciones-container .cotizaciones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)) !important;
+    gap: 24px;
   }
 }
 
 @media (min-width: 1400px) {
   .cotizaciones-container .cotizaciones-grid {
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)) !important;
+    gap: 26px;
+  }
+}
+
+/* Estilos para pantallas muy grandes */
+@media (min-width: 1600px) {
+  .cotizaciones-container .cotizaciones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)) !important;
+    gap: 28px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .cotizaciones-container .cotizaciones-grid {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)) !important;
+    gap: 30px;
+  }
+  
+  .cotizaciones-container {
+    max-width: 1400px;
   }
 }
 
@@ -69,6 +109,11 @@
   overflow: hidden;
   transition: all 0.3s ease;
   border: 1px solid #e9ecef;
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
 }
 
 .cotizacion-card:hover {
@@ -110,12 +155,16 @@
 /* Contenido de la tarjeta */
 .cotizacion-content {
   padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .cotizacion-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  flex: 1;
 }
 
 .info-section {
@@ -361,16 +410,24 @@
   font-size: 0.95rem;
 }
 
+/* Asegurar que el grid siempre tenga un comportamiento uniforme */
+.cotizaciones-container .cotizaciones-grid > * {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Responsive */
 @media (max-width: 1023px) and (min-width: 769px) {
   .cotizaciones-container .cotizaciones-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 18px;
   }
 }
 
 @media (max-width: 768px) {
   .cotizaciones-container .cotizaciones-grid {
     grid-template-columns: 1fr !important;
+    gap: 16px;
   }
   
   .cotizaciones-header {
@@ -415,5 +472,13 @@
   
   .cotizaciones-header h2 {
     font-size: 1.5rem;
+  }
+  
+  .cotizaciones-container .cotizaciones-grid {
+    gap: 12px;
+  }
+  
+  .cotizacion-card {
+    min-height: 350px;
   }
 }

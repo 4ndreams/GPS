@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getImagePath } from '../utils/getImagePath';
 import '../styles/Carrito.css';
 
 interface Product {
@@ -16,18 +16,15 @@ interface CartItem extends Product {
 }
 
 interface CarritoProps {
-  cartItems: CartItem[];
-  removeFromCart: (productId: number, quantity: number) => void;
-  updateQuantity: (productId: number, newQuantity: number) => void;
+  readonly cartItems: CartItem[];
+  readonly removeFromCart: (productId: number) => void;
+  readonly updateQuantity: (productId: number, newQuantity: number) => void;
 }
 
 function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   // Calcular subtotal
   const subtotal = cartItems.reduce(
-    (total, item) => total + (item.precio * item.quantity),
+    (total, item) => total + ((item.precio || 0) * (item.quantity || 0)),
     0
   );
 
@@ -36,19 +33,6 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
 
   // Calcular total
   const total = subtotal + iva;
-
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Cargando carrito...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="error-message">Error: {error}</div>;
-  }
 
   return (
     <div className="carrito-page">
@@ -68,7 +52,7 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
               <div key={item.id} className="carrito-item">
                 <div className="item-imagen">
                   <img 
-                    src={`../src/img/${item.categoria}/${item.imagen}`} 
+                    src={getImagePath(`${item.categoria}/${item.imagen}`)} 
                     alt={item.nombre} 
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
@@ -84,12 +68,12 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
                   
                   <div className="item-cantidad">
                     <button 
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                       disabled={item.quantity <= 1}
                     >
                       -
                     </button>
-                    <span>{item.quantity}</span>
+                    <span>{item.quantity || 0}</span>
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     >
@@ -104,7 +88,7 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
                 
                 <button 
                   className="item-eliminar"
-                  onClick={() => removeFromCart(item.id, item.quantity)}
+                  onClick={() => removeFromCart(item.id)}
                 >
                   <i className="bi bi-trash"></i>
                 </button>

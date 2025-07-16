@@ -513,19 +513,12 @@ function Cotizar() {
       
       // Logging para debugging
       console.log('Enviando cotización con tipo_puerta:', cotizacionData.tipo_puerta);
-      console.log('Usuario logueado:', isLoggedIn);
-      console.log('Datos completos a enviar:', cotizacionData);
 
       // Para usuarios no logueados, agregar campos adicionales
       if (!isLoggedIn) {
         cotizacionData.nombre_apellido_contacto = formData.nombre_apellido_contacto;
         cotizacionData.rut_contacto = formData.rut_contacto;
         cotizacionData.email_contacto = formData.email_contacto;
-        console.log('Agregando campos de contacto para usuario no logueado');
-        console.log('Datos finales con contacto:', cotizacionData);
-      } else {
-        console.log('Usuario logueado - omitiendo campos de contacto opcionales');
-        console.log('Datos finales sin contacto:', cotizacionData);
       }
 
       const result = await crearCotizacion(cotizacionData);

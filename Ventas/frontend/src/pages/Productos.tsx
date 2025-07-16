@@ -1,41 +1,26 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Productos.css';
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { getImagePath } from "../utils/getImagePath";
 import "../styles/Productos.css";
 
 interface Product {
-  id: number;
-  nombre: string;
+  id_producto: number;
+  nombre_producto: string;
   precio: number;
   imagen?: string;
   tipo?: { nombre_tipo: string };
-  imagen: string;
-  categoria: string;
-  quantity: number;
 }
 
-interface ProductosProps {
-  products: Product[];
-  addToCart: (product: Product) => void;
-}
-
-function Productos({ products, addToCart }: ProductosProps) {
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
-  const [nameFilter, setNameFilter] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [priceError, setPriceError] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('todos');
-  const [loading, setLoading] = useState(false);
+function Productos() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Actualizar productos filtrados cuando cambian los productos o los filtros
-  useEffect(() => {
-    setFilteredProducts(products);
-  }, [products]);
+  const [nameFilter, setNameFilter] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("todos");
+  const [priceError, setPriceError] = useState("");
 
   const validatePrices = () => {
     if (minPrice && maxPrice) {
@@ -51,39 +36,30 @@ function Productos({ products, addToCart }: ProductosProps) {
   };
 
   useEffect(() => {
-    if (!validatePrices()) return;
+    const fetchProducts = async () => {
+      if (!validatePrices()) return;
+      try {
+        setLoading(true);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products`, {
+          params: {
+            nombre: nameFilter || undefined,
+            minPrecio: minPrice || undefined,
+            maxPrecio: maxPrice || undefined,
+            categoria: categoryFilter !== "todos" ? categoryFilter : undefined,
+          },
+        });
 
-    let result = [...products];
-    
-    if (nameFilter) {
-      result = result.filter(p => 
-        p.nombre.toLowerCase().includes(nameFilter.toLowerCase())
-      );
-    }
-    
-    if (minPrice) {
-      const min = Number(minPrice);
-      if (!isNaN(min) && min > 0) {
-        result = result.filter(p => p.precio >= min);
+        setProducts(response.data.data);
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+        setError("Error al cargar productos");
+      } finally {
+        setLoading(false);
       }
-    }
-    
-    if (maxPrice) {
-      const max = Number(maxPrice);
-      if (!isNaN(max) && max > 0) {
-        result = result.filter(p => p.precio <= max);
-      }
-    }
-    
-    if (categoryFilter !== 'todos') {
-      console.log("Filtrando por categoría:", categoryFilter);
-      result = result.filter(p => 
-        p.categoria.toLowerCase() === categoryFilter.toLowerCase()
-      );
-    }
-    
-    setFilteredProducts(result);
-  }, [nameFilter, minPrice, maxPrice, categoryFilter, products]);
+    };
+
+    fetchProducts();
+  }, [nameFilter, minPrice, maxPrice, categoryFilter]);
 
   const clearFilters = () => {
     setNameFilter("");
@@ -91,30 +67,6 @@ function Productos({ products, addToCart }: ProductosProps) {
     setMaxPrice("");
     setCategoryFilter("todos");
     setPriceError("");
-  };
-
-  // Agregar al carrito en localStorage
-  const handleAddToCart = (product: Product) => {
-    const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const exists = storedCart.find((item: any) => item.id === product.id_producto);
-    if (exists) {
-      const updatedCart = storedCart.map((item: any) =>
-        item.id === product.id_producto
-          ? { ...item, cantidad: item.cantidad + 1 }
-          : item
-      );
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-    } else {
-      const newItem = {
-        id: product.id_producto,
-        nombre: product.nombre_producto,
-        precio: product.precio,
-        cantidad: 1,
-        imagen: product.imagen,
-      };
-      localStorage.setItem("cart", JSON.stringify([...storedCart, newItem]));
-    }
-    alert("Producto agregado al carrito.");
   };
 
   return (
@@ -174,8 +126,8 @@ function Productos({ products, addToCart }: ProductosProps) {
                 className="categoria-select"
               >
                 <option value="todos">Todos</option>
-                <option value="puertas">Puertas</option>
-                <option value="molduras">Molduras</option>
+                <option value="puerta">Puertas</option>
+                <option value="moldura">Molduras</option>
               </select>
             </label>
           </div>
@@ -183,59 +135,57 @@ function Productos({ products, addToCart }: ProductosProps) {
       </div>
 
       <div className="productos-grid">
-        {filteredProducts.length > 0 ? (
-          filteredProducts.map(product => (
-            <div key={product.id} className="producto-card">
-              <div className="producto-imagen-container">
-                <div className="producto-categoria-badge">
-                  {product.categoria.toUpperCase()}
-                </div>
-                {product.quantity <= 0 && (
-                  <div className="producto-agotado">
-                    AGOTADO
+        {(() => {
+          if (loading) {
+            return (
+              <div className="loading-container">
+                <div className="loading-spinner"></div>
+                <p>Cargando productos...</p>
+              </div>
+            );
+          }
+          
+          if (error) {
+            return <div className="error-message">Error: {error}</div>;
+          }
+          
+          if (products.length === 0) {
+            return (
+              <div className="no-resultados">
+                <p>No se encontraron productos con los filtros seleccionados</p>
+                <button className="clear-filters-btn" onClick={clearFilters}>
+                  Limpiar todos los filtros
+                </button>
+              </div>
+            );
+          }
+          
+          return products.map((product) => {
+            const tipo = product.tipo?.nombre_tipo || "otros";
+            return (
+              <div key={product.id_producto} className="producto-card">
+                <Link to={`/product/${product.id_producto}`} className="producto-link">
+                  <div className="producto-imagen-container">
+                    <div className="producto-categoria-badge">{tipo.toUpperCase()}</div>
+                    <img
+                      src={getImagePath(`${tipo}/${product.imagen}`)}
+                      alt={product.nombre_producto}
+                      onError={(e) => {
+                        e.currentTarget.src = "/img/puertas/default.jpeg";
+                      }}
+                    />
                   </div>
-                )}
-                <img 
-                  src={`../src/img/${product.categoria}/${product.imagen}`} 
-                  alt={product.nombre} 
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
-                  }}
-                  className={product.quantity <= 0 ? 'img-agotada' : ''}
-                />
+                  <div className="producto-info">
+                    <h3>{product.nombre_producto}</h3>
+                    <p className="producto-precio">
+                      ${Number(product.precio).toLocaleString("es-CL")}
+                    </p>
+                  </div>
+                </Link>
               </div>
-              <div className="producto-info">
-                <h3>{product.nombre}</h3>
-                <p className="producto-precio">
-                  ${product.precio.toLocaleString('es-CL')}
-                </p>
-                <p className="producto-stock">
-                  {product.quantity > 0 
-                    ? `Disponibles: ${product.quantity}` 
-                    : 'Producto no disponible'}
-                </p>
-                <div className="producto-acciones">
-                  <button 
-                    className={`add-to-cart-btn ${product.quantity <= 0 ? 'disabled' : ''}`}
-                    onClick={() => addToCart(product)}
-                    disabled={product.quantity <= 0}
-                  >
-                    {product.quantity > 0 
-                      ? <><i className="bi bi-cart-plus"></i> Agregar al carrito</>
-                      : 'Sin stock'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="no-resultados">
-            <p>No se encontraron productos con los filtros seleccionados</p>
-            <button className="clear-filters-btn" onClick={clearFilters}>
-              Limpiar todos los filtros
-            </button>
-          </div>
-        )}
+            );
+          });
+        })()}
       </div>
     </div>
   );
