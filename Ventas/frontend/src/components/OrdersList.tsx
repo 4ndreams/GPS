@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../styles/OrdersList.css";
+import "@styles/OrdersList.css";
 
 interface VentaProduct {
   id: number;
@@ -71,7 +71,7 @@ const OrdersList: React.FC = () => {
             <div className="order-products">
               {venta.products.map((p) => (
                 <div key={p.id} className="order-product-item">
-                  <img src={`../src/img/${p.id <= 5 ? 'puertas' : 'molduras'}/${p.imagen}`} alt={p.nombre} />
+                  <img src={`@src/img/${p.id <= 5 ? 'puertas' : 'molduras'}/${p.imagen}`} alt={p.nombre} />
                   <p className="product-name">{p.nombre}</p>
                   <p className="product-qty">x{p.cantidad}</p>
                 </div>

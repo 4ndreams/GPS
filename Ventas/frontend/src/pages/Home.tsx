@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import TerplacFoto1 from '../assets/TerplacFoto1.png';
-import '../styles/Home.css';
-import '../styles/animations.css';
-import Notification from '../components/Notification';
+import TerplacFoto1 from '@assets/TerplacFoto1.png';
+import '@styles/Home.css';
+import '@styles/animations.css';
+import Notification from '@components/Notification';
 
 
 function Home() {

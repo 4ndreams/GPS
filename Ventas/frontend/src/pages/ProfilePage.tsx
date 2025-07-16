@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import ProfileInfo from "../components/ProfileInfo";
-import UsersTable from "../components/UserTable";
-import UserInfo from "../components/UserInfo";
-import ProductManagement from "../components/ProductManagement";
-import MisCotizaciones from "../components/MisCotizaciones.tsx";
-import { TokenService } from '../services/tokenService';
-import "../styles/ProfileInfo.css";
-import "../styles/animations.css";
+import ProfileInfo from "@components/ProfileInfo";
+import UsersTable from "@components/UserTable";
+import UserInfo from "@components/UserInfo";
+import ProductManagement from "@components/ProductManagement";
+import MisCotizaciones from "@components/MisCotizaciones.tsx";
+import { TokenService } from '@services/tokenService';
+import "@styles/ProfileInfo.css";
+import "@styles/animations.css";
 
 const dinamicTabs = (role: string) => {
   if (role.toLowerCase() === "administrador") {

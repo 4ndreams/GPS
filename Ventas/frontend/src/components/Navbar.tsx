@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo_terplac.svg';
-import logoMobile from '../assets/TERPLAC_T.png';
-import '../styles/Navbar.css';
+import logo from '@assets/logo_terplac.svg';
+import logoMobile from '@assets/TERPLAC_T.png';
+import '@styles/Navbar.css';
 
 type User = {
   nombre: string;

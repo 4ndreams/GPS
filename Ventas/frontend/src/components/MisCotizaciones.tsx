@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { obtenerMisCotizaciones, type CotizacionResponse } from '../services/cotizarService';
-import '../styles/MisCotizaciones.css';
+import { obtenerMisCotizaciones, type CotizacionResponse } from '@services/cotizarService';
+import '@styles/MisCotizaciones.css';
 
 const MisCotizaciones: React.FC = () => {
   const [cotizaciones, setCotizaciones] = useState<CotizacionResponse[]>([]);

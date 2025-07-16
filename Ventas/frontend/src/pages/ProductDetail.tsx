@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getImagePath } from "../utils/getImagePath";
-import "../styles/ProductDetail.css";
+import { getImagePath } from "@utils/getImagePath";
+import "@styles/ProductDetail.css";
 
 interface Producto {
   id_producto: number;

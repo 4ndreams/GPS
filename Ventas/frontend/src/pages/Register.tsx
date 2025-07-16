@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Notification from "../components/Notification";
-import "../styles/Register.css";
-import "../styles/animations.css";
-import puertaImg from "../assets/TerplacFoto1.png";
-import { registerUser } from "../services/authService";
-import { formatRut, validateField } from "../utils/validations";
+import Notification from "@components/Notification";
+import "@styles/Register.css";
+import "@styles/animations.css";
+import puertaImg from "@assets/TerplacFoto1.png";
+import { registerUser } from "@services/authService";
+import { formatRut, validateField } from "@utils/validations";
 
 function Register() {
   const [formData, setFormData] = useState({

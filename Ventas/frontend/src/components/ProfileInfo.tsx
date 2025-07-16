@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import "../styles/ProfileInfo.css";
-import { getUserProfile } from "../services/userService.ts";
+import "@styles/ProfileInfo.css";
+import { getUserProfile } from "@services/userService.ts";
 import ModalProfile from "./ModalProfile";
-import { updateUserProfile } from "../services/userService"; 
+import { updateUserProfile } from "@services/userService"; 
 import Notification from "./Notification"; 
 
 

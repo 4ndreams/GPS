@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import "../styles/modal.css";
-import { formatRut, validateField } from "../utils/validations";
+import "@styles/modal.css";
+import { formatRut, validateField } from "@utils/validations";
 
 type ModalProfileProps = {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { getImagePath } from '../utils/getImagePath';
-import '../styles/Carrito.css';
+import { getImagePath } from '@utils/getImagePath';
+import '@styles/Carrito.css';
 
 interface Product {
   id: number;
