@@ -3,17 +3,26 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Google from 'expo-auth-session/providers/google';
 import styles from '../../styles/perfilStyles'; 
 import { useUsuario } from '../../contexts/UsuarioContext'; 
+import { useAuth } from '../../contexts/AuthContext';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { usuario, cambiarPerfil, limpiarPerfil } = useUsuario();
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
+  const [, , promptAsync] = Google.useAuthRequest({
     androidClientId: '896102954860-hu7i30kdiughklr1835bcc34ehpg47g5.apps.googleusercontent.com',
     webClientId: '896102954860-8h3bvdiv6141jhctsegtf55nmv8lam0b.apps.googleusercontent.com',
   });
 
   const seleccionarPerfil = async (perfil: 'fabrica' | 'tienda', nombre: string) => {
     await cambiarPerfil(perfil, nombre);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/login');
   };
         
 
@@ -30,6 +39,19 @@ export default function ProfileScreen() {
         <View style={styles.innerContainer}>
         <Text style={[styles.title, {marginTop: -100}]}>Perfil de Usuario</Text>
         <Text style={styles.subtitle}>Gestiona tu información personal</Text>
+        
+        {/* Información del usuario actual */}
+        {user && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Usuario Actual</Text>
+            <Text style={styles.sectionText}>
+              {user.name || 'Usuario'}
+            </Text>
+            <Text style={styles.sectionText}>
+              {user.email || 'No email'}
+            </Text>
+          </View>
+        )}
         
         {/* Sección de Selector de Perfiles */}
         <View style={styles.section}>
@@ -97,51 +119,69 @@ export default function ProfileScreen() {
           <Text style={styles.separadorText}>Autenticación</Text>
         </View>
 
-        <TextInput 
-          placeholder="example@gmail.com"
-          style={styles.Textinput}
-          placeholderTextColor="#999"
-          />
-        <TextInput 
-          placeholder="Contraseña"
-          style={styles.Textinput}
-          placeholderTextColor="#999"
-          secureTextEntry={true}
-          />
-        <Text style={styles.texto}>
-          ¿Tienes problemas para iniciar sesión?
-        </Text>
-
-        <TouchableOpacity 
-          style={styles.botonIniciar}
-          >
-            <Text style={styles.botonTexto}>Iniciar sesión</Text>
-        </TouchableOpacity>
-    
-      <Text style={styles.texto}>
-        ¿No tienes cuenta? <Text style={{ color: 'blue' }}>Regístrate</Text>
-      </Text>     
-
-      <Pressable
-        onPress={() => {
-          promptAsync().catch((e) => {
-            console.error('Error al iniciar sesión: ', e);
-        })}}
-        >   
-      <View style={styles.section}>
-        <Ionicons name="person-circle-outline" size={32} color="#DC2626" style={styles.icon} />
-        <View>
-            
-          <Text style={styles.sectionTitle}>Iniciar Sesión</Text>
-          <Text style={styles.sectionText}>
-            Login con Google
- 
+        {/* Campos de login - solo mostrar si no está autenticado */}
+        {!user && (
+          <>
+            <TextInput 
+              placeholder="example@gmail.com"
+              style={styles.Textinput}
+              placeholderTextColor="#999"
+            />
+            <TextInput 
+              placeholder="Contraseña"
+              style={styles.Textinput}
+              placeholderTextColor="#999"
+              secureTextEntry={true}
+            />
+            <Text style={styles.texto}>
+              ¿Tienes problemas para iniciar sesión?
             </Text>
-            
-        </View>
+
+            <TouchableOpacity 
+              style={styles.botonIniciar}
+            >
+              <Text style={styles.botonTexto}>Iniciar sesión</Text>
+            </TouchableOpacity>
         
-      </View>  
-      </Pressable>
+            <Text style={styles.texto}>
+              ¿No tienes cuenta? <Text style={{ color: 'blue' }}>Regístrate</Text>
+            </Text>     
+
+            <Pressable
+              onPress={() => {
+                promptAsync().catch((e) => {
+                  console.error('Error al iniciar sesión: ', e);
+                })}}
+            >   
+              <View style={styles.section}>
+                <Ionicons name="person-circle-outline" size={32} color="#DC2626" style={styles.icon} />
+                <View>
+                  <Text style={styles.sectionTitle}>Iniciar Sesión</Text>
+                  <Text style={styles.sectionText}>
+                    Login con Google
+                  </Text>
+                </View>
+              </View>  
+            </Pressable>
+          </>
+        )}
+
+        {/* Botón de logout - solo mostrar si está autenticado */}
+        {user && (
+          <TouchableOpacity 
+            style={[styles.botonIniciar, { 
+              backgroundColor: '#DC2626', 
+              marginTop: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }]}
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Text style={styles.botonTexto}>Cerrar Sesión</Text>
+          </TouchableOpacity>
+        )}
        </View>
 </View>
     );
