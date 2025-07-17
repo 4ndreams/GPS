@@ -129,6 +129,7 @@ export async function verifyEmailService(token) {
     try {
       payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
     } catch (err) {
+      console.error("Error al verificar el token de recuperación de contraseña:", err);
       return [null, "Token inválido o expirado"];
     }
 
@@ -160,7 +161,7 @@ export async function recoverPasswordService(token, newPassword) {
     try {
       payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
     } catch (err) {
-      return [null, "Token inválido o expirado"];
+      return ["Error: Token inválido o expirado, " + err];
     }
 
     const user = await userRepository.findOne({ where: {email: payload.email } });
