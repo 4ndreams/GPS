@@ -6,6 +6,7 @@ interface AuthUser {
   email: string;
   name: string;
   avatar?: string;
+  perfil?: 'fabrica' | 'tienda' | 'admin';
 }
 
 interface AuthContextType {
@@ -36,7 +37,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const userData = await AsyncStorage.getItem('auth_user');
       if (userData) {
-        setUser(JSON.parse(userData));
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
       }
     } catch (error) {
       console.error('Error checking auth state:', error);
@@ -58,7 +60,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id: '1',
           email: email,
           name: 'Administrador',
-          avatar: 'https://ui-avatars.com/api/?name=Admin&background=DC2626&color=fff'
+          avatar: 'https://ui-avatars.com/api/?name=Admin&background=DC2626&color=fff',
+          perfil: 'admin'
         };
         
         await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
@@ -69,7 +72,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id: '2',
           email: email,
           name: 'Operador Fábrica',
-          avatar: 'https://ui-avatars.com/api/?name=Fabrica&background=DC2626&color=fff'
+          avatar: 'https://ui-avatars.com/api/?name=Fabrica&background=DC2626&color=fff',
+          perfil: 'fabrica'
         };
         
         await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
@@ -80,7 +84,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id: '3',
           email: email,
           name: 'Vendedora Tienda',
-          avatar: 'https://ui-avatars.com/api/?name=Tienda&background=DC2626&color=fff'
+          avatar: 'https://ui-avatars.com/api/?name=Tienda&background=DC2626&color=fff',
+          perfil: 'tienda'
         };
         
         await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
