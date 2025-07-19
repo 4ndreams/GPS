@@ -1,6 +1,18 @@
 import jwt from "jsonwebtoken";
 import transporter from "../config/mailer.config.js";
-import { HOST, PORT, ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
+import { ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
+
+// Función auxiliar para mostrar el tipo de puerta de forma legible
+function formatTipoPuerta(tipo_puerta) {
+  switch (tipo_puerta) {
+    case 'puertaPaso':
+      return 'Puerta de paso';
+    case 'puertaCloset':
+      return 'Puerta de closet';
+    default:
+      return 'No especificado';
+  }
+}
 
 export async function sendLoginAlertEmail(email) {
   const token = jwt.sign({ email }, ACCESS_TOKEN_SECRET, { expiresIn: "2m" });
@@ -121,6 +133,237 @@ export async function sendVerificationEmail(to, token) {
                 <tr>
                   <td style="background: #1a1a1a; padding: 1.2rem 2.5rem; border-top: 1px solid #222; color: #ccc; font-size: 0.95rem; text-align: center;">
                     Si no creaste una cuenta, puedes ignorar este correo.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; padding: 1rem 0 0.5rem 0;">
+                    <span style="color: #EC221F; font-size: 1.2rem; font-weight: bold;">TERPLAC</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `
+  });
+}
+
+export async function sendCotizacionConfirmationEmail(cotizacion) {
+  const { 
+    id_producto_personalizado, 
+    nombre_apellido_contacto, 
+    email_contacto, 
+    telefono_contacto,
+    medida_ancho, 
+    medida_alto, 
+    medida_largo,
+    tipo_puerta,
+    mensaje,
+    estado,
+    material, 
+    relleno,
+    usuario
+  } = cotizacion;
+
+  // Determinar el email y nombre del destinatario
+  const destinatarioEmail = email_contacto || usuario?.email;
+  const destinatarioNombre = nombre_apellido_contacto || `${usuario?.nombre} ${usuario?.apellido}`;
+  
+  if (!destinatarioEmail) {
+    throw new Error('No se pudo determinar el email del destinatario');
+  }
+
+  await transporter.sendMail({
+    to: destinatarioEmail,
+    subject: `Confirmación de Cotización #${id_producto_personalizado} - TERPLAC`,
+    html: `
+      <div style="font-family: 'Inter', Arial, sans-serif; background: #fff; padding: 0; margin: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background: #fff; padding: 0; margin: 0;">
+          <tr>
+            <td align="center">
+              <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 2rem auto; background: #111; border-radius: 12px; box-shadow: 0 4px 24px rgba(236,34,31,0.08); overflow: hidden;">
+                <tr>
+                  <td style="background: #EC221F; padding: 2rem 0;">
+                    <h1 style="color: #fff; font-size: 2.2rem; margin: 0; font-weight: 700; letter-spacing: 1px; text-align: center;">TERPLAC</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 2rem 2.5rem 1rem 2.5rem;">
+                    <h2 style="color: #fff; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; text-align: center;">¡Cotización Recibida!</h2>
+                    <p style="color: #fff; font-size: 1.1rem; margin-bottom: 1.5rem; text-align: center;">
+                      Hola ${destinatarioNombre}, hemos recibido tu solicitud de cotización y la estamos procesando.
+                    </p>
+                    
+                    <div style="background: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0;">
+                      <h3 style="color: #EC221F; font-size: 1.2rem; margin: 0 0 1rem 0; font-weight: 600;">Detalles de tu Cotización #${id_producto_personalizado}</h3>
+                      
+                      <table style="width: 100%; color: #ccc; font-size: 0.95rem;">
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Tipo de puerta:</td>
+                          <td style="padding: 0.3rem 0;">${formatTipoPuerta(tipo_puerta)}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Material:</td>
+                          <td style="padding: 0.3rem 0;">${material?.nombre_material || 'No especificado'}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Relleno:</td>
+                          <td style="padding: 0.3rem 0;">${relleno?.nombre_relleno || 'No especificado'}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
+                          <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Estado:</td>
+                          <td style="padding: 0.3rem 0; color: #EC221F; font-weight: 600;">${estado}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Teléfono:</td>
+                          <td style="padding: 0.3rem 0;">${telefono_contacto}</td>
+                        </tr>
+                        ${mensaje ? `
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff; vertical-align: top;">Mensaje:</td>
+                          <td style="padding: 0.3rem 0;">${mensaje}</td>
+                        </tr>
+                        ` : ''}
+                      </table>
+                    </div>
+                    
+                    <p style="color: #ccc; font-size: 0.98rem; margin-bottom: 0.5rem; text-align: center;">
+                      Te contactaremos pronto para proporcionarte más detalles sobre tu cotización.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #1a1a1a; padding: 1.2rem 2.5rem; border-top: 1px solid #222; color: #ccc; font-size: 0.95rem; text-align: center;">
+                    Si tienes alguna consulta, no dudes en contactarnos.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; padding: 1rem 0 0.5rem 0;">
+                    <span style="color: #EC221F; font-size: 1.2rem; font-weight: bold;">TERPLAC</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `
+  });
+}
+
+export async function sendCotizacionStatusChangeEmail(cotizacion, estadoAnterior) {
+  const { 
+    id_producto_personalizado, 
+    nombre_apellido_contacto, 
+    email_contacto, 
+    telefono_contacto,
+    medida_ancho, 
+    medida_alto, 
+    medida_largo,
+    tipo_puerta,
+    estado,
+    material, 
+    relleno,
+    usuario
+  } = cotizacion;
+
+  // Determinar el email y nombre del destinatario
+  const destinatarioEmail = email_contacto || usuario?.email;
+  const destinatarioNombre = nombre_apellido_contacto || `${usuario?.nombre} ${usuario?.apellido}`;
+  
+  if (!destinatarioEmail) {
+    throw new Error('No se pudo determinar el email del destinatario');
+  }
+
+  // Configurar el mensaje según el nuevo estado
+  let statusMessage = '';
+  let statusColor = '#EC221F';
+  let actionMessage = '';
+
+  switch (estado) {
+    case 'En Proceso':
+      statusMessage = 'Tu cotización está ahora en proceso';
+      actionMessage = 'Nuestro equipo está trabajando en los detalles de tu solicitud.';
+      statusColor = '#FFA500';
+      break;
+    case 'Lista para retirar':
+      statusMessage = 'Tu cotización está lista';
+      actionMessage = 'Puedes contactarnos para coordinar la entrega o más información.';
+      statusColor = '#28a745';
+      break;
+    default:
+      statusMessage = `El estado de tu cotización ha cambiado a: ${estado}`;
+      actionMessage = 'Te mantendremos informado sobre cualquier actualización.';
+  }
+
+  await transporter.sendMail({
+    to: destinatarioEmail,
+    subject: `Actualización de Cotización #${id_producto_personalizado} - ${estado} - TERPLAC`,
+    html: `
+      <div style="font-family: 'Inter', Arial, sans-serif; background: #fff; padding: 0; margin: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background: #fff; padding: 0; margin: 0;">
+          <tr>
+            <td align="center">
+              <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 2rem auto; background: #111; border-radius: 12px; box-shadow: 0 4px 24px rgba(236,34,31,0.08); overflow: hidden;">
+                <tr>
+                  <td style="background: #EC221F; padding: 2rem 0;">
+                    <h1 style="color: #fff; font-size: 2.2rem; margin: 0; font-weight: 700; letter-spacing: 1px; text-align: center;">TERPLAC</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 2rem 2.5rem 1rem 2.5rem;">
+                    <h2 style="color: #fff; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; text-align: center;">¡Actualización de Cotización!</h2>
+                    <p style="color: #fff; font-size: 1.1rem; margin-bottom: 1.5rem; text-align: center;">
+                      Hola ${destinatarioNombre}, ${statusMessage}.
+                    </p>
+                    
+                    <div style="background: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0;">
+                      <h3 style="color: #EC221F; font-size: 1.2rem; margin: 0 0 1rem 0; font-weight: 600;">Cotización #${id_producto_personalizado}</h3>
+                      
+                      <div style="background: #222; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border-left: 4px solid ${statusColor};">
+                        <p style="color: #fff; margin: 0; font-weight: 600; font-size: 1rem;">
+                          Estado: <span style="color: ${statusColor};">${estado}</span>
+                        </p>
+                        ${estadoAnterior ? `<p style="color: #999; margin: 0.5rem 0 0 0; font-size: 0.9rem;">Estado anterior: ${estadoAnterior}</p>` : ''}
+                      </div>
+                      
+                      <table style="width: 100%; color: #ccc; font-size: 0.95rem;">
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Tipo de puerta:</td>
+                          <td style="padding: 0.3rem 0;">${formatTipoPuerta(tipo_puerta)}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Material:</td>
+                          <td style="padding: 0.3rem 0;">${material?.nombre_material || 'No especificado'}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Relleno:</td>
+                          <td style="padding: 0.3rem 0;">${relleno?.nombre_relleno || 'No especificado'}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
+                          <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Teléfono:</td>
+                          <td style="padding: 0.3rem 0;">${telefono_contacto}</td>
+                        </tr>
+                      </table>
+                    </div>
+                    
+                    <p style="color: #ccc; font-size: 0.98rem; margin-bottom: 0.5rem; text-align: center;">
+                      ${actionMessage}
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #1a1a1a; padding: 1.2rem 2.5rem; border-top: 1px solid #222; color: #ccc; font-size: 0.95rem; text-align: center;">
+                    Si tienes alguna consulta sobre tu cotización, no dudes en contactarnos.
                   </td>
                 </tr>
                 <tr>

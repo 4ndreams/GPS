@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import "../styles/ProfileInfo.css";
-import { getUserProfile } from "../services/userService.ts";
+import "@styles/ProfileInfo.css";
+import { getUserProfile } from "@services/userService.ts";
 import ModalProfile from "./ModalProfile";
-import { updateUserProfile } from "../services/userService"; 
+import { updateUserProfile } from "@services/userService"; 
 import Notification from "./Notification"; 
 
 
@@ -38,7 +38,8 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditData({ ...editData!, [e.target.name]: e.target.value });
+    if (!editData) return;
+    setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
@@ -49,7 +50,6 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
       nombre: editData.nombre,
       apellidos: editData.apellidos,
       email: editData.email,
-      telefono: editData.telefono,
       rut: editData.rut,
       /*aqui van mas weas pa los campos*/ 
     };

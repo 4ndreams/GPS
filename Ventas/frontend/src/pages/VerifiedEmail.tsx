@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { verifyEmail } from "../services/authService";
-import "../styles/VerifiedEmail.css";
+import "@styles/VerifiedEmail.css";
 
 const VerifiedEmail: React.FC = () => {
   const [searchParams] = useSearchParams();

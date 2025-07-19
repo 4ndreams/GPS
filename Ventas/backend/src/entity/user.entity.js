@@ -108,6 +108,7 @@ const UsuarioSchema = new EntitySchema({
             inverseSide: "usuario", 
         },
     },
+    
     indices: [
         {
             name: "idx_usuario_id",

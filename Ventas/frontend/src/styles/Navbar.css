@@ -254,13 +254,25 @@
   }
 }
 
-
-
   .navbar-icons .badge {
     right: 1.2rem;
     top: 2.3rem;
   }
 
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #f01010;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* Disminuir el tamaño del logo en pantallas más pequeñas */
 @media (max-width: 768px) {

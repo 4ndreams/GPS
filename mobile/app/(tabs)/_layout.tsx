@@ -69,8 +69,17 @@ export default function TabLayout() {
         headerShown: false,
       }}
     >
+      {/* Pantalla index invisible para redirección */}
       <Tabs.Screen
         name="index"
+        options={{
+          title: '',
+          tabBarButton: () => null, // Ocultar del tab bar
+        }}
+      />
+      
+      <Tabs.Screen
+        name="home"
         options={{
           title: 'Inicio',
           tabBarIcon: renderHomeIcon,

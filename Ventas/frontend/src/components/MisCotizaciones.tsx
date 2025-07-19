@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { obtenerMisCotizaciones, type CotizacionResponse } from '../services/cotizarService';
-import '../styles/MisCotizaciones.css';
+import { obtenerMisCotizaciones, type CotizacionResponse } from '@services/cotizarService';
+import '@styles/MisCotizaciones.css';
 
 const MisCotizaciones: React.FC = () => {
   const [cotizaciones, setCotizaciones] = useState<CotizacionResponse[]>([]);
@@ -67,6 +67,10 @@ const MisCotizaciones: React.FC = () => {
         return '#f39c12'; // Naranja
       case 'Lista para retirar':
         return '#27ae60'; // Verde
+      case 'Cancelada':
+        return '#e74c3c'; // Rojo
+      case 'Producto Entregado':
+        return '#2ecc71'; // Verde más brillante
       default:
         return '#95a5a6'; // Gris
     }
@@ -80,6 +84,10 @@ const MisCotizaciones: React.FC = () => {
         return 'bi-gear-fill';
       case 'Lista para retirar':
         return 'bi-check-circle-fill';
+      case 'Cancelada':
+        return 'bi-x-circle-fill';
+      case 'Producto Entregado':
+        return 'bi-truck';
       default:
         return 'bi-question-circle';
     }
@@ -96,7 +104,18 @@ const MisCotizaciones: React.FC = () => {
   };
 
   const formatearMedidas = (ancho: number, alto: number, largo: number): string => {
-    return `${ancho} × ${alto} × ${largo} cm`;
+    return `${ancho} cm × ${alto} cm × ${largo} mm`;
+  };
+
+  const formatearTipoPuerta = (tipo: string): string => {
+    switch (tipo) {
+      case 'puertaPaso':
+        return 'Puerta de paso';
+      case 'puertaCloset':
+        return 'Puerta de closet';
+      default:
+        return 'Tipo no especificado';
+    }
   };
 
   if (loading) {
@@ -238,6 +257,12 @@ const MisCotizaciones: React.FC = () => {
 
             {/* Contenido principal */}
             <div className="cotizacion-content">
+              <div className="cotizacion-details">
+                <h3 className="cotizacion-title">
+                  <i className="bi bi-door-open-fill"></i>
+                  {formatearTipoPuerta(cotizacion.tipo_puerta)}
+                </h3>
+                </div>
               <div className="cotizacion-info">
                 <div className="info-section">
                   <h4>

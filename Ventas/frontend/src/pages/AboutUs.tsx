@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import '../styles/AboutUs.css';
-import '../styles/animations.css';
+import '@styles/AboutUs.css';
+import '@styles/animations.css';
 // Import images
-import salaVentas from '../assets/sala_ventas.jpg';
-import salaVentas2 from '../assets/sala_ventas2.jpg';
-import bodegaTerplac from '../assets/bodega_terplac.jpg';
-import logoTerplac from '../assets/logo_terplac.svg';
+import salaVentas from '@assets/sala_ventas.jpg';
+import salaVentas2 from '@assets/sala_ventas2.jpg';
+import bodegaTerplac from '@assets/bodega_terplac.jpg';
+import logoTerplac from '@assets/logo_terplac.svg';
 
 const AboutUs: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);

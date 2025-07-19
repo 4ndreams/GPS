@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import TerplacFoto1 from '../assets/TerplacFoto1.png';
-import '../styles/Home.css';
-import '../styles/animations.css';
-import Notification from '../components/Notification';
+import TerplacFoto1 from '@assets/TerplacFoto1.png';
+import '@styles/Home.css';
+import '@styles/animations.css';
 
 
 function Home() {
@@ -10,7 +9,7 @@ function Home() {
 
   const cardRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
   const [visibleCards, setVisibleCards] = useState([false, false]);
-  const [showNotif, setShowNotif] = useState(false);
+  //const [showNotif, setShowNotif] = useState(false);
 
   const nosotrosRefs = [
     useRef<HTMLDivElement>(null),

@@ -48,11 +48,13 @@ button:focus,
 }
 
 .profile-content {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
   padding: 2rem;
   width: 100%;
+  justify-items: center;
+  align-content: start;
 }
 
 .profile-info {
@@ -90,7 +92,6 @@ button:focus,
   font-weight: 700;
   flex: 1;
 }
-/* ...existing code... */
 
 
 .profile-info-card {
@@ -112,10 +113,10 @@ button:focus,
 
 .profile-info-main {
   text-align: left;
-  align-items: flex-start;
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 32px;
+  align-items: start;
 }
 
 .profile-info-header {
@@ -143,9 +144,17 @@ button:focus,
 }
 
 .profile-info-grid {
-  display: grid;
+  display: grid !important;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px 30px;
+  gap: 24px;
+  align-items: start;
+}
+
+.profile-info-grid > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .profile-label {
@@ -217,18 +226,75 @@ button:focus,
     left: 0;
   }
   .profile-content {
-    padding-top: 80px;
-    margin-left: 0 !important;
+    margin-top: 80px;
+    margin-left: 12px !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
   }
   .profile-info-main {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 24px;
   }
+  
+  .profile-info-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  .profile-info-grid > div {
+    width: 100%;
+  }
+  
   .profile-info-card {
     padding: 16px 6px;
   }
+}
+
+/* Media queries para el grid de tarjetas - organizadas de mayor a menor */
+@media (max-width: 1400px) {
+  .profile-content {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .profile-content {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .profile-info-grid > div {
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-content {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+  }
+  
   .profile-info-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .profile-info-grid > div {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-content {
+    padding: 0.5rem !important;
+    gap: 0.75rem !important;
   }
 }
