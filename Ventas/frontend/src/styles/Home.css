@@ -115,12 +115,12 @@
 }
 
 .card-puertas {
-  background: url('../assets/Puertas_Home.png') center center/cover no-repeat;
+  background: url('@assets/Puertas_Home.png') center center/cover no-repeat;
   color: #fff;
 }
 
 .card-molduras {
-  background: url('../assets/Molduras_Home.png') center center/cover no-repeat;
+  background: url('@assets/Molduras_Home.png') center center/cover no-repeat;
   color: #fff;
 }
 
