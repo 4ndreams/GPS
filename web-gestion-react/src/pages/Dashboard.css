@@ -5,6 +5,21 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
+/* Estilos para navbar scrolleable */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Asegurar que las tabs mantengan su ancho mínimo */
+.min-w-fit {
+  min-width: fit-content;
+}
+
 h1 {
   font-size: 2rem;
   margin-bottom: 2rem;

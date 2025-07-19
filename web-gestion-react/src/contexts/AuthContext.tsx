@@ -1,20 +1,23 @@
 import React, { createContext, useState } from 'react';
 import type { ReactNode } from 'react';
+import { authService } from '../services/authService';
 
 // Tipos
 export interface Usuario {
   id: string;
   nombre: string;
   email: string;
-  rol: 'admin' | 'operador' | 'vendedor';
+  rol: 'admin' | 'operador' | 'vendedor' | 'user';
   avatar?: string;
+  rut?: string;
+  telefono?: string;
 }
 
 export interface AuthContextType {
   usuario: Usuario | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
@@ -30,58 +33,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Simulación de usuarios para desarrollo
-  const usuariosDemo = [
-    {
-      id: '1',
-      nombre: 'Admin Sistema',
-      email: 'admin@gps.com',
-      password: 'admin123',
-      rol: 'admin' as const,
-      avatar: undefined
-    },
-    {
-      id: '2',
-      nombre: 'María López',
-      email: 'maria@gps.com',
-      password: 'maria123',
-      rol: 'operador' as const,
-      avatar: undefined
-    },
-    {
-      id: '3',
-      nombre: 'Carlos Ruiz',
-      email: 'carlos@gps.com',
-      password: 'carlos123',
-      rol: 'vendedor' as const,
-      avatar: undefined
-    }
-  ];
-
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
 
     try {
-      // Simulación de delay de red
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await authService.login({ email, password });
 
-      // Buscar usuario en datos demo
-      const usuarioEncontrado = usuariosDemo.find(
-        u => u.email === email && u.password === password
-      );
+      if (result.success && result.data) {
+        // Intentar obtener información completa del usuario
+        const tokenInfo = await authService.verifyToken();
+        
+        let usuario: Usuario;
+        
+        if (tokenInfo.valid && tokenInfo.user) {
+          // Si tenemos información del usuario desde el backend
+          usuario = {
+            id: tokenInfo.user.id || Date.now().toString(),
+            nombre: tokenInfo.user.nombre || email.split('@')[0],
+            email: tokenInfo.user.email || email,
+            rol: tokenInfo.user.rol || 'user',
+            avatar: tokenInfo.user.avatar,
+            rut: tokenInfo.user.rut,
+            telefono: tokenInfo.user.telefono,
+          };
+        } else {
+          // Fallback con datos básicos
+          usuario = {
+            id: Date.now().toString(),
+            nombre: email.split('@')[0],
+            email: email,
+            rol: 'user',
+          };
+        }
 
-      if (usuarioEncontrado) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password: _, ...usuarioSinPassword } = usuarioEncontrado;
-        setUsuario(usuarioSinPassword);
+        setUsuario(usuario);
         
         // Guardar en localStorage para persistencia
-        localStorage.setItem('usuario', JSON.stringify(usuarioSinPassword));
+        localStorage.setItem('usuario', JSON.stringify(usuario));
         
-        console.log('Login exitoso:', usuarioSinPassword);
+        console.log('Login exitoso:', usuario);
         return true;
       } else {
-        console.log('Credenciales inválidas');
+        console.log('Error en login:', result.error);
         return false;
       }
     } catch (error) {
@@ -92,10 +85,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setUsuario(null);
-    localStorage.removeItem('usuario');
-    console.log('Logout realizado');
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Error en logout:', error);
+    } finally {
+      setUsuario(null);
+      console.log('Logout realizado');
+    }
   };
 
   // Restaurar sesión al cargar la app
@@ -113,13 +111,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const value: AuthContextType = {
+  const value = React.useMemo(() => ({
     usuario,
     isAuthenticated: !!usuario,
     login,
     logout,
     loading
-  };
+  }), [usuario, loading]);
 
   return (
     <AuthContext.Provider value={value}>

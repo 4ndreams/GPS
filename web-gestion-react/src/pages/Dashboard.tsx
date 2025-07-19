@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../contexts/AuthContext"
+import UsersManagement from "../components/UsersManagement"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,6 +39,7 @@ import {
   TreePine,
   Phone,
   User,
+  Users,
   LogOut,
 } from "lucide-react"
 import {
@@ -533,20 +535,24 @@ export default function TerplacMundoPuertas() {
       {/* Contenido Principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="dashboard" className="flex items-center space-x-2">
+          <TabsList className="grid w-full grid-cols-5 overflow-x-auto scrollbar-hide">
+            <TabsTrigger value="dashboard" className="flex items-center space-x-2 min-w-fit">
               <Home className="h-4 w-4" />
               <span>Dashboard</span>
             </TabsTrigger>
-            <TabsTrigger value="ordenes" className="flex items-center space-x-2">
+            <TabsTrigger value="ordenes" className="flex items-center space-x-2 min-w-fit">
               <Package className="h-4 w-4" />
               <span>Órdenes</span>
             </TabsTrigger>
-            <TabsTrigger value="reportes" className="flex items-center space-x-2">
+            <TabsTrigger value="usuarios" className="flex items-center space-x-2 min-w-fit">
+              <Users className="h-4 w-4" />
+              <span>Usuarios</span>
+            </TabsTrigger>
+            <TabsTrigger value="reportes" className="flex items-center space-x-2 min-w-fit">
               <BarChart3 className="h-4 w-4" />
               <span>Reportes</span>
             </TabsTrigger>
-            <TabsTrigger value="configuracion" className="flex items-center space-x-2">
+            <TabsTrigger value="configuracion" className="flex items-center space-x-2 min-w-fit">
               <Settings className="h-4 w-4" />
               <span>Configuración</span>
             </TabsTrigger>
@@ -950,6 +956,11 @@ export default function TerplacMundoPuertas() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Usuarios Tab */}
+          <TabsContent value="usuarios" className="space-y-6">
+            <UsersManagement />
           </TabsContent>
 
           {/* Reportes Tab */}
