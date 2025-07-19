@@ -26,7 +26,7 @@ export async function crearCompXBod(body) {
                 productoExistente = rellenoExistente;
             }                
         }
-        console.log("Producto existente:", productoExistente);
+        
         if (productoExistente) {
             // actualizar bodega
             if("id_material" in productoExistente){
@@ -39,7 +39,7 @@ export async function crearCompXBod(body) {
                 });
                 
             }
-            console.log("Bodega del producto existente:", productoExistente);
+            
             const aumentar = {
                 stock: productoExistente.stock + body.stock,
                 updatedAt: new Date()
@@ -49,7 +49,8 @@ export async function crearCompXBod(body) {
 
             // registrar compra
             body.id_bodega = productoExistente.id_bodega;
-            const nuevaCompra = await createCompraService(body);
+            const [nuevaCompra, errorNuevacompra] = await createCompraService(body);
+            console.log("Compra registrada:", nuevaCompra);
 
             return [{
                 mensaje: "Producto ya existe, se actualizó el stock y se registró la compra",

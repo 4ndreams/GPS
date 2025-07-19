@@ -14,6 +14,7 @@ const router = Router();
 
 router.use(authenticateJwt);
 
+
 router
     .get('/', isFabricaOrAdmin, getComprasController)
     .get('/:id_compra', isFabricaOrAdmin, getCompraController)
