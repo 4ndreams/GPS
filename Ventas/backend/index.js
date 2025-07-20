@@ -23,7 +23,12 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173'], //Autorizamos más origenes
+      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
+        'http://localhost:5173', 
+        'http://localhost:3000',  // Para la app móvil en web
+        'http://192.168.1.105:3000', 
+        'http://192.168.1.105:19000'
+      ], 
       credentials: true
     }));
 
@@ -53,7 +58,7 @@ async function setupServer() {
     app.use("/api", indexRoutes);
 
     // ✅ Inicio del servidor
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Servidor corriendo en ${HOST}:${PORT}/api`);
     });
 

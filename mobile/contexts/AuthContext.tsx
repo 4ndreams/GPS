@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { loginUser } from '../services/authService';
+import { TokenService } from '../services/tokenService';
 
 interface AuthUser {
   id: string;
   email: string;
   name: string;
-  avatar?: string;
-  perfil?: 'fabrica' | 'tienda' | 'admin';
+  rol?: 'fabrica' | 'tienda' | 'admin';
 }
 
 interface AuthContextType {
@@ -35,68 +36,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuthState = async () => {
     try {
-      const userData = await AsyncStorage.getItem('auth_user');
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
+      // Verificar si hay un token válido
+      const token = await TokenService.getToken();
+      if (token && await TokenService.isTokenValid()) {
+        // Si hay token válido, obtener datos del usuario del almacenamiento
+        const userData = await AsyncStorage.getItem('auth_user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        }
+      } else {
+        // Si no hay token válido, limpiar datos
+        await TokenService.removeToken();
+        await AsyncStorage.removeItem('auth_user');
       }
     } catch (error) {
       console.error('Error checking auth state:', error);
+      // En caso de error, limpiar datos por seguridad
+      await TokenService.removeToken();
+      await AsyncStorage.removeItem('auth_user');
     } finally {
       setIsLoading(false);
     }
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
+      // Llamar al servicio de autenticación real
+      const response = await loginUser(email, password);
       
-      // Simular llamada a API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Validación simple para demo
-      if (email === 'admin@mundogestion.com' && password === '123456') {
+      if (response) {
+        // Extraer datos del usuario de la respuesta
         const userData: AuthUser = {
-          id: '1',
-          email: email,
-          name: 'Administrador',
-          avatar: 'https://ui-avatars.com/api/?name=Admin&background=DC2626&color=fff',
-          perfil: 'admin'
+          id: response.user?.id_usuario?.toString() || 'unknown',
+          email: response.user?.email || email,
+          name: response.user?.nombre || 'Usuario',
+          rol: response.user?.rol as 'fabrica' | 'tienda' | 'admin'
         };
-        
-        await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
-        setUser(userData);
-        return true;
-      } else if (email === 'fabrica@mundogestion.com' && password === '123456') {
-        const userData: AuthUser = {
-          id: '2',
-          email: email,
-          name: 'Operador Fábrica',
-          avatar: 'https://ui-avatars.com/api/?name=Fabrica&background=DC2626&color=fff',
-          perfil: 'fabrica'
-        };
-        
-        await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
-        setUser(userData);
-        return true;
-      } else if (email === 'tienda@mundogestion.com' && password === '123456') {
-        const userData: AuthUser = {
-          id: '3',
-          email: email,
-          name: 'Vendedora Tienda',
-          avatar: 'https://ui-avatars.com/api/?name=Tienda&background=DC2626&color=fff',
-          perfil: 'tienda'
-        };
-        
+
         await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
         setUser(userData);
         return true;
       }
       
       return false;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
+    } catch (error: any) {
+      // Propagar el error para que el componente de login pueda manejarlo
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData: AuthUser = {
         id: 'google_' + Date.now(),
         email: 'usuario@gmail.com',
-        name: 'Usuario Google',
-        avatar: 'https://ui-avatars.com/api/?name=Google+User&background=4285F4&color=fff'
+        name: 'Usuario Google'
       };
       
       await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
@@ -137,8 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData: AuthUser = {
         id: 'new_' + Date.now(),
         email: email,
-        name: name,
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=DC2626&color=fff`
+        name: name
       };
       
       await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
@@ -154,6 +139,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
+      // Limpiar token del almacenamiento seguro
+      await TokenService.removeToken();
+      // Limpiar datos del usuario
       await AsyncStorage.removeItem('auth_user');
       setUser(null);
     } catch (error) {
