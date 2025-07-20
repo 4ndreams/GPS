@@ -49,7 +49,7 @@ export const userBodyValidation = Joi.object({
     }),
   password: Joi.string().min(8).max(26).pattern(/^[a-zA-Z0-9]+$/),
   newPassword: Joi.string().min(8).max(26).pattern(/^[a-zA-Z0-9]+$/),
-  rol: Joi.string().valid("Cliente", "Empleado", "Administrador"),
+  rol: Joi.string().valid("cliente", "fabrica", "tienda", "administrador"),
   flag_blacklist: Joi.boolean(),
 }).or("nombre", "apellidos", "email", "rut", "password", "newPassword", "rol", "flag_blacklist")
   .messages({

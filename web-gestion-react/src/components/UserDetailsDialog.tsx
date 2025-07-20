@@ -41,7 +41,7 @@ export default function UserDetailsDialog({ isOpen, onClose, userId }: UserDetai
         setError(result.error || 'Error al cargar detalles del usuario');
       }
     } catch (error) {
-      console.error('Error loading user details:', error);
+      console.error('UserDetailsDialog - Error en la carga:', error);
       setError('Error de conexión al cargar detalles');
     } finally {
       setLoading(false);
@@ -70,7 +70,7 @@ export default function UserDetailsDialog({ isOpen, onClose, userId }: UserDetai
   const getRoleBadgeVariant = (rol: string) => {
     if (rol === 'administrador') return 'default';
     if (rol === 'fabrica') return 'secondary';
-    if (rol === 'tienda') return 'outline';
+    if (rol === 'bodega') return 'outline';
     return 'outline';
   };
 

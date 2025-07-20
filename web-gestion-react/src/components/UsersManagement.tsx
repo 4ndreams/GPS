@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { userService, type User as UserType } from '../services/userService';
 import UserDetailsDialog from './UserDetailsDialog';
 import EditUserDialog from './EditUserDialog';
 import DeleteUserDialog from './DeleteUserDialog';
+import CreateUserDialog from './CreateUserDialog';
+import UnauthorizedAccess from './UnauthorizedAccess';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +33,7 @@ import {
 } from "lucide-react";
 
 export default function UsersManagement() {
+  const { usuario } = useAuth();
   const [users, setUsers] = useState<UserType[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
@@ -43,6 +47,7 @@ export default function UsersManagement() {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
 
   // Helper para verificar si hay filtros activos
@@ -61,7 +66,8 @@ export default function UsersManagement() {
     const matchesSearch = searchTerm === '' || 
       user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.apellidos?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.rut?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesRole = selectedRole === '' || selectedRole === 'todos' || user.rol === selectedRole;
     
@@ -106,6 +112,11 @@ export default function UsersManagement() {
     setSelectedUser(null);
   };
 
+  const handleUserCreated = () => {
+    loadUsers(); // Recargar usuarios después de crear
+    setShowCreateDialog(false);
+  };
+
   // Función para cargar usuarios
   const loadUsers = async () => {
     setLoadingUsers(true);
@@ -132,6 +143,12 @@ export default function UsersManagement() {
     loadUsers();
   }, []);
 
+  // Verificar autorización después de todos los hooks
+  const isAdmin = usuario?.rol === 'administrador';
+  if (!isAdmin) {
+    return <UnauthorizedAccess requiredRole="Administrador" />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -140,10 +157,19 @@ export default function UsersManagement() {
           <h2 className="text-3xl font-bold">Administración de Usuarios</h2>
           <p className="text-gray-600">Configura a los usuarios del sistema</p>
         </div>
-        <Button onClick={loadUsers} disabled={loadingUsers}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? "animate-spin" : ""}`} />
-          {loadingUsers ? "Cargando..." : "Actualizar"}
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={() => setShowCreateDialog(true)} 
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Crear Usuario
+          </Button>
+          <Button onClick={loadUsers} disabled={loadingUsers} variant="outline">
+            <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? "animate-spin" : ""}`} />
+            {loadingUsers ? "Cargando..." : "Actualizar"}
+          </Button>
+        </div>
       </div>
 
       {/* Filtros */}
@@ -162,7 +188,7 @@ export default function UsersManagement() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Nombre, apellido o email..."
+                  placeholder="Nombre, apellido, email o RUT..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -196,8 +222,8 @@ export default function UsersManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos los estados</SelectItem>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
+                  <SelectItem value="Activo">Activo</SelectItem>
+                  <SelectItem value="Inactivo">Inactivo</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -252,6 +278,7 @@ export default function UsersManagement() {
                     <TableHead>ID</TableHead>
                     <TableHead>Nombre</TableHead>
                     <TableHead>Apellido</TableHead>
+                    <TableHead>RUT</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Rol</TableHead>
                     <TableHead>Estado</TableHead>
@@ -261,7 +288,7 @@ export default function UsersManagement() {
                 <TableBody>
                   {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                      <TableCell colSpan={8} className="text-center py-8 text-gray-500">
                         {users.length === 0 
                           ? "No hay usuarios disponibles. Haz clic en 'Actualizar' para cargar los usuarios."
                           : "No se encontraron usuarios que coincidan con los filtros aplicados."
@@ -281,6 +308,7 @@ export default function UsersManagement() {
                           </div>
                         </TableCell>
                         <TableCell>{user.apellidos || 'No especificado'}</TableCell>
+                        <TableCell>{user.rut || 'No especificado'}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
                           <Badge variant={getRoleBadgeVariant(user.rol)}>
@@ -296,7 +324,7 @@ export default function UsersManagement() {
                                 : 'bg-red-100 text-red-800'
                             }
                           >
-                            {!user.flag_blacklist && user.correoVerificado ? 'Activo' : 'Inactivo'}
+                            {!user.flag_blacklist ? 'Activo' : 'Inactivo'}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -419,6 +447,12 @@ export default function UsersManagement() {
           onUserDeleted={handleUserDeleted}
         />
       )}
+
+      <CreateUserDialog
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onUserCreated={handleUserCreated}
+      />
     </div>
   );
 }

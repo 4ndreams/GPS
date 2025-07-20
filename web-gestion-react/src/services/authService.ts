@@ -9,7 +9,7 @@ export interface User {
   id: string;
   nombre: string;
   email: string;
-  rol: 'admin' | 'operador' | 'vendedor' | 'user';
+  rol: 'administrador' | 'fabrica' | 'tienda' | 'cliente';
   avatar?: string;
   rut?: string;
   telefono?: string;

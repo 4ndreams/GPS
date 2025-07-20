@@ -7,11 +7,39 @@ export interface Usuario {
   id: string;
   nombre: string;
   email: string;
-  rol: 'admin' | 'operador' | 'vendedor' | 'user';
+  rol: 'administrador' | 'fabrica' | 'tienda' | 'cliente';
   avatar?: string;
   rut?: string;
   telefono?: string;
 }
+
+// Función para mapear roles del backend al frontend
+const mapRoleFromBackend = (backendRole: string): Usuario['rol'] => {
+  switch (backendRole) {
+    case 'tienda':
+      return 'tienda';
+    case 'administrador':
+    case 'fabrica':
+    case 'cliente':
+      return backendRole as Usuario['rol'];
+    default:
+      return 'cliente';
+  }
+};
+
+// Función para mapear roles del frontend al backend
+export const mapRoleToBackend = (frontendRole: Usuario['rol']): string => {
+  switch (frontendRole) {
+    case 'tienda':
+      return 'tienda';
+    case 'administrador':
+    case 'fabrica':
+    case 'cliente':
+      return frontendRole;
+    default:
+      return 'cliente';
+  }
+};
 
 export interface AuthContextType {
   usuario: Usuario | null;
@@ -47,14 +75,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (tokenInfo.valid && tokenInfo.user) {
           // Si tenemos información del usuario desde el backend
+          const tokenUser = tokenInfo.user as any;
+          const backendUser = tokenUser.user || tokenUser;
+          
+          const userRole = backendUser.rol || 'cliente';
+          const mappedRole = mapRoleFromBackend(userRole);
+          
           usuario = {
-            id: tokenInfo.user.id || Date.now().toString(),
-            nombre: tokenInfo.user.nombre || email.split('@')[0],
-            email: tokenInfo.user.email || email,
-            rol: tokenInfo.user.rol || 'user',
-            avatar: tokenInfo.user.avatar,
-            rut: tokenInfo.user.rut,
-            telefono: tokenInfo.user.telefono,
+            id: backendUser.id || Date.now().toString(),
+            nombre: backendUser.nombreCompleto || backendUser.nombre || email.split('@')[0],
+            email: backendUser.email || email,
+            rol: mappedRole,
+            avatar: backendUser.avatar,
+            rut: backendUser.rut,
+            telefono: backendUser.telefono,
           };
         } else {
           // Fallback con datos básicos
@@ -62,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             id: Date.now().toString(),
             nombre: email.split('@')[0],
             email: email,
-            rol: 'user',
+            rol: 'cliente',
           };
         }
 
@@ -71,7 +105,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Guardar en localStorage para persistencia
         localStorage.setItem('usuario', JSON.stringify(usuario));
         
-        console.log('Login exitoso:', usuario);
         return true;
       } else {
         console.log('Error en login:', result.error);
@@ -92,7 +125,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Error en logout:', error);
     } finally {
       setUsuario(null);
-      console.log('Logout realizado');
     }
   };
 
@@ -103,7 +135,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const usuario = JSON.parse(usuarioGuardado);
         setUsuario(usuario);
-        console.log('Sesión restaurada:', usuario);
       } catch (error) {
         console.error('Error al restaurar sesión:', error);
         localStorage.removeItem('usuario');

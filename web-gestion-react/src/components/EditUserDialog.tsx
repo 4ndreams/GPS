@@ -90,10 +90,14 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
       
       if (result.success && result.data) {
         const userData = result.data;
+        
+        // Limpiar RUT quitando puntos
+        const cleanRut = (rut: string) => rut ? rut.replace(/\./g, '') : rut;
+        
         setFormData({
           nombre: userData.nombre || '',
           email: userData.email || '',
-          rut: userData.rut || '',
+          rut: cleanRut(userData.rut || ''), // Limpiar RUT al cargar
           rol: userData.rol || 'cliente',
           password: '', // Siempre vacío por seguridad
           flag_blacklist: userData.flag_blacklist || false
@@ -134,11 +138,16 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
     errors.rut = validateField('rut', formData.rut);
     errors.password = validatePassword(formData.password);
 
+    // Debug: mostrar qué está fallando
+    console.log('FormData antes de validar:', formData);
+    console.log('Errores de validación:', errors);
+
     // Verificar si hay errores
     const hasErrors = Object.values(errors).some(error => error !== null);
     if (hasErrors) {
       setValidationErrors(errors);
       setError('Por favor corrige los errores en el formulario');
+      console.log('Validación falló. Errores:', Object.entries(errors).filter(([_, error]) => error !== null));
       return;
     }
     
@@ -146,7 +155,7 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
     setError(null);
     
     try {
-      // Preparar datos para envío (solo incluir password si se proporcionó)
+      // Preparar datos para envío (solo incluir newPassword si se proporcionó)
       const dataToSend: any = {
         nombre: formData.nombre,
         email: formData.email,
@@ -155,9 +164,9 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
         flag_blacklist: formData.flag_blacklist
       };
 
-      // Solo incluir password si se proporcionó
+      // Solo incluir newPassword si se proporcionó (no password)
       if (formData.password.trim() !== '') {
-        dataToSend.password = formData.password;
+        dataToSend.newPassword = formData.password;
       }
 
       const result = await userService.updateUser(userId, dataToSend);

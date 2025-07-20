@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo, useContext } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { AuthContext } from "../contexts/AuthContext"
+import { useAuth } from "../hooks/useAuth"
 import UsersManagement from "../components/UsersManagement"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -254,13 +254,10 @@ const getPrioridadBadge = (prioridad: string) => {
 
 export default function TerplacMundoPuertas() {
   const navigate = useNavigate()
-  const authContext = useContext(AuthContext)
+  const { usuario, logout: authLogout } = useAuth()
   
-  if (!authContext) {
-    throw new Error('Dashboard debe usarse dentro de AuthProvider')
-  }
-  
-  const { usuario, logout: authLogout } = authContext
+  // Verificar si el usuario es administrador
+  const isAdmin = usuario?.rol === 'administrador'
   
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -285,6 +282,13 @@ export default function TerplacMundoPuertas() {
     name: usuario.nombre,
     email: usuario.email
   } : { name: "Usuario", email: "usuario@terplac.com" }
+
+  // Protección: redirigir si no es admin y trata de acceder a usuarios
+  useEffect(() => {
+    if (activeTab === "usuarios" && !isAdmin) {
+      setActiveTab("dashboard")
+    }
+  }, [activeTab, isAdmin])
 
   // Simulación de datos en tiempo real desde la app móvil
   useEffect(() => {
@@ -544,10 +548,13 @@ export default function TerplacMundoPuertas() {
               <Package className="h-4 w-4" />
               <span>Órdenes</span>
             </TabsTrigger>
-            <TabsTrigger value="usuarios" className="flex items-center space-x-2 min-w-fit">
-              <Users className="h-4 w-4" />
-              <span>Usuarios</span>
-            </TabsTrigger>
+            {/* Solo mostrar el tab de usuarios si el usuario es administrador */}
+            {isAdmin && (
+              <TabsTrigger value="usuarios" className="flex items-center space-x-2 min-w-fit">
+                <Users className="h-4 w-4" />
+                <span>Usuarios</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="reportes" className="flex items-center space-x-2 min-w-fit">
               <BarChart3 className="h-4 w-4" />
               <span>Reportes</span>
@@ -958,10 +965,12 @@ export default function TerplacMundoPuertas() {
             </Card>
           </TabsContent>
 
-          {/* Usuarios Tab */}
-          <TabsContent value="usuarios" className="space-y-6">
-            <UsersManagement />
-          </TabsContent>
+          {/* Usuarios Tab - Solo para administradores */}
+          {isAdmin && (
+            <TabsContent value="usuarios" className="space-y-6">
+              <UsersManagement />
+            </TabsContent>
+          )}
 
           {/* Reportes Tab */}
           <TabsContent value="reportes" className="space-y-6">

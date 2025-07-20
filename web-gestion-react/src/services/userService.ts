@@ -21,6 +21,81 @@ export interface User {
   ultimaActividad?: string;
 }
 
+// Función para mapear roles del backend al frontend
+const mapRoleFromBackend = (backendRole: string): User['rol'] => {
+  switch (backendRole) {
+    case 'tienda':
+      return 'tienda';
+    case 'administrador':
+    case 'fabrica':
+    case 'cliente':
+      return backendRole as User['rol'];
+    default:
+      return 'cliente';
+  }
+};
+
+// Función para mapear roles del frontend al backend
+const mapRoleToBackend = (frontendRole: User['rol']): string => {
+  switch (frontendRole) {
+    case 'tienda':
+      return 'tienda';
+    case 'administrador':
+    case 'fabrica':
+    case 'cliente':
+      return frontendRole;
+    default:
+      return 'cliente';
+  }
+};
+
+// Función para limpiar RUT (remover puntos, mantener guión)
+const cleanRut = (rut: string): string => {
+  if (!rut) return rut;
+  // Remover puntos pero mantener guión y números
+  return rut.replace(/\./g, '');
+};
+
+// Función para transformar un usuario del backend al frontend
+const transformUserFromBackend = (backendUser: any): User => {
+  return {
+    ...backendUser,
+    rol: mapRoleFromBackend(backendUser.rol),
+    rut: backendUser.rut ? cleanRut(backendUser.rut) : backendUser.rut
+  };
+};
+
+// Función para transformar un usuario del frontend al backend
+const transformUserToBackend = (frontendUser: Partial<User>, includeId: boolean = false): any => {
+  // Eliminar todos los campos de ID y campos calculados (excepto id_usuario si se solicita)
+  const { 
+    id_usuario, 
+    id, // También eliminar 'id' si existe
+    estado, 
+    avatar, 
+    fechaCreacion, 
+    ultimaActividad,
+    correoVerificado,
+    createdAt,
+    updatedAt,
+    intentosFallidos,
+    fechaBloqueo,
+    ...userDataWithoutCalculatedFields 
+  } = frontendUser as any;
+  
+  const result = {
+    ...userDataWithoutCalculatedFields,
+    rol: frontendUser.rol ? mapRoleToBackend(frontendUser.rol) : undefined
+  };
+  
+  // Incluir id_usuario solo si se solicita explícitamente
+  if (includeId && id_usuario) {
+    result.id_usuario = id_usuario;
+  }
+  
+  return result;
+};
+
 export interface UserProfile {
   id_usuario: string;
   nombre: string;
@@ -50,7 +125,7 @@ export const userService = {
       if (response.data?.data) {
         return {
           success: true,
-          data: response.data.data
+          data: response.data.data.map(transformUserFromBackend)
         };
       }
       
@@ -76,13 +151,27 @@ export const userService = {
   // Obtener un usuario específico por ID (requiere admin)
   async getUser(id: string): Promise<{ success: boolean; data?: User; error?: string }> {
     try {
-      const response = await api.get(`/users?id_usuario=${id}`);
+      // Usar la ruta que funciona (/users) y filtrar en el frontend
+      const response = await api.get('/users');
       
-      if (response.data?.data) {
-        return {
-          success: true,
-          data: response.data.data
-        };
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        // Buscar el usuario específico en el array
+        const userArray = response.data.data;
+        const targetUser = userArray.find((user: any) => user.id_usuario?.toString() === id.toString());
+        
+        if (targetUser) {
+          const transformedUser = transformUserFromBackend(targetUser);
+          
+          return {
+            success: true,
+            data: transformedUser
+          };
+        } else {
+          return {
+            success: false,
+            error: 'Usuario no encontrado'
+          };
+        }
       }
       
       return {
@@ -138,18 +227,22 @@ export const userService = {
   // Actualizar usuario específico (requiere admin)
   async updateUser(id: string, userData: Partial<User>): Promise<{ success: boolean; data?: User; error?: string }> {
     try {
-      const response = await api.patch(`/users?id_usuario=${id}`, userData);
+      // Transformar los datos al formato del backend antes de enviar
+      const backendUserData = transformUserToBackend(userData);
+      
+      // Usar la ruta correcta con el parámetro id_usuario
+      const response = await api.patch(`/users/detail/${id}`, backendUserData);
       
       if (response.data?.data) {
         return {
           success: true,
-          data: response.data.data
+          data: transformUserFromBackend(response.data.data)
         };
       }
       
       return {
         success: true,
-        data: response.data
+        data: transformUserFromBackend(response.data)
       };
     } catch (error: any) {
       console.error('Error actualizando usuario:', error);
@@ -200,7 +293,7 @@ export const userService = {
   // Eliminar usuario (requiere admin)
   async deleteUser(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await api.delete(`/users?id_usuario=${id}`);
+      await api.delete(`/users/detail/${id}`);
       
       return {
         success: true
@@ -238,6 +331,40 @@ export const userService = {
       };
     } catch (error: any) {
       console.error('Error obteniendo actividad del usuario:', error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error || 
+                          error.message || 
+                          'Error de conexión con el servidor';
+      
+      return {
+        success: false,
+        error: errorMessage
+      };
+    }
+  },
+
+  // Crear nuevo usuario (requiere admin)
+  async createUser(userData: Partial<User>): Promise<{ success: boolean; data?: User; error?: string }> {
+    try {
+      // Transformar los datos al formato del backend antes de enviar
+      const backendUserData = transformUserToBackend(userData);
+      
+      const response = await api.post('/users', backendUserData);
+      
+      if (response.data?.data) {
+        return {
+          success: true,
+          data: transformUserFromBackend(response.data.data)
+        };
+      }
+      
+      return {
+        success: true,
+        data: transformUserFromBackend(response.data)
+      };
+    } catch (error: any) {
+      console.error('Error creando usuario:', error);
       
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error || 
