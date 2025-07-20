@@ -7,6 +7,7 @@ import imagenRoutes from "./imagen.routes.js";
 import tipoRoutes from "./tipo.routes.js"; 
 import materialRoutes from "./material.routes.js";
 import ordenRoutes from "./orden.routes.js"; 
+import despachoRoutes from "./despacho.routes.js";
 import productoRoutes from "./producto.routes.js";
 import ventaRoutes from "./venta.routes.js"; 
 import itemCarritoRoutes from "./item_carrito.routes.js"; 
@@ -37,6 +38,7 @@ router.use('/tipo', tipoRoutes);
 router.use('/material', materialRoutes);
 router.use('/producto', productoRoutes); 
 router.use('/orden', ordenRoutes);
+router.use('/despachos', despachoRoutes);
 router.use('/venta', ventaRoutes);
 router.use('/item_carrito', itemCarritoRoutes);
 

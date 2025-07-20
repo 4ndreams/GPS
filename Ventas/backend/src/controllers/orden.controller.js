@@ -4,7 +4,8 @@ import {
     getOrdenByIdService,
     createOrdenService,
     updateOrdenService,
-    deleteOrdenService
+    deleteOrdenService,
+    getOrdenesByFiltersService
 } from "../services/orden.service.js";
 import { OrdenQueryValidation, OrdenBodyValidation } from "../validations/orden.validation.js";
 import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
@@ -31,7 +32,16 @@ export async function getOrdenController(req, res) {
 
 export async function getOrdenesController(req, res) {
     try {
-        const [ordenes, err] = await getOrdenesService();
+        const { estado, tipo } = req.query;
+        
+        let ordenes, err;
+        if (estado || tipo) {
+            // Filtrar por parámetros específicos
+            [ordenes, err] = await getOrdenesByFiltersService({ estado, tipo });
+        } else {
+            [ordenes, err] = await getOrdenesService();
+        }
+        
         if (err) {
             return handleErrorServer(res, 500, err);
         }

@@ -2,6 +2,7 @@
 import { EntitySchema } from "typeorm";
 import BodegaSchema from "./bodega.entity.js";
 import UsuarioSchema from "./user.entity.js";
+import ProductoSchema from "./producto.entity.js";
 
 const OrdenSchema = new EntitySchema({
   name: "Orden",
@@ -31,11 +32,32 @@ const OrdenSchema = new EntitySchema({
       default: () => "CURRENT_TIMESTAMP",
       nullable: false,
     },
+    fecha_entrega: {
+      type: "timestamp with time zone",
+      nullable: true,
+    },
     estado: {
       type: "varchar",
       length: 50,
       default: "Pendiente",
       nullable: false,
+    },
+    prioridad: {
+      type: "varchar",
+      length: 20,
+      default: "Media",
+      nullable: true,
+    },
+    transportista: {
+      type: "varchar",
+      length: 255,
+      nullable: true,
+    },
+    tipo: {
+      type: "varchar",
+      length: 50,
+      default: "normal",
+      nullable: true,
     },
     observaciones: {
       type: "varchar",
@@ -61,6 +83,10 @@ const OrdenSchema = new EntitySchema({
       type: "int",
       nullable: false,
     },
+    id_producto: {
+      type: "int",
+      nullable: false,
+    },
   },
   relations: {
     usuario: {
@@ -79,6 +105,14 @@ const OrdenSchema = new EntitySchema({
       },
       nullable: false,
     },
+    producto: {
+      type: "many-to-one",
+      target: ProductoSchema, 
+      joinColumn: {
+        name: "id_producto",
+      },
+      nullable: false,
+    },
   },
   indices: [
     {
@@ -89,6 +123,10 @@ const OrdenSchema = new EntitySchema({
     {
       name: "idx_orden_bodega",
       columns: ["id_bodega"],
+    },
+    {
+      name: "idx_orden_producto",
+      columns: ["id_producto"],
     },
     {
       name: "idx_orden_usuario",

@@ -22,7 +22,8 @@ const AuthSyncWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
       // Limpiar perfil cuando no hay usuario autenticado
       limpiarPerfil();
     }
-  }, [isAuthenticated, user, cambiarPerfil, limpiarPerfil]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, user]); // cambiarPerfil y limpiarPerfil están memoizados con useCallback
 
   return <>{children}</>;
 };

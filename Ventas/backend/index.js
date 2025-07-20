@@ -23,7 +23,7 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173'], //Autorizamos más origenes
+      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:8081'], //Autorizamos más origenes  
       credentials: true
     }));
 
