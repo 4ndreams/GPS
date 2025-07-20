@@ -37,7 +37,7 @@ async function setupServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: false,       // true si usas HTTPS
+        secure: true,       // true si usas HTTPS
         httpOnly: true,
         sameSite: "strict",  // evita CSRF
       },
