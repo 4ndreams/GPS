@@ -6,8 +6,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   TextInput,
+  Image,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { BaseDashboard } from '../../components/BaseDashboard';
 import { BaseOrderCard } from '../../components/BaseOrderCard';
 import { getConfigForProfile } from '../../config/dashboardConfig';
@@ -23,6 +26,7 @@ export default function DashboardFabrica() {
   const [ordenesSeleccionadas, setOrdenesSeleccionadas] = useState<number[]>([]);
   const [transportista, setTransportista] = useState('');
   const [observacionesDespacho, setObservacionesDespacho] = useState('');
+  const [fotoDespacho, setFotoDespacho] = useState<string | null>(null);
 
   const toggleOrdenSeleccionada = (id_orden: number) => {
     if (ordenesSeleccionadas.includes(id_orden)) {
@@ -32,13 +36,96 @@ export default function DashboardFabrica() {
     }
   };
 
+  const seleccionarFoto = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permisos requeridos', 'Se necesitan permisos para acceder a la galería');
+        return;
+      }
+
+      Alert.alert(
+        'Seleccionar foto',
+        'Elige una opción',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Galería', onPress: () => abrirGaleria() },
+          { text: 'Cámara', onPress: () => abrirCamara() },
+        ]
+      );
+    } catch (error) {
+      console.error('Error al solicitar permisos:', error);
+    }
+  };
+
+  const abrirGaleria = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setFotoDespacho(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error al abrir galería:', error);
+      Alert.alert('Error', 'No se pudo abrir la galería');
+    }
+  };
+
+  const abrirCamara = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permisos requeridos', 'Se necesitan permisos para usar la cámara');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setFotoDespacho(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error al abrir cámara:', error);
+      Alert.alert('Error', 'No se pudo abrir la cámara');
+    }
+  };
+
+  const eliminarFoto = () => {
+    setFotoDespacho(null);
+  };
+
   const handleCrearDespacho = async () => {
-    await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho);
+    // Validar que se haya seleccionado una foto
+    if (!fotoDespacho) {
+      Alert.alert(
+        'Foto requerida', 
+        'Debes subir una foto del despacho antes de continuar. Esto es obligatorio para mayor seguridad.'
+      );
+      return;
+    }
+
+    // Validar que se haya ingresado transportista
+    if (!transportista.trim()) {
+      Alert.alert('Campo requerido', 'Debes ingresar el nombre del transportista');
+      return;
+    }
+
+    await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho, fotoDespacho);
     
     // Limpiar formulario después del éxito
     setOrdenesSeleccionadas([]);
     setTransportista('');
     setObservacionesDespacho('');
+    setFotoDespacho(null);
   };
 
   const renderFabricaContent = (activeTab: string, data: any) => {
@@ -78,6 +165,46 @@ export default function DashboardFabrica() {
                 multiline
                 numberOfLines={3}
               />
+            </View>
+
+            {/* Sección de foto del despacho */}
+            <View style={styles.formGroup}>
+              <Text style={styles.formLabel}>
+                Foto del Despacho <Text style={styles.required}>*</Text>
+              </Text>
+              <Text style={styles.formHint}>
+                Foto obligatoria del despacho cargado en el camión para mayor seguridad
+              </Text>
+              
+              {!fotoDespacho ? (
+                <TouchableOpacity 
+                  style={styles.fotoButton}
+                  onPress={seleccionarFoto}
+                >
+                  <Ionicons name="camera" size={24} color="#4F46E5" />
+                  <Text style={styles.fotoButtonText}>Subir Foto del Despacho</Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.fotoContainer}>
+                  <Image source={{ uri: fotoDespacho }} style={styles.fotoPreview} />
+                  <View style={styles.fotoActions}>
+                    <TouchableOpacity 
+                      style={styles.fotoActionButton}
+                      onPress={seleccionarFoto}
+                    >
+                      <Ionicons name="pencil" size={16} color="#4F46E5" />
+                      <Text style={styles.fotoActionText}>Cambiar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[styles.fotoActionButton, styles.fotoDeleteButton]}
+                      onPress={eliminarFoto}
+                    >
+                      <Ionicons name="trash" size={16} color="#DC2626" />
+                      <Text style={[styles.fotoActionText, styles.fotoDeleteText]}>Eliminar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
             </View>
 
             <Text style={styles.sectionTitle}>Pedidos Fabricados Disponibles</Text>
@@ -287,5 +414,71 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 8,
+  },
+  // Estilos para la funcionalidad de foto
+  required: {
+    color: '#DC2626',
+    fontWeight: 'bold',
+  },
+  formHint: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
+  fotoButton: {
+    backgroundColor: '#F3F4F6',
+    borderWidth: 2,
+    borderColor: '#4F46E5',
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fotoButtonText: {
+    color: '#4F46E5',
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  fotoContainer: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  fotoPreview: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  fotoActions: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  fotoActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  fotoDeleteButton: {
+    borderLeftWidth: 1,
+    borderLeftColor: '#E5E7EB',
+  },
+  fotoActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 6,
+    color: '#4F46E5',
+  },
+  fotoDeleteText: {
+    color: '#DC2626',
   },
 });

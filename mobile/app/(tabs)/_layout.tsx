@@ -57,6 +57,14 @@ export default function TabLayout() {
     []
   );
 
+  // Botón de revisar despacho (para fábrica)
+  const renderReviewDespachoIcon = useCallback(
+    ({ color, size }: { color: string; size: number }) => (
+      <Ionicons name="clipboard-outline" size={size} color={color} />
+    ),
+    []
+  );
+
   // Botón de perfiles
   const renderProfileIcon = useCallback(
     ({ color, size }: { color: string; size: number }) => (
@@ -124,6 +132,18 @@ export default function TabLayout() {
           tabBarAccessibilityLabel: 'Flujo de despacho de fábrica',
           // Ocultar del tab bar si no es perfil de fábrica
           tabBarButton: usuario.perfil === 'fabrica' ? undefined : () => null,
+        }}
+      />
+
+      {/* Tab para Revisar Despachos - Solo para VENDEDORA/TIENDA */}
+      <Tabs.Screen
+        name="revisar-despacho"
+        options={{
+          title: 'Revisar Despachos',
+          tabBarIcon: renderReviewDespachoIcon,
+          tabBarAccessibilityLabel: 'Revisar despachos recibidos',
+          // Ocultar del tab bar si no es perfil de tienda
+          tabBarButton: usuario.perfil === 'tienda' ? undefined : () => null,
         }}
       />
       {/* Tab para crear minuta - OCULTO - no se usa actualmente */}

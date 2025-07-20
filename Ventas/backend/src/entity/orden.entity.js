@@ -64,6 +64,10 @@ const OrdenSchema = new EntitySchema({
       length: 500,
       nullable: true
     },
+    foto_despacho: {
+      type: "text",
+      nullable: true
+    },
     createdAt: {
       type: "timestamp with time zone",
       default: () => "CURRENT_TIMESTAMP",

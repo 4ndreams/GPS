@@ -131,5 +131,21 @@ export const OrdenBodyValidation = Joi.object({
             "number.integer": "El ID del usuario debe ser un número entero.",
             "number.positive": "El ID del usuario debe ser un número positivo.",
             "any.required": "El ID del usuario es obligatorio."
+        }),
+    id_bodega: Joi.number()
+        .integer()
+        .positive()
+        .optional()
+        .messages({
+            "number.base": "El ID de la bodega debe ser un número entero positivo.",
+            "number.integer": "El ID de la bodega debe ser un número entero.",
+            "number.positive": "El ID de la bodega debe ser un número positivo.",
+            "any.required": "El ID de la bodega es obligatorio."
+        }),
+    foto_despacho: Joi.string()
+        .optional()
+        .allow(null)
+        .messages({
+            "string.base": "La foto del despacho debe ser una cadena de texto."
         })
 });
