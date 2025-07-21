@@ -10,6 +10,7 @@ import passport from "passport";
 import indexRoutes from "./src/routes/index.routes.js";
 import { connectDB } from "./src/config/configDb.js";
 import { testConnection } from "./src/config/initialSetup.js";
+import { initializeDefaultData } from "./src/config/seedData.js";
 import { cookieKey, HOST, PORT } from "./src/config/configEnv.js";
 import {
   passportJwtSetup,
@@ -23,7 +24,13 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173'], //Autorizamos más origenes
+      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
+        'http://localhost:5173', 
+        'http://localhost:3000',  // Para la app móvil en web
+        'http://192.168.1.105:3000', 
+        'http://192.168.1.105:19000',
+        'http://localhost:8081'
+      ], 
       credentials: true
     }));
 
@@ -53,7 +60,7 @@ async function setupServer() {
     app.use("/api", indexRoutes);
 
     // ✅ Inicio del servidor
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Servidor corriendo en ${HOST}:${PORT}/api`);
     });
 
@@ -64,9 +71,10 @@ async function setupServer() {
 
 async function setupAPI() {
   try {
-    await connectDB();       // Conexión a la base de datos
-    await setupServer();     // Servidor Express
-    await testConnection();  // (Opcional) Validación inicial
+    await connectDB();              // Conexión a la base de datos
+    await initializeDefaultData();  // Seeding de datos por defecto
+    await setupServer();            // Servidor Express
+    await testConnection();         // (Opcional) Validación inicial
   } catch (error) {
     console.error("❌ Error al iniciar la API:", error);
   }
