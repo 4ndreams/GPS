@@ -48,10 +48,13 @@ export default function Home() {
   // Datos para la tabla de resumen
   const summaryData = [
     { title: 'Total', value: ordenes.length },
-    { title: 'Entregados', value: ordenes.filter((orden: any) => orden.estado === 'Entregado').length },
-    { title: 'Enviados', value: ordenes.filter((orden: any) => orden.estado === 'Enviado').length },
-    { title: 'Pendientes', value: ordenes.filter((orden: any) => orden.estado === 'Pendiente').length },
-    { title: 'Cancelados', value: ordenes.filter((orden: any) => orden.estado === 'Cancelado').length },
+    { title: 'Pendiente', value: ordenes.filter((orden: any) => orden.estado === 'Pendiente').length },
+    { title: 'En producción', value: ordenes.filter((orden: any) => orden.estado === 'En producción').length },
+    { title: 'Fabricada', value: ordenes.filter((orden: any) => orden.estado === 'Fabricada').length },
+    { title: 'En tránsito', value: ordenes.filter((orden: any) => orden.estado === 'En tránsito').length },
+    { title: 'Recibido', value: ordenes.filter((orden: any) => orden.estado === 'Recibido').length },
+    { title: 'Recibido con problemas', value: ordenes.filter((orden: any) => orden.estado === 'Recibido con problemas').length },
+    { title: 'Cancelado', value: ordenes.filter((orden: any) => orden.estado === 'Cancelado').length },
   ];
 
 

@@ -99,7 +99,7 @@ export const OrdenBodyValidation = Joi.object({
     observaciones: Joi.string()
         .max(500)
         .optional()
-        .allow(null)
+        .allow(null, '')
         .messages({
             "string.base": "Las observaciones deben ser una cadena de texto.",
             "string.max": "Las observaciones no pueden exceder los 500 caracteres."
@@ -131,5 +131,15 @@ export const OrdenBodyValidation = Joi.object({
             "number.integer": "El ID del usuario debe ser un número entero.",
             "number.positive": "El ID del usuario debe ser un número positivo.",
             "any.required": "El ID del usuario es obligatorio."
+        }),
+    id_bodega: Joi.number()
+        .integer()
+        .positive()
+        .optional()
+        .messages({
+            "number.base": "El ID de la bodega debe ser un número entero positivo.",
+            "number.integer": "El ID de la bodega debe ser un número entero.",
+            "number.positive": "El ID de la bodega debe ser un número positivo.",
+            "any.required": "El ID de la bodega es obligatorio."
         })
 });
