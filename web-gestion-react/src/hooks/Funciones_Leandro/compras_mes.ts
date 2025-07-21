@@ -4,14 +4,14 @@ import type {
   Compra,
   ComprasFiltroBody,
   ComprasTotalesFiltradasResponse,
-} from "@services/bodega.service"; // ajusta la ruta según tu estructura
+} from "@services/bodega.service";
 
 const useGetComprasMes = (body: ComprasFiltroBody) => {
-  const [compras, setCompras] = useState<Compra[]>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [cantidad, setCantidad] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [compras,   setCompras]   = useState<Compra[]>([]);
+  const [total,     setTotal]     = useState<number>(0);
+  const [cantidad,  setCantidad]  = useState<number>(0);
+  const [loading,   setLoading]   = useState<boolean>(true);
+  const [error,     setError]     = useState<string | null>(null);
 
   useEffect(() => {
     if (!body) return;
@@ -19,9 +19,9 @@ const useGetComprasMes = (body: ComprasFiltroBody) => {
     const fetch = async () => {
       setLoading(true);
       try {
-        console.log("Cuerpo de la solicitud compras_mes.ts:", body);
-        const res: ComprasTotalesFiltradasResponse = await comprasTotalesFiltradas(body);
-        console.log("Compras totales filtradas response:", res.data.compras);
+        const res: ComprasTotalesFiltradasResponse =
+          await comprasTotalesFiltradas(body);
+
         if (res.status === "Success" && res.data) {
           setCompras(res.data.compras);
           setTotal(res.data.total);
@@ -30,17 +30,25 @@ const useGetComprasMes = (body: ComprasFiltroBody) => {
         } else {
           setError(res.message || "Error desconocido");
         }
-      } catch (err: any) {
-        setError(err.message || "Error al obtener compras");
+      } catch (err: unknown) {
+        // Normalizamos cualquier forma de error a string
+        let mensaje = "Error al obtener compras";
+        if (err instanceof Error) {
+          mensaje = err.message;
+        } else if (typeof err === "object" && err && "message" in err) {
+          mensaje = String((err as { message: unknown }).message);
+        }
+        setError(mensaje);
       } finally {
         setLoading(false);
       }
     };
 
     fetch();
-  }, [JSON.stringify(body)]); // detecta cambios en el objeto
+  }, [JSON.stringify(body)]); // detecta cambios en body
 
   return { compras, total, cantidad, loading, error };
 };
 
 export default useGetComprasMes;
+

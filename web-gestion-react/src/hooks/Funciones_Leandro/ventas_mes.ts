@@ -22,11 +22,16 @@ export default function useVentasTotalesPorMes(body: Body) {
           setTotal(res.data.total);
           setError(null);
         } else {
-          // El backend ya viene con status:"Error" y res.message
           setError(res.message || "Error desconocido");
         }
-      } catch (err: any) {
-        setError(err.message || "Error de red");
+      } catch (err: unknown) {
+        let mensaje = "Error de red";
+        if (err instanceof Error) {
+          mensaje = err.message;
+        } else if (typeof err === "object" && err && "message" in err) {
+          mensaje = String((err as { message: unknown }).message);
+        }
+        setError(mensaje);
       } finally {
         setLoading(false);
       }

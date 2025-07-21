@@ -8,9 +8,23 @@ const generateColorPalette = (count: number): string[] =>
 
 const RADIAN = Math.PI / 180;
 
+type LabelProps = {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+};
+
 const renderCustomizedLabel = ({
-  cx, cy, midAngle, innerRadius, outerRadius, percent,
-}: any) => {
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+}: LabelProps) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -29,6 +43,7 @@ const renderCustomizedLabel = ({
     </text>
   );
 };
+
 
 type Props = {
   id_bodega?: number | string | number[];
