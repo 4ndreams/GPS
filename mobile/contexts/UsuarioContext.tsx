@@ -25,8 +25,8 @@ interface UsuarioProviderProps {
 
 export const UsuarioProvider: React.FC<UsuarioProviderProps> = ({ children }) => {
   const [usuario, setUsuario] = useState<Usuario>({
-    perfil: null,
-    nombre: ''
+    perfil: 'tienda', // Perfil por defecto para testing
+    nombre: 'Vendedora Tienda'
   });
   const loading = false; // Por ahora sin persistencia
 

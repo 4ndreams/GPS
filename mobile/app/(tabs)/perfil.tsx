@@ -49,27 +49,39 @@ export default function ProfileScreen() {
         
         {/* Información del usuario actual */}
         {user && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Usuario Actual</Text>
-            <Text style={styles.sectionText}>
-              {user.name || 'Usuario'}
-            </Text>
-            <Text style={styles.sectionText}>
-              {user.email || 'No email'}
-            </Text>
+          <View style={[styles.section, { width: '100%' }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+              <Ionicons name="person-circle" size={24} color="#DC2626" style={{ marginRight: 8 }} />
+              <Text style={styles.sectionTitle}>Usuario Actual</Text>
+            </View>
+            <View style={{ marginLeft: 32 }}>
+              <Text style={styles.sectionText}>
+                <Text style={{ fontWeight: 'bold' }}>Nombre: </Text>
+                {user.name || 'Usuario'}
+              </Text>
+              <Text style={styles.sectionText}>
+                <Text style={{ fontWeight: 'bold' }}>Email: </Text>
+                {user.email || 'No email'}
+              </Text>
+            </View>
           </View>
         )}
         
         {/* Sección de Perfil Asignado */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Perfil Asignado</Text>
-          <Text style={styles.sectionText}>
-            {user?.rol ? 
-              (user.rol === 'fabrica' ? 'Personal de Fábrica' : 
-               user.rol === 'tienda' ? 'Personal de Tienda' : 
-               user.rol === 'admin' ? 'Administrador' : 'Sin asignar') 
-              : 'No hay rol asignado'}
-          </Text>
+        <View style={[styles.section, { width: '100%' }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+            <Ionicons name="shield-checkmark" size={24} color="#DC2626" style={{ marginRight: 8 }} />
+            <Text style={styles.sectionTitle}>Perfil Asignado</Text>
+          </View>
+          <View style={{ marginLeft: 32 }}>
+            <Text style={styles.sectionText}>
+              {user?.rol ? 
+                (user.rol === 'fabrica' ? 'Personal de Fábrica' : 
+                 user.rol === 'tienda' ? 'Personal de Tienda' : 
+                 user.rol === 'admin' ? 'Administrador' : 'Sin asignar') 
+                : 'No hay rol asignado'}
+            </Text>
+          </View>
         </View>
 
         {/* Mostrar opciones específicas según el rol del usuario */}

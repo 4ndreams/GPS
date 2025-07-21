@@ -27,7 +27,8 @@ async function setupServer() {
         'http://localhost:5173', 
         'http://localhost:3000',  // Para la app móvil en web
         'http://192.168.1.105:3000', 
-        'http://192.168.1.105:19000'
+        'http://192.168.1.105:19000',
+        'http://localhost:8081'
       ], 
       credentials: true
     }));
@@ -42,7 +43,7 @@ async function setupServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: false,       // true si usas HTTPS
+        secure: true,       // true si usas HTTPS
         httpOnly: true,
         sameSite: "strict",  // evita CSRF
       },

@@ -1,88 +1,76 @@
 import axios from 'axios';
-import { TokenService } from './tokenService';
-import { config } from './config';
+import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+
+// TokenService adaptado a plataforma
+const TokenService = {
+  async getToken() {
+    if (Platform.OS === 'web') {
+      return localStorage.getItem('token');
+    } else {
+      return await SecureStore.getItemAsync('token');
+    }
+  },
+  async removeToken() {
+    if (Platform.OS === 'web') {
+      localStorage.removeItem('token');
+    } else {
+      await SecureStore.deleteItemAsync('token');
+    }
+  },
+  async refreshTokenManually() {
+    // Aquí deberías implementar la lógica para renovar el token.
+    // Ej: llamar a /auth/refresh con refreshToken
+    return false; // o true si se logró
+  }
+};
 
 const api = axios.create({
-  baseURL: config.API_BASE_URL,
-  timeout: config.REQUEST_TIMEOUT,
+  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor para requests - agregar token de autenticación
+// Interceptor request
 api.interceptors.request.use(
   async (config) => {
-    try {
-      const token = await TokenService.getToken();
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (error) {
-      console.error('Error al obtener token para request:', error);
+    const token = await TokenService.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    console.error('Error en interceptor de request:', error);
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Interceptor para responses - manejar errores de autenticación
+// Interceptor response
 api.interceptors.response.use(
-  (response) => {
-    // Respuesta exitosa, retornar tal como está
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    // Si es error 401 (no autorizado)
-    if (error.response?.status === 401) {
-      // Si no es un request de login/register y no se ha intentado renovar
-      if (!originalRequest._retry && 
-          !originalRequest.url?.includes('/login') && 
-          !originalRequest.url?.includes('/register')) {
-        
-        originalRequest._retry = true;
-        
-        try {
-          // Intentar renovar el token
-          const renewed = await TokenService.refreshTokenManually();
-          if (renewed) {
-            const newToken = await TokenService.getToken();
-            if (newToken) {
-              originalRequest.headers.Authorization = `Bearer ${newToken}`;
-              return api(originalRequest);
-            }
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const renewed = await TokenService.refreshTokenManually();
+        if (renewed) {
+          const newToken = await TokenService.getToken();
+          if (newToken) {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            return api(originalRequest);
           }
-        } catch (refreshError) {
-          console.error('Error al renovar token:', refreshError);
         }
+      } catch (err) {
+        console.error('Error al renovar token:', err);
       }
-      
-      // Si llegamos aquí, la renovación falló o no se pudo hacer
+
       await TokenService.removeToken();
-      console.log('❌ Sesión expirada, token eliminado');
+      console.log('❌ Token eliminado por sesión expirada');
     }
-    
-    // Para otros errores, agregar información adicional de debug
-    if (error.response) {
-      // El servidor respondió con un código de estado fuera del rango 2xx
-      console.error('Error de respuesta:', {
-        status: error.response.status,
-        data: error.response.data,
-        url: error.config?.url
-      });
-    } else if (error.request) {
-      // La petición fue hecha pero no hubo respuesta
-      console.error('Error de red - sin respuesta:', error.message);
-    } else {
-      // Error en la configuración de la petición
-      console.error('Error de configuración:', error.message);
-    }
-    
+
     return Promise.reject(error);
   }
 );
