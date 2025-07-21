@@ -27,14 +27,14 @@ export default function RevisarPedido() {
   const [reportarProblema, setReportarProblema] = useState(false);
   const [cantidadCorrecta, setCantidadCorrecta] = useState(false);
 
-  // Cargar datos reales de la orden desde la API
+  // Cargar datos de la orden desde la API
   useEffect(() => {
     const cargarOrden = async () => {
       try {
         console.log('🔄 Cargando orden con ID:', id);
         setLoading(true);
         
-        // Llamada real a la API
+        // Llamada a la API
         const response = await api.get(`/orden/test/${id}`);
         const ordenData = response.data.data;
         
@@ -46,7 +46,7 @@ export default function RevisarPedido() {
           cantidad: ordenData.cantidad || 0,
           origen: ordenData.origen || 'Fábrica Principal',
           destino: ordenData.destino || 'Tienda',
-          fecha_envio: ordenData.fecha_orden || ordenData.created_at,
+          fecha_envio: ordenData.fecha_envio || ordenData.created_at,
           estado: ordenData.estado || 'En tránsito',
           prioridad: ordenData.prioridad || 'Media',
           transportista: ordenData.transportista || 'No asignado',
@@ -54,7 +54,6 @@ export default function RevisarPedido() {
           observaciones: ordenData.observaciones || null,
           fecha_entrega: ordenData.fecha_entrega || null,
           imagen_url: ordenData.imagen_url || null,
-          // Datos adicionales del producto si están disponibles
           producto: ordenData.producto || null,
         });
         

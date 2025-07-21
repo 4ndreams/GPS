@@ -10,6 +10,7 @@ import passport from "passport";
 import indexRoutes from "./src/routes/index.routes.js";
 import { connectDB } from "./src/config/configDb.js";
 import { testConnection } from "./src/config/initialSetup.js";
+import { initializeDefaultData } from "./src/config/seedData.js";
 import { cookieKey, HOST, PORT } from "./src/config/configEnv.js";
 import {
   passportJwtSetup,
@@ -70,9 +71,10 @@ async function setupServer() {
 
 async function setupAPI() {
   try {
-    await connectDB();       // Conexión a la base de datos
-    await setupServer();     // Servidor Express
-    await testConnection();  // (Opcional) Validación inicial
+    await connectDB();              // Conexión a la base de datos
+    await initializeDefaultData();  // Seeding de datos por defecto
+    await setupServer();            // Servidor Express
+    await testConnection();         // (Opcional) Validación inicial
   } catch (error) {
     console.error("❌ Error al iniciar la API:", error);
   }

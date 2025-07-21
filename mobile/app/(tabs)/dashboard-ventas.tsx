@@ -33,7 +33,7 @@ export default function DashboardVentas() {
     const getDataForTab = () => {
       switch (activeTab) {
         case 'despachos':
-          return data['en-transito'] || [];
+          return data['despachos'] || [];
         case 'pedidos-stock':
           return data['pedidos-stock'] || [];
         case 'recibidos':
