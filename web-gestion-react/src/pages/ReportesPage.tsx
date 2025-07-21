@@ -6,14 +6,33 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
-import { Users, Package, Calendar as CalendarIcon, BarChart3 } from "lucide-react";
+import {
+  Users,
+  Package,
+  Calendar as CalendarIcon,
+  BarChart3
+} from "lucide-react";
 import useGetAllBodega from '@Funciones_Leandro/useGetAllBodegas';
 import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+
+// 📊 Importa el gráfico circular
+import MaterialStockPieChart from '@components/ui/materialstock';
+import ComprasVsVentasPieChart from '@components/ui/comprasvsventas';
 
 export default function ReportesPage() {
   const { bodegas, loading, error } = useGetAllBodega();
@@ -27,14 +46,9 @@ export default function ReportesPage() {
   if (error) return <p>Error: {error}</p>;
 
   const toggleSeleccion = (id: number) => {
-    setSeleccionadas(prev => {
-      const nuevas = prev.includes(id)
-        ? prev.filter(i => i !== id)
-        : [...prev, id];
-
-      console.log("Bodegas seleccionadas:", nuevas);
-      return nuevas;
-    });
+    setSeleccionadas(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
   };
 
   const toggleSeleccionarTodos = (tipo: 'material' | 'relleno') => {
@@ -57,9 +71,18 @@ export default function ReportesPage() {
   const renderGrafico = () => {
     switch (graficoSeleccionado) {
       case 'materiales':
-        return <div className="text-center py-10">Gráfico: Cantidad de materiales en bodega</div>;
+        return (
+          <MaterialStockPieChart
+            id_bodega={datosCheckout.id_bodega}
+            fecha_inicial={datosCheckout.fecha_inicial ?? undefined}
+            fecha_final={datosCheckout.fecha_final ?? undefined}
+          />
+        );
       case 'ventas':
-        return <div className="text-center py-10">Gráfico: Comparación de ventas y compras</div>;
+        return <ComprasVsVentasPieChart
+          fecha_inicial={datosCheckout.fecha_inicial ?? undefined}
+          fecha_final={datosCheckout.fecha_final ?? undefined}
+        />;
       case 'puertas':
         return <div className="text-center py-10">Gráfico: Comparación de puertas vendidas</div>;
       default:
@@ -71,9 +94,7 @@ export default function ReportesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Reportes TERPLAC
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Reportes TERPLAC</h1>
           <p className="text-gray-600 mt-1">
             Análisis y estadísticas del sistema de gestión
           </p>
@@ -81,6 +102,7 @@ export default function ReportesPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Filtros: materiales/rellenos */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -99,7 +121,6 @@ export default function ReportesPage() {
               onChange={(e) => setFiltroNombre(e.target.value)}
               className="w-full p-2 border mb-4 rounded"
             />
-
             <div className="mb-4">
               <label className="text-sm font-medium mr-2">Ordenar por:</label>
               <Select value={ordenSeleccionado} onValueChange={(val) => setOrdenSeleccionado(val as 'nombre' | 'stock')}>
@@ -117,9 +138,10 @@ export default function ReportesPage() {
               {['material', 'relleno'].map((tipo) => {
                 const itemsFiltrados = bodegas
                   .filter(b => b.tipo === tipo && b.nombre.toLowerCase().includes(filtroNombre.toLowerCase()))
-                  .sort((a, b) => ordenSeleccionado === 'nombre'
-                    ? a.nombre.localeCompare(b.nombre)
-                    : b.stock - a.stock
+                  .sort((a, b) =>
+                    ordenSeleccionado === 'nombre'
+                      ? a.nombre.localeCompare(b.nombre)
+                      : b.stock - a.stock
                   );
 
                 if (itemsFiltrados.length === 0) return null;
@@ -140,15 +162,10 @@ export default function ReportesPage() {
                     </div>
                     <div className="space-y-2 ml-4 max-h-48 overflow-y-auto pr-1">
                       {itemsFiltrados.map((bodega) => (
-                        <label
-                          key={bodega.id}
-                          className="flex items-center justify-between p-2 border rounded-md cursor-pointer"
-                        >
+                        <label key={bodega.id} className="flex items-center justify-between p-2 border rounded-md cursor-pointer">
                           <div>
                             <p className="font-medium">{bodega.nombre}</p>
-                            <p className="text-sm text-gray-500">
-                              Stock: {bodega.stock}
-                            </p>
+                            <p className="text-sm text-gray-500">Stock: {bodega.stock}</p>
                           </div>
                           <input
                             type="checkbox"
@@ -166,6 +183,7 @@ export default function ReportesPage() {
           </CardContent>
         </Card>
 
+        {/* Filtro por fechas */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -179,10 +197,7 @@ export default function ReportesPage() {
           <CardContent>
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                >
+                <Button variant="outline" className="w-full justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date?.from ? (
                     date.to ? (
@@ -199,17 +214,22 @@ export default function ReportesPage() {
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={new Date()}
                   selected={date}
                   onSelect={setDate}
                   numberOfMonths={2}
+                  defaultMonth={new Date()}
+                  captionLayout="dropdown"
+                  disabled={{ after: new Date() }}
                 />
+
+
               </PopoverContent>
             </Popover>
           </CardContent>
         </Card>
       </div>
 
+      {/* Gráfico dinámico */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -226,7 +246,7 @@ export default function ReportesPage() {
               onClick={() => setGraficoSeleccionado('materiales')}
               className={`px-3 py-1 rounded-t-md ${graficoSeleccionado === 'materiales' ? 'border-b-2 border-blue-600 font-semibold' : 'text-gray-500'}`}
             >
-              Materiales
+              Cantidad de compras de Materiales/Rellenos
             </button>
             <button
               onClick={() => setGraficoSeleccionado('ventas')}
@@ -241,16 +261,18 @@ export default function ReportesPage() {
               Puertas Vendidas
             </button>
           </div>
-          <div className="min-h-[200px]">
-            {renderGrafico()}
-          </div>
+          <div className="min-h-[200px]">{renderGrafico()}</div>
         </CardContent>
       </Card>
 
+      {/* Debug */}
       <div className="p-4 bg-gray-100 rounded-md">
         <h4 className="text-sm font-bold">Checkout JSON:</h4>
-        <pre className="text-xs bg-white p-2 mt-2 rounded border">{JSON.stringify(datosCheckout, null, 2)}</pre>
+        <pre className="text-xs bg-white p-2 mt-2 rounded border">
+          {JSON.stringify(datosCheckout, null, 2)}
+        </pre>
       </div>
     </div>
   );
 }
+
