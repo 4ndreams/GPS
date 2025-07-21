@@ -118,6 +118,19 @@ const MisCotizaciones: React.FC = () => {
     }
   };
 
+  const formatearPrecio = (precio: number): string => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(precio);
+  };
+
+  const mostrarPrecio = (cotizacion: CotizacionResponse): boolean => {
+    return cotizacion.estado !== 'Solicitud Recibida' && cotizacion.precio !== undefined && cotizacion.precio > 0;
+  };
+
   if (loading) {
     return (
       <div className="cotizaciones-container">
@@ -252,7 +265,15 @@ const MisCotizaciones: React.FC = () => {
                 <i className={`bi ${getEstadoIcon(cotizacion.estado)}`}></i>
                 <span className="estado-text">{cotizacion.estado}</span>
               </div>
-              <span className="cotizacion-id">#{cotizacion.id_producto_personalizado}</span>
+              <div className="header-right">
+                {mostrarPrecio(cotizacion) && (
+                  <div className="precio-badge">
+                    <i className="bi bi-currency-dollar"></i>
+                    <span className="precio-text">{formatearPrecio(cotizacion.precio!)}</span>
+                  </div>
+                )}
+                <span className="cotizacion-id">#{cotizacion.id_producto_personalizado}</span>
+              </div>
             </div>
 
             {/* Contenido principal */}
