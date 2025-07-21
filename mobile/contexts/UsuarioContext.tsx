@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 
 // Tipos
 export type TipoPerfil = 'fabrica' | 'tienda' | null;
@@ -25,12 +25,12 @@ interface UsuarioProviderProps {
 
 export const UsuarioProvider: React.FC<UsuarioProviderProps> = ({ children }) => {
   const [usuario, setUsuario] = useState<Usuario>({
-    perfil: null,
-    nombre: ''
+    perfil: 'tienda', // Perfil por defecto para testing
+    nombre: 'Vendedora Tienda'
   });
   const loading = false; // Por ahora sin persistencia
 
-  const cambiarPerfil = async (perfil: TipoPerfil, nombre: string = ''): Promise<void> => {
+  const cambiarPerfil = useCallback(async (perfil: TipoPerfil, nombre: string = ''): Promise<void> => {
     try {
       // Actualizar estado
       setUsuario({
@@ -42,9 +42,9 @@ export const UsuarioProvider: React.FC<UsuarioProviderProps> = ({ children }) =>
     } catch (error) {
       console.error('Error al cambiar perfil:', error);
     }
-  };
+  }, []);
 
-  const limpiarPerfil = async (): Promise<void> => {
+  const limpiarPerfil = useCallback(async (): Promise<void> => {
     try {
       setUsuario({
         perfil: null,
@@ -55,7 +55,7 @@ export const UsuarioProvider: React.FC<UsuarioProviderProps> = ({ children }) =>
     } catch (error) {
       console.error('Error al limpiar perfil:', error);
     }
-  };
+  }, []);
 
   const value: UsuarioContextType = {
     usuario,

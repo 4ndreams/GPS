@@ -2,6 +2,7 @@ import { Text, View, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../styles/indexStyles'; 
 import { useEffect, useState } from 'react';
+import api from '../../services/api';
 
 export default function Home() {
   console.log('🚀 Componente Home iniciando...');
@@ -23,63 +24,20 @@ export default function Home() {
       setLoading(true);
       setError(null);
       
-      console.log('Iniciando fetch...');
+      console.log('🌐 Iniciando fetch usando servicio API configurado...');
       
-      // URLs para probar según el tipo de dispositivo
-      const urls = [
-        'http://192.168.1.105:3000/api/orden/',  // Para dispositivo físico
-        'http://10.0.2.2:3000/api/orden/',      // Para emulador Android
-        'http://localhost:3000/api/orden/'      // Para simulador iOS
-      ];
+      // Usar el servicio API configurado con la URL correcta
+      const response = await api.get('/orden/test');
       
-      let response;
-      let lastError;
+      console.log('✅ Respuesta del API:', response.data);
       
-      for (const url of urls) {
-        try {
-          console.log(`Probando URL: ${url}`);
-          
-          // Crear un timeout para evitar que la petición se cuelgue
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos
-          
-          response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
-            signal: controller.signal,
-          });
-          
-          clearTimeout(timeoutId);
-          
-          console.log(`URL ${url} - Status: ${response.status}, OK: ${response.ok}`);
-          
-          if (response.ok) {
-            break; 
-          }
-        } catch (err) {
-          console.log(`Error con URL ${url}:`, err);
-          lastError = err;
-          continue; 
-        }
-      }
-      
-      if (!response || !response.ok) {
-        throw lastError || new Error('No se pudo conectar con ninguna URL');
-      }
-      
-      const result = await response.json();
-      console.log('Respuesta completa:', result);
-      
-      // Si el backend devuelve un objeto con estructura {status, message, data}
-      const data = result.data || result;
+      // El backend devuelve {status, message, data}
+      const data = response.data.data || [];
       setOrdenes(data);
-      console.log('Datos de órdenes:', data);
-      console.log('Fetch completado exitosamente');
+      console.log('📋 Datos de órdenes cargados:', data.length);
+      console.log('✨ Fetch completado exitosamente');
     } catch (error) {
-      console.error('Error detallado:', error);
+      console.error('❌ Error detallado:', error);
       setError(error instanceof Error ? error.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -90,10 +48,13 @@ export default function Home() {
   // Datos para la tabla de resumen
   const summaryData = [
     { title: 'Total', value: ordenes.length },
-    { title: 'Entregados', value: ordenes.filter((orden: any) => orden.estado === 'Entregado').length },
-    { title: 'Enviados', value: ordenes.filter((orden: any) => orden.estado === 'Enviado').length },
-    { title: 'Pendientes', value: ordenes.filter((orden: any) => orden.estado === 'Pendiente').length },
-    { title: 'Cancelados', value: ordenes.filter((orden: any) => orden.estado === 'Cancelado').length },
+    { title: 'Pendiente', value: ordenes.filter((orden: any) => orden.estado === 'Pendiente').length },
+    { title: 'En producción', value: ordenes.filter((orden: any) => orden.estado === 'En producción').length },
+    { title: 'Fabricada', value: ordenes.filter((orden: any) => orden.estado === 'Fabricada').length },
+    { title: 'En tránsito', value: ordenes.filter((orden: any) => orden.estado === 'En tránsito').length },
+    { title: 'Recibido', value: ordenes.filter((orden: any) => orden.estado === 'Recibido').length },
+    { title: 'Recibido con problemas', value: ordenes.filter((orden: any) => orden.estado === 'Recibido con problemas').length },
+    { title: 'Cancelado', value: ordenes.filter((orden: any) => orden.estado === 'Cancelado').length },
   ];
 
 
