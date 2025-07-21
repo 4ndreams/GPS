@@ -33,12 +33,35 @@ export default function DashboardFabrica() {
   };
 
   const handleCrearDespacho = async () => {
-    await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho);
-    
-    // Limpiar formulario después del éxito
-    setOrdenesSeleccionadas([]);
-    setTransportista('');
-    setObservacionesDespacho('');
+    // Validar que se haya ingresado la información requerida
+    if (!transportista.trim()) {
+      alert('Por favor, ingresa el nombre del transportista');
+      return;
+    }
+
+    if (ordenesSeleccionadas.length === 0) {
+      alert('Por favor, selecciona al menos una orden para el despacho');
+      return;
+    }
+
+    try {
+      // Crear el despacho con la información completa
+      await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho);
+      
+      // Cambiar estado de todas las órdenes seleccionadas a "En tránsito" y agregar transportista
+      for (const ordenId of ordenesSeleccionadas) {
+        await cambiarEstado(ordenId, 'En tránsito', { 
+          transportista: transportista.trim() 
+        });
+      }
+      
+      // Limpiar formulario después del éxito
+      setOrdenesSeleccionadas([]);
+      setTransportista('');
+      setObservacionesDespacho('');
+    } catch (error) {
+      console.error('Error al crear despacho y cambiar estados:', error);
+    }
   };
 
   const renderFabricaContent = (activeTab: string, data: any) => {

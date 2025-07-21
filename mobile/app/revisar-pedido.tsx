@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useOrderActions } from '../hooks/useOrderActions';
+import api from '../services/api';
 
 // Componente para mostrar los detalles de una orden
 export default function RevisarPedido() {
@@ -26,38 +27,48 @@ export default function RevisarPedido() {
   const [reportarProblema, setReportarProblema] = useState(false);
   const [cantidadCorrecta, setCantidadCorrecta] = useState(false);
 
-  // Simular carga de datos de la orden
+  // Cargar datos reales de la orden desde la API
   useEffect(() => {
     const cargarOrden = async () => {
       try {
-        // Aquí harías la llamada real a la API
-        // const response = await api.obtenerOrden(id);
+        console.log('🔄 Cargando orden con ID:', id);
+        setLoading(true);
         
-        // Por ahora simulamos datos
-        setTimeout(() => {
-          setOrden({
-            id_orden: id,
-            cantidad: 10,
-            origen: 'Fabrica Central',
-            destino: 'Tienda Norte',
-            fecha_envio: '2025-07-21T14:30:00.000Z',
-            estado: 'En tránsito',
-            prioridad: 'Media',
-            transportista: null,
-            tipo: 'normal',
-            observaciones: null,
-            fecha_entrega: null,
-            imagen_url: null // Una sola imagen por pedido
-          });
-          setLoading(false);
-        }, 1000);
+        // Llamada real a la API
+        const response = await api.get(`/orden/test/${id}`);
+        const ordenData = response.data.data;
+        
+        console.log('✅ Orden cargada:', ordenData);
+        
+        // Mapear los datos de la API al formato esperado
+        setOrden({
+          id_orden: ordenData.id_orden,
+          cantidad: ordenData.cantidad || 0,
+          origen: ordenData.origen || 'Fábrica Principal',
+          destino: ordenData.destino || 'Tienda',
+          fecha_envio: ordenData.fecha_orden || ordenData.created_at,
+          estado: ordenData.estado || 'En tránsito',
+          prioridad: ordenData.prioridad || 'Media',
+          transportista: ordenData.transportista || 'No asignado',
+          tipo: ordenData.tipo || 'normal',
+          observaciones: ordenData.observaciones || null,
+          fecha_entrega: ordenData.fecha_entrega || null,
+          imagen_url: ordenData.imagen_url || null,
+          // Datos adicionales del producto si están disponibles
+          producto: ordenData.producto || null,
+        });
+        
       } catch (error) {
-        console.error('Error cargando orden:', error);
+        console.error('❌ Error cargando orden:', error);
+        Alert.alert('Error', 'No se pudo cargar la información del pedido');
+      } finally {
         setLoading(false);
       }
     };
 
-    cargarOrden();
+    if (id) {
+      cargarOrden();
+    }
   }, [id]);
 
   const handleConfirmarRecepcion = async () => {
