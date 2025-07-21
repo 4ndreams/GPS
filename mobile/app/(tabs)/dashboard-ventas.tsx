@@ -1,50 +1,32 @@
-import React, { useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
-  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { BaseDashboard } from '../../components/BaseDashboard';
 import { BaseOrderCard } from '../../components/BaseOrderCard';
 import { getConfigForProfile } from '../../config/dashboardConfig';
-import { useOrderActions } from '../../hooks/useOrderActions';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { OrdenVentas, PedidoStock } from '../../types/dashboard';
 
 export default function DashboardVentas() {
   const config = getConfigForProfile('tienda');
   const { data, loading, refreshing, onRefresh } = useDashboardData(config);
-  const { procesando, confirmarRecepcion } = useOrderActions(onRefresh);
-  
-  const [observacionesRecepcion, setObservacionesRecepcion] = useState<{[key: number]: string}>({});
-  const [reportarProblema, setReportarProblema] = useState<{[key: number]: boolean}>({});
+
+  // Refrescar datos cuando la pantalla recibe foco (ej: al volver de revisar-pedido)
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🔄 Dashboard de ventas recibió foco, refrescando datos...');
+      onRefresh();
+    }, [onRefresh])
+  );
 
   const crearNuevoPedidoStock = () => {
     router.push('/nuevo-pedido-stock');
-  };
-
-  const handleConfirmarRecepcion = async (id_orden: number) => {
-    const conProblema = reportarProblema[id_orden] || false;
-    const observaciones = observacionesRecepcion[id_orden] || '';
-    
-    await confirmarRecepcion(id_orden, conProblema, observaciones);
-    
-    // Limpiar formulario después del éxito
-    setObservacionesRecepcion(prev => {
-      const nuevo = { ...prev };
-      delete nuevo[id_orden];
-      return nuevo;
-    });
-    setReportarProblema(prev => {
-      const nuevo = { ...prev };
-      delete nuevo[id_orden];
-      return nuevo;
-    });
   };
 
   const renderVentasContent = (activeTab: string, data: any) => {
@@ -95,72 +77,24 @@ export default function DashboardVentas() {
                 {/* Contenido específico para despachos en tránsito */}
                 {activeTab === 'despachos' && (
                   <View>
-                    {/* Toggle de problema */}
+                    {/* Botón de revisar pedido */}
                     <TouchableOpacity
-                      style={[
-                        styles.problemaToggle,
-                        reportarProblema[orden.id_orden] && styles.problemaToggleActive
-                      ]}
-                      onPress={() => setReportarProblema(prev => ({
-                        ...prev,
-                        [orden.id_orden]: !prev[orden.id_orden]
-                      }))}
+                      style={styles.revisarButton}
+                      onPress={() => {
+                        router.push({
+                          pathname: '/revisar-pedido',
+                          params: { id: orden.id_orden }
+                        });
+                      }}
                     >
                       <Ionicons 
-                        name={reportarProblema[orden.id_orden] ? "warning" : "warning-outline"} 
+                        name="eye" 
                         size={16} 
-                        color={reportarProblema[orden.id_orden] ? "#FFFFFF" : "#F59E0B"} 
+                        color="#FFFFFF" 
                       />
-                      <Text style={[
-                        styles.problemaToggleText,
-                        reportarProblema[orden.id_orden] && styles.problemaToggleTextActive
-                      ]}>
-                        {reportarProblema[orden.id_orden] ? 'Reportar problema' : 'Sin problemas'}
+                      <Text style={styles.revisarButtonText}>
+                        Revisar Pedido
                       </Text>
-                    </TouchableOpacity>
-
-                    {/* Campo de observaciones */}
-                    <TextInput
-                      style={styles.observacionesInput}
-                      placeholder={
-                        reportarProblema[orden.id_orden] 
-                          ? "Describe el problema encontrado..." 
-                          : "Observaciones adicionales..."
-                      }
-                      placeholderTextColor="#666"
-                      value={observacionesRecepcion[orden.id_orden] || ''}
-                      onChangeText={(text) => setObservacionesRecepcion(prev => ({
-                        ...prev,
-                        [orden.id_orden]: text
-                      }))}
-                      maxLength={300}
-                      multiline
-                      numberOfLines={2}
-                    />
-
-                    {/* Botón de confirmar recepción */}
-                    <TouchableOpacity
-                      style={[
-                        styles.confirmarButton,
-                        reportarProblema[orden.id_orden] && styles.confirmarButtonProblema
-                      ]}
-                      onPress={() => handleConfirmarRecepcion(orden.id_orden)}
-                      disabled={procesando[orden.id_orden]}
-                    >
-                      {procesando[orden.id_orden] ? (
-                        <ActivityIndicator color="#FFFFFF" size="small" />
-                      ) : (
-                        <>
-                          <Ionicons 
-                            name={reportarProblema[orden.id_orden] ? "warning" : "checkmark-circle"} 
-                            size={16} 
-                            color="#FFFFFF" 
-                          />
-                          <Text style={styles.confirmarButtonText}>
-                            {reportarProblema[orden.id_orden] ? 'Confirmar con Problemas' : 'Confirmar Recepción'}
-                          </Text>
-                        </>
-                      )}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -231,44 +165,8 @@ const styles = StyleSheet.create({
   ordenesContainer: {
     gap: 12,
   },
-  problemaToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#F59E0B',
-    backgroundColor: '#FFFBEB',
-    marginBottom: 12,
-  },
-  problemaToggleActive: {
-    backgroundColor: '#F59E0B',
-    borderColor: '#F59E0B',
-  },
-  problemaToggleText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#F59E0B',
-    marginLeft: 8,
-  },
-  problemaToggleTextActive: {
-    color: '#FFFFFF',
-  },
-  observacionesInput: {
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    color: '#374151',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 12,
-    textAlignVertical: 'top',
-    minHeight: 60,
-  },
-  confirmarButton: {
-    backgroundColor: '#10B981',
+  revisarButton: {
+    backgroundColor: '#3B82F6',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -276,10 +174,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
   },
-  confirmarButtonProblema: {
-    backgroundColor: '#F59E0B',
-  },
-  confirmarButtonText: {
+  revisarButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 'bold',

@@ -242,7 +242,9 @@ export default function NuevoPedidoStock() {
                   style={styles.picker}
                 >
                   <Picker.Item label="Seleccionar producto" value={null} />
-                  {productos.map(producto => (
+                  {productos
+                  .filter(producto => producto && producto.nombre_producto && producto.nombre_producto.trim() !== '') 
+                  .map(producto => (
                     <Picker.Item
                       key={producto.id_producto}
                       label={producto.nombre_producto}
