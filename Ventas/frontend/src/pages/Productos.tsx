@@ -4,15 +4,39 @@ import { Link } from "react-router-dom";
 import { getImagePath } from "@utils/getImagePath";
 import "@styles/Productos.css";
 
+
 interface Product {
   id_producto: number;
   nombre_producto: string;
   precio: number;
   imagen?: string;
   tipo?: { nombre_tipo: string };
+  stock?: number;
 }
 
-function Productos() {
+
+interface CartItem {
+  id: number;
+  nombre: string;
+  precio: number;
+  imagen: string;
+  categoria: string;
+  quantity: number;
+}
+
+interface ProductosProps {
+  addToCart: (product: CartItem) => void;
+  cartItems: CartItem[];
+}
+
+
+function Productos({ addToCart, cartItems }: ProductosProps) {
+  // Mapear el carrito a { [id]: cantidad }
+  const cartMap = cartItems.reduce((acc, item) => {
+    acc[item.id] = item.quantity;
+    return acc;
+  }, {} as { [key: number]: number });
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +45,8 @@ function Productos() {
   const [maxPrice, setMaxPrice] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("todos");
   const [priceError, setPriceError] = useState("");
+
+
 
   const validatePrices = () => {
     if (minPrice && maxPrice) {
@@ -48,7 +74,6 @@ function Productos() {
             categoria: categoryFilter !== "todos" ? categoryFilter : undefined,
           },
         });
-
         setProducts(response.data.data);
       } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -57,7 +82,6 @@ function Productos() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, [nameFilter, minPrice, maxPrice, categoryFilter]);
 
@@ -68,6 +92,21 @@ function Productos() {
     setCategoryFilter("todos");
     setPriceError("");
   };
+
+  const handleAddToCart = (product: Product) => {
+    const enCarrito = cartMap[product.id_producto] || 0;
+    if (enCarrito < (product.stock ?? 0)) {
+      addToCart({
+        id: product.id_producto,
+        nombre: product.nombre_producto,
+        precio: product.precio,
+        imagen: product.imagen || "default.jpeg",
+        categoria: product.tipo?.nombre_tipo || "otros",
+        quantity: 1,
+      });
+    }
+  };
+
 
   return (
     <div className="productos-page">
@@ -126,8 +165,8 @@ function Productos() {
                 className="categoria-select"
               >
                 <option value="todos">Todos</option>
-                <option value="puerta">Puertas</option>
-                <option value="moldura">Molduras</option>
+                <option value="puertas">Puertas</option>
+                <option value="molduras">Molduras</option>
               </select>
             </label>
           </div>
@@ -144,11 +183,9 @@ function Productos() {
               </div>
             );
           }
-          
           if (error) {
             return <div className="error-message">Error: {error}</div>;
           }
-          
           if (products.length === 0) {
             return (
               <div className="no-resultados">
@@ -159,9 +196,11 @@ function Productos() {
               </div>
             );
           }
-          
           return products.map((product) => {
             const tipo = product.tipo?.nombre_tipo || "otros";
+            const stockDisponible = product.stock ?? 0;
+            const enCarrito = cartMap[product.id_producto] || 0;
+            const agotado = stockDisponible - enCarrito <= 0;
             return (
               <div key={product.id_producto} className="producto-card">
                 <Link to={`/product/${product.id_producto}`} className="producto-link">
@@ -170,6 +209,7 @@ function Productos() {
                     <img
                       src={getImagePath(`${tipo}/${product.imagen}`)}
                       alt={product.nombre_producto}
+                      className={agotado ? 'img-agotada' : ''}
                       onError={(e) => {
                         e.currentTarget.src = "/img/puertas/default.jpeg";
                       }}
@@ -180,8 +220,19 @@ function Productos() {
                     <p className="producto-precio">
                       ${Number(product.precio).toLocaleString("es-CL")}
                     </p>
+                    <p className="producto-stock">
+                      Stock disponible: {stockDisponible - enCarrito}
+                    </p>
                   </div>
                 </Link>
+                <button
+                  className="add-to-cart-btn"
+                  onClick={() => handleAddToCart(product)}
+                  disabled={agotado}
+                  style={{ marginTop: 8, width: '100%', cursor: agotado ? 'not-allowed' : 'pointer' }}
+                >
+                  {agotado ? 'Sin stock' : 'Agregar al carrito'}
+                </button>
               </div>
             );
           });
