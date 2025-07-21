@@ -40,7 +40,7 @@ function Productos() {
       if (!validatePrices()) return;
       try {
         setLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/all`, {
           params: {
             nombre: nameFilter || undefined,
             minPrecio: minPrice || undefined,
