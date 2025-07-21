@@ -5,7 +5,7 @@ import { AppDataSource } from "../config/configDb.js";
 export async function getOrdenesService() {
   try {
     const repo = AppDataSource.getRepository(Orden);
-    const ordenes = await repo.find({ relations: ["producto", "usuario"] });
+    const ordenes = await repo.find({ relations: ["producto", "usuario", "bodega"] });
     return [ordenes, null];
   } catch (error) {
     console.error("Error al obtener órdenes:", error);
@@ -16,7 +16,7 @@ export async function getOrdenesService() {
 export async function getOrdenByIdService(id) {
   try {
     const repo = AppDataSource.getRepository(Orden);
-    const orden = await repo.findOne({ where: { id_orden: id }, relations: ["producto", "usuario"] });
+    const orden = await repo.findOne({ where: { id_orden: id }, relations: ["producto", "usuario", "bodega"] });
 
     if (!orden) return [null, "Orden no encontrada"];
     return [orden, null];
@@ -35,6 +35,10 @@ export async function createOrdenService(body) {
       destino: body.destino,
       fecha_envio: new Date(body.fecha_envio),
       estado: body.estado || "Pendiente",
+      prioridad: body.prioridad || "Media",
+      transportista: body.transportista || null,
+      tipo: body.tipo || "normal",
+      observaciones: body.observaciones || null,
       id_producto: body.id_producto,
       id_usuario: body.id_usuario,
       id_bodega: body.id_bodega,
@@ -62,7 +66,12 @@ export async function updateOrdenService(id, body) {
       origen: body.origen ?? orden.origen,
       destino: body.destino ?? orden.destino,
       fecha_envio: body.fecha_envio ? new Date(body.fecha_envio) : orden.fecha_envio,
+      fecha_entrega: body.fecha_entrega ? new Date(body.fecha_entrega) : orden.fecha_entrega,
       estado: body.estado ?? orden.estado,
+      prioridad: body.prioridad ?? orden.prioridad,
+      transportista: body.transportista ?? orden.transportista,
+      tipo: body.tipo ?? orden.tipo,
+      observaciones: body.observaciones ?? orden.observaciones,
       id_producto: body.id_producto ?? orden.id_producto,
       id_usuario: body.id_usuario ?? orden.id_usuario,
       id_bodega: body.id_bodega ?? orden.id_bodega,
@@ -73,12 +82,38 @@ export async function updateOrdenService(id, body) {
 
     const ordenActualizada = await repo.findOne({
       where: { id_orden: id },
-      relations: ["producto", "usuario"],
+      relations: ["producto", "usuario", "bodega"],
     });
 
     return [ordenActualizada, null];
   } catch (error) {
     console.error("Error al actualizar orden:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+export async function getOrdenesByFiltersService(filters) {
+  try {
+    const repo = AppDataSource.getRepository(Orden);
+    const queryBuilder = repo.createQueryBuilder('orden')
+      .leftJoinAndSelect('orden.producto', 'producto')
+      .leftJoinAndSelect('orden.usuario', 'usuario')
+      .leftJoinAndSelect('orden.bodega', 'bodega');
+    
+    if (filters.estado) {
+      // Manejar múltiples estados separados por coma
+      const estados = filters.estado.split(',').map(e => e.trim());
+      queryBuilder.andWhere('orden.estado IN (:...estados)', { estados });
+    }
+    
+    if (filters.tipo) {
+      queryBuilder.andWhere('orden.tipo = :tipo', { tipo: filters.tipo });
+    }
+    
+    const ordenes = await queryBuilder.getMany();
+    return [ordenes, null];
+  } catch (error) {
+    console.error("Error al obtener órdenes filtradas:", error);
     return [null, "Error interno del servidor"];
   }
 }

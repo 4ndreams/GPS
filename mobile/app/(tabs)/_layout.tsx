@@ -41,6 +41,22 @@ export default function TabLayout() {
     []
   );
 
+  // Botón de dashboard de ventas
+  const renderSalesIcon = useCallback(
+    ({ color, size }: { color: string; size: number }) => (
+      <Ionicons name="storefront-outline" size={size} color={color} />
+    ),
+    []
+  );
+
+  // Botón de flujo de despacho
+  const renderFactoryIcon = useCallback(
+    ({ color, size }: { color: string; size: number }) => (
+      <Ionicons name="cube-outline" size={size} color={color} />
+    ),
+    []
+  );
+
   // Botón de perfiles
   const renderProfileIcon = useCallback(
     ({ color, size }: { color: string; size: number }) => (
@@ -87,15 +103,38 @@ export default function TabLayout() {
         }}
       />
       
-      {/* Tab para crear minuta - siempre presente pero oculto si no es fábrica */}
+      {/* Tab para Dashboard de Ventas */}
+      <Tabs.Screen
+        name="dashboard-ventas"
+        options={{
+          title: 'Dashboard Ventas',
+          tabBarIcon: renderSalesIcon,
+          tabBarAccessibilityLabel: 'Dashboard de ventas',
+          // Ocultar del tab bar si no es perfil de tienda
+          tabBarButton: usuario.perfil === 'tienda' ? undefined : () => null,
+        }}
+      />
+
+      {/* Tab para Flujo de Despacho */}
+      <Tabs.Screen
+        name="dashboard-fabrica"
+        options={{
+          title: 'Flujo de despacho',
+          tabBarIcon: renderFactoryIcon,
+          tabBarAccessibilityLabel: 'Flujo de despacho de fábrica',
+          // Ocultar del tab bar si no es perfil de fábrica
+          tabBarButton: usuario.perfil === 'fabrica' ? undefined : () => null,
+        }}
+      />
+      {/* Tab para crear minuta - OCULTO - no se usa actualmente */}
       <Tabs.Screen
         name="crear-minuta"
         options={{
           title: 'Nueva Minuta',
           tabBarIcon: renderAddIcon,
           tabBarAccessibilityLabel: 'Crear nueva minuta',
-          // Ocultar del tab bar si no es perfil de fábrica
-          tabBarButton: usuario.perfil === 'fabrica' ? undefined : () => null,
+          // Completamente oculto del tab bar
+          tabBarButton: () => null,
         }}
       />
       
