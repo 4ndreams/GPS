@@ -16,7 +16,7 @@ import Navbar from './components/Navbar'
 
 import './App.css'
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { useEffect, useState } from "react";
+import {  useRef ,useEffect, useState } from "react";
 import { getUserProfile } from './services/userService.ts';
 
 function App() {

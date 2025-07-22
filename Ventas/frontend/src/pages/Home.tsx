@@ -1,16 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, forwardRef, Ref } from 'react';
 import TerplacFoto1 from '../assets/TerplacFoto1.png';
 import '../styles/Home.css';
 import '../styles/animations.css';
 import Notification from '../components/Notification';
 
+interface HomeProps {
+  contactoRef?: Ref<HTMLElement>;
+}
 
-function Home() {
+// Usamos forwardRef para pasar el ref desde App.tsx hacia la sección contacto
+const Home = forwardRef<HTMLElement, HomeProps>((props, ref) => {
   const heroContentRef = useRef<HTMLDivElement>(null);
 
   const cardRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
   const [visibleCards, setVisibleCards] = useState([false, false]);
-  const [showNotif, setShowNotif] = useState(false);
 
   const nosotrosRefs = [
     useRef<HTMLDivElement>(null),
@@ -19,7 +22,7 @@ function Home() {
   ];
   const [visibleNosotros, setVisibleNosotros] = useState([false, false, false]);
 
-  // Estado para los datos del formulario de contacto
+  // Estado para formulario contacto
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -27,7 +30,7 @@ function Home() {
     mensaje: ''
   });
 
-  // Maneja cambios en inputs
+  // Cambios en inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
@@ -35,16 +38,14 @@ function Home() {
     });
   };
 
-  // Maneja envío de formulario
+  // Envío formulario
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
       const res = await fetch(`${import.meta.env.VITE_BASE}/api/contacto`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
 
@@ -77,7 +78,7 @@ function Home() {
 
     cardRefs.forEach((ref, idx) => {
       if (!ref.current) return;
-      const observer = new window.IntersectionObserver(
+      const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach(entry => {
             setVisibleCards(prev => {
@@ -101,7 +102,7 @@ function Home() {
 
     nosotrosRefs.forEach((ref, idx) => {
       if (!ref.current) return;
-      const observer = new window.IntersectionObserver(
+      const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach(entry => {
             setVisibleNosotros(prev => {
@@ -132,9 +133,9 @@ function Home() {
           <div className="hero-buttons">
             <button
               onClick={() => {
-                const contacto = document.getElementById('productos-destacados');
-                if (contacto) {
-                  contacto.scrollIntoView({ behavior: 'smooth' });
+                const productosDestacados = document.getElementById('productos-destacados');
+                if (productosDestacados) {
+                  productosDestacados.scrollIntoView({ behavior: 'smooth' });
                 }
               }}
             >
@@ -142,9 +143,14 @@ function Home() {
             </button>
             <button
               onClick={() => {
-                const contacto = document.getElementById('contacto');
-                if (contacto) {
-                  contacto.scrollIntoView({ behavior: 'smooth' });
+                if (ref && 'current' in ref && ref.current) {
+                  ref.current.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  // fallback si no se pasa ref
+                  const contacto = document.getElementById('contacto');
+                  if (contacto) {
+                    contacto.scrollIntoView({ behavior: 'smooth' });
+                  }
                 }
               }}
             >
@@ -153,7 +159,7 @@ function Home() {
           </div>
         </div>
       </section>
-    
+
       <section id='productos-destacados' className='products-section'>
         <div className="hero-content-mobile">
           <h1 style={{ color: 'black' }}>Nuestros Productos</h1>
@@ -182,6 +188,7 @@ function Home() {
           </div>
         </div>
       </section>
+
       <section className='products-section'>
         <div className="hero-content-mobile">
           <h1 style={{ color: 'black' }}>Productos destacados</h1>
@@ -191,6 +198,7 @@ function Home() {
           <button onClick={() => window.location.href = '/productos'}>Ver todos los productos</button>
         </div>
       </section>
+
       <section className='nosotros-section black-bg'>
         <div className="hero-content-mobile">
           <h1 style={{ color: 'white' }}>¿Por qué elegir Terplac?</h1>
@@ -230,7 +238,7 @@ function Home() {
         </div>
       </section>
 
-      <section id='contacto' className='nosotros-section contacto-section'>
+      <section id='contacto' className='nosotros-section contacto-section' ref={ref}>
         <div className="contacto-flex">
           <div className="contacto-info">
             <div className="hero-content-mobile">
@@ -321,10 +329,10 @@ function Home() {
       <section className="nosotros-section black-bg footer-section">
         <div className="footer-container">
           <div className="footer-col footer-logo-desc">
-          <h1>TERPLAC</h1>
-          <p className="footer-desc">
-            Especialistas en puertas y molduras de alta calidad para transformar cualquier espacio.
-          </p>
+            <h1>TERPLAC</h1>
+            <p className="footer-desc">
+              Especialistas en puertas y molduras de alta calidad para transformar cualquier espacio.
+            </p>
           </div>
           <div className="footer-col">
             <h3>Productos</h3>
@@ -359,6 +367,6 @@ function Home() {
       </section>
     </div>
   );
-}
+});
 
 export default Home;
