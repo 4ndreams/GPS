@@ -68,12 +68,13 @@ export default function UsersManagement() {
       user.apellidos?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.rut?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesRole = selectedRole === '' || selectedRole === 'todos' || user.rol === selectedRole;
-    
-    const userStatus = !user.flag_blacklist && user.correoVerificado ? 'activo' : 'inactivo';
+
+    // Estado: activo si NO está en blacklist, inactivo si está en blacklist
+    const userStatus = user.flag_blacklist ? 'inactivo' : 'activo';
     const matchesStatus = selectedStatus === '' || selectedStatus === 'todos' || userStatus === selectedStatus;
-    
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -285,8 +286,8 @@ export default function UsersManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos los estados</SelectItem>
-                  <SelectItem value="Activo">Activo</SelectItem>
-                  <SelectItem value="Inactivo">Inactivo</SelectItem>
+                  <SelectItem value="activo">Activo</SelectItem>
+                  <SelectItem value="inactivo">Inactivo</SelectItem>
                 </SelectContent>
               </Select>
             </div>
