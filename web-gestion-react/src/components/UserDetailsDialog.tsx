@@ -164,21 +164,7 @@ export default function UserDetailsDialog({ isOpen, onClose, userId }: UserDetai
 
         {/* Información adicional */}
         <Card>
-          <CardContent className="pt-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-500">Email Verificado:</span>
-              <div className="flex items-center space-x-1">
-                {user.correoVerificado ? (
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                ) : (
-                  <X className="h-4 w-4 text-red-600" />
-                )}
-                <span className="text-sm">
-                  {user.correoVerificado ? 'Verificado' : 'No verificado'}
-                </span>
-              </div>
-            </div>
-            
+          <CardContent className="pt-4 space-y-3">                        
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-500">Bloqueado:</span>
               <div className="flex items-center space-x-1">

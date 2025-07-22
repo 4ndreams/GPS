@@ -145,11 +145,32 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
         });
         setValidationErrors({});
       } else {
-        setError(result.error || 'Error al crear usuario');
+        // Mostrar error con detalles si están disponibles
+        let errorMessage = result.error || 'Error al crear usuario';
+        
+        // Si hay detalles adicionales del servidor, incluirlos
+        if (result.details) {
+          errorMessage = `${errorMessage}: ${result.details}`;
+        }
+        
+        setError(errorMessage);
       }
     } catch (error) {
       console.error('Error creating user:', error);
-      setError('Error de conexión al crear usuario');
+      
+      // Verificar si el error tiene una respuesta del servidor con detalles
+      if (error instanceof Error && 'response' in error) {
+        const response = (error as any).response;
+        if (response?.data?.details) {
+          setError(`Error de conexión: ${response.data.details}`);
+        } else if (response?.data?.message) {
+          setError(`Error de conexión: ${response.data.message}`);
+        } else {
+          setError('Error de conexión al crear usuario');
+        }
+      } else {
+        setError('Error de conexión al crear usuario');
+      }
     } finally {
       setSaving(false);
     }

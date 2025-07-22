@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../hooks/useAuth"
 import UsersManagement from "../components/UsersManagement"
+import CotizacionesManagement from "../components/CotizacionesManagement"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -384,8 +385,8 @@ export default function TerplacMundoPuertas() {
     setTimeout(() => setRefreshing(false), 2000)
   }
 
-  const exportData = (format: string) => {
-    console.log(`Exportando órdenes en formato: ${format}`)
+  const exportData = (_format: string) => {
+    // Aquí iría la lógica de exportación
   }
 
   const handleLogout = () => {
@@ -398,9 +399,6 @@ export default function TerplacMundoPuertas() {
       
       // Redirigir al login
       navigate('/login')
-      
-      // Mostrar mensaje de confirmación
-      console.log("Sesión cerrada exitosamente")
     }
   }
 
@@ -539,7 +537,7 @@ export default function TerplacMundoPuertas() {
       {/* Contenido Principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 overflow-x-auto scrollbar-hide">
+          <TabsList className="grid w-full grid-cols-6 overflow-x-auto scrollbar-hide">
             <TabsTrigger value="dashboard" className="flex items-center space-x-2 min-w-fit">
               <Home className="h-4 w-4" />
               <span>Dashboard</span>
@@ -547,6 +545,10 @@ export default function TerplacMundoPuertas() {
             <TabsTrigger value="ordenes" className="flex items-center space-x-2 min-w-fit">
               <Package className="h-4 w-4" />
               <span>Órdenes</span>
+            </TabsTrigger>
+            <TabsTrigger value="cotizaciones" className="flex items-center space-x-2 min-w-fit">
+              <DoorOpen className="h-4 w-4" />
+              <span>Cotizaciones</span>
             </TabsTrigger>
             {/* Solo mostrar el tab de usuarios si el usuario es administrador */}
             {isAdmin && (
@@ -963,6 +965,11 @@ export default function TerplacMundoPuertas() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Cotizaciones Tab */}
+          <TabsContent value="cotizaciones" className="space-y-6">
+            <CotizacionesManagement />
           </TabsContent>
 
           {/* Usuarios Tab - Solo para administradores */}

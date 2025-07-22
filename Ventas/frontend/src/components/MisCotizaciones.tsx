@@ -62,34 +62,34 @@ const MisCotizaciones: React.FC = () => {
   const getEstadoColor = (estado: string): string => {
     switch (estado) {
       case 'Solicitud Recibida':
-        return '#3498db'; // Azul
+        return '#6b7280'; // Gris (outline style)
       case 'En Proceso':
-        return '#f39c12'; // Naranja
+        return '#9ca3af'; // Gris claro (secondary style)
       case 'Lista para retirar':
-        return '#27ae60'; // Verde
+        return '#374151'; // Gris oscuro (default style)
       case 'Cancelada':
-        return '#e74c3c'; // Rojo
+        return '#dc2626'; // Rojo (destructive style)
       case 'Producto Entregado':
-        return '#2ecc71'; // Verde más brillante
+        return '#16a34a'; // Verde (success style)
       default:
-        return '#95a5a6'; // Gris
+        return '#6b7280'; // Gris (outline style)
     }
   };
 
   const getEstadoIcon = (estado: string): string => {
     switch (estado) {
       case 'Solicitud Recibida':
-        return 'bi-clock-history';
+        return 'bi-clock';
       case 'En Proceso':
         return 'bi-gear-fill';
       case 'Lista para retirar':
-        return 'bi-check-circle-fill';
+        return 'bi-box-seam';
       case 'Cancelada':
         return 'bi-x-circle-fill';
       case 'Producto Entregado':
-        return 'bi-truck';
+        return 'bi-box-seam';
       default:
-        return 'bi-question-circle';
+        return 'bi-clock';
     }
   };
 

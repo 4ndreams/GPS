@@ -21,6 +21,14 @@ export interface User {
   ultimaActividad?: string;
 }
 
+// Tipo de respuesta para operaciones de usuario
+export interface UserServiceResponse<T = User> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  details?: string;
+}
+
 // Función para mapear roles del backend al frontend
 const mapRoleFromBackend = (backendRole: string): User['rol'] => {
   switch (backendRole) {
@@ -225,7 +233,7 @@ export const userService = {
   },
 
   // Actualizar usuario específico (requiere admin)
-  async updateUser(id: string, userData: Partial<User>): Promise<{ success: boolean; data?: User; error?: string }> {
+  async updateUser(id: string, userData: Partial<User>): Promise<UserServiceResponse<User>> {
     try {
       // Transformar los datos al formato del backend antes de enviar
       const backendUserData = transformUserToBackend(userData);
@@ -251,10 +259,13 @@ export const userService = {
                           error.response?.data?.error || 
                           error.message || 
                           'Error de conexión con el servidor';
+      // Extraer detalles del error si están disponibles
+      const errorDetails = error.response?.data?.details || null;
       
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
+        details: errorDetails
       };
     }
   },
@@ -345,7 +356,7 @@ export const userService = {
   },
 
   // Crear nuevo usuario (requiere admin)
-  async createUser(userData: Partial<User>): Promise<{ success: boolean; data?: User; error?: string }> {
+  async createUser(userData: Partial<User>): Promise<UserServiceResponse<User>> {
     try {
       // Transformar los datos al formato del backend antes de enviar
       const backendUserData = transformUserToBackend(userData);
@@ -371,9 +382,13 @@ export const userService = {
                           error.message || 
                           'Error de conexión con el servidor';
       
+      // Extraer detalles del error si están disponibles
+      const errorDetails = error.response?.data?.details || null;
+      
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
+        details: errorDetails
       };
     }
   }

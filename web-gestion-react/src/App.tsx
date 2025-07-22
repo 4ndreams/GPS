@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import AlertasPage from './pages/AlertasPage';
 import GraficosPage from './pages/GraficosPage';
+import CotizacionesPage from './pages/CotizacionesPage';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="alertas" element={<AlertasPage />} />
           <Route path="graficos" element={<GraficosPage />} />
+          <Route path="cotizaciones" element={<CotizacionesPage />} />
         </Route>
       </Routes>
     </AuthProvider>

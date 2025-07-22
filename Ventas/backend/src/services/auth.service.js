@@ -67,6 +67,7 @@ export async function loginService(user) {
       email: userFound.email,
       rut: userFound.rut,
       rol: userFound.rol,
+      flag_blacklist: userFound.flag_blacklist,
     };
 
     // Usar TokenService para generar el token con gestión de expiración

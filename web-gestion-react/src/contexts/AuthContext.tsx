@@ -8,6 +8,7 @@ export interface Usuario {
   nombre: string;
   email: string;
   rol: 'administrador' | 'fabrica' | 'tienda' | 'cliente';
+  flag_blacklist?: boolean; // <-- Añade esto
   avatar?: string;
   rut?: string;
   telefono?: string;
@@ -81,11 +82,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const userRole = backendUser.rol || 'cliente';
           const mappedRole = mapRoleFromBackend(userRole);
           
+          
           usuario = {
             id: backendUser.id || Date.now().toString(),
             nombre: backendUser.nombreCompleto || backendUser.nombre || email.split('@')[0],
             email: backendUser.email || email,
             rol: mappedRole,
+            flag_blacklist: backendUser.flag_blacklist, 
             avatar: backendUser.avatar,
             rut: backendUser.rut,
             telefono: backendUser.telefono,
@@ -107,7 +110,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         return true;
       } else {
-        console.log('Error en login:', result.error);
         return false;
       }
     } catch (error) {
@@ -125,16 +127,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Error en logout:', error);
     } finally {
       setUsuario(null);
+      localStorage.removeItem('usuario'); // Limpiar localStorage
+      localStorage.removeItem('token'); // Limpiar token si existe
     }
   };
 
   // Restaurar sesión al cargar la app
   React.useEffect(() => {
     const usuarioGuardado = localStorage.getItem('usuario');
+    
     if (usuarioGuardado) {
       try {
         const usuario = JSON.parse(usuarioGuardado);
-        setUsuario(usuario);
+        
+        // NO establecer el usuario inmediatamente, esperar verificación del token
+        
+        // Verificar si el token sigue siendo válido
+        authService.verifyToken().then(tokenInfo => {
+          
+          if (tokenInfo.valid && tokenInfo.user) {
+            // Token válido, actualizar usuario con datos frescos del backend
+            const tokenUser = tokenInfo.user as any;
+            const backendUser = tokenUser.user || tokenUser;
+            
+            const userRole = backendUser.rol || 'cliente';
+            const mappedRole = mapRoleFromBackend(userRole);
+            
+            const usuarioActualizado = {
+              ...usuario,
+              rol: mappedRole,
+              estado: backendUser.flag_blacklist === true ? false : 'activo',
+            };
+            
+            setUsuario(usuarioActualizado);
+            localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
+          } else {
+            // Token inválido, limpiar sesión
+            setUsuario(null);
+            localStorage.removeItem('usuario');
+          }
+        }).catch(error => {
+          console.error('Error verificando token:', error);
+          // En caso de error de red, limpiar sesión por seguridad
+          setUsuario(null);
+          localStorage.removeItem('usuario');
+        });
+        
       } catch (error) {
         console.error('Error al restaurar sesión:', error);
         localStorage.removeItem('usuario');

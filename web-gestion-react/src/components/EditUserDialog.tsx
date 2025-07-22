@@ -127,35 +127,58 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
     return null;
   };
 
+  // Helper para validar todos los campos
+  const getValidationErrors = (formData: UserFormData) => {
+    return {
+      nombre: validateField('nombre', formData.nombre),
+      email: validateField('email', formData.email),
+      rut: validateField('rut', formData.rut),
+      password: validatePassword(formData.password)
+    };
+  };
+
+  // Helper para manejar errores de actualización
+  const handleUpdateError = (result: any) => {
+    let errorMessage = result.error || 'Error al actualizar usuario';
+    if (result.details) {
+      errorMessage = `${errorMessage}: ${result.details}`;
+    }
+    setError(errorMessage);
+  };
+
+  // Helper para manejar errores de excepción
+  const handleExceptionError = (error: unknown) => {
+    console.error('Error updating user:', error);
+    if (error instanceof Error && 'response' in error) {
+      const response = (error as any).response;
+      if (response?.data?.details) {
+        setError(`Error de conexión: ${response.data.details}`);
+      } else if (response?.data?.message) {
+        setError(`Error de conexión: ${response.data.message}`);
+      } else {
+        setError('Error de conexión al actualizar usuario');
+      }
+    } else {
+      setError('Error de conexión al actualizar usuario');
+    }
+  };
+
   // Guardar cambios del usuario
   const handleSave = async () => {
     if (!userId) return;
-    
-    // Validar todos los campos antes de enviar
-    const errors: {[key: string]: string | null} = {};
-    errors.nombre = validateField('nombre', formData.nombre);
-    errors.email = validateField('email', formData.email);
-    errors.rut = validateField('rut', formData.rut);
-    errors.password = validatePassword(formData.password);
 
-    // Debug: mostrar qué está fallando
-    console.log('FormData antes de validar:', formData);
-    console.log('Errores de validación:', errors);
-
-    // Verificar si hay errores
+    const errors = getValidationErrors(formData);
     const hasErrors = Object.values(errors).some(error => error !== null);
     if (hasErrors) {
       setValidationErrors(errors);
       setError('Por favor corrige los errores en el formulario');
-      console.log('Validación falló. Errores:', Object.entries(errors).filter(([_, error]) => error !== null));
       return;
     }
-    
+
     setSaving(true);
     setError(null);
-    
+
     try {
-      // Preparar datos para envío (solo incluir newPassword si se proporcionó)
       const dataToSend: any = {
         nombre: formData.nombre,
         email: formData.email,
@@ -164,23 +187,21 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
         flag_blacklist: formData.flag_blacklist
       };
 
-      // Solo incluir newPassword si se proporcionó (no password)
       if (formData.password.trim() !== '') {
         dataToSend.newPassword = formData.password;
       }
 
       const result = await userService.updateUser(userId, dataToSend);
-      
+
       if (result.success) {
         onUserUpdated();
         onClose();
-        setValidationErrors({}); // Limpiar errores al cerrar
+        setValidationErrors({});
       } else {
-        setError(result.error || 'Error al actualizar usuario');
+        handleUpdateError(result);
       }
     } catch (error) {
-      console.error('Error updating user:', error);
-      setError('Error de conexión al actualizar usuario');
+      handleExceptionError(error);
     } finally {
       setSaving(false);
     }
