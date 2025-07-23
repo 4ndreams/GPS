@@ -15,12 +15,24 @@ const API_URLS = {
   mobile: 'http://146.83.198.35:1237/api', // Cambia esta IP
   
   // Para producción
-  production: 'https://146.83.198.35:1237/api'
+  production: 'http://146.83.198.35:1237/api'
 };
 
 // Seleccionar URL base apropiada
 const getApiBaseUrl = () => {
+  // Priorizar la variable de entorno si existe
+  if (process.env.EXPO_PUBLIC_API_BASE_URL) {
+    return process.env.EXPO_PUBLIC_API_BASE_URL;
+  }
+  
+  // Fallback a la configuración manual
+  if (isWeb && isDev) {
+    return API_URLS.web;
+  } else if (!isWeb && isDev) {
+    return API_URLS.mobile;
+  } else {
     return API_URLS.production;
+  }
 };
 
 export const config = {
