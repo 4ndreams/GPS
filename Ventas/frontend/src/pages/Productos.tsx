@@ -26,17 +26,11 @@ interface CartItem {
 
 interface ProductosProps {
   addToCart: (product: CartItem) => void;
-  cartItems: CartItem[];
+  getCartItemQuantity: (productId: number) => number;
 }
 
 
-function Productos({ addToCart, cartItems }: ProductosProps) {
-  // Mapear el carrito a { [id]: cantidad }
-  const cartMap = cartItems.reduce((acc, item) => {
-    acc[item.id] = item.quantity;
-    return acc;
-  }, {} as { [key: number]: number });
-
+function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,25 +42,25 @@ function Productos({ addToCart, cartItems }: ProductosProps) {
 
 
 
-  const validatePrices = () => {
-    if (minPrice && maxPrice) {
-      const min = Number(minPrice);
-      const max = Number(maxPrice);
-      if (min > max) {
-        setPriceError("El precio mínimo no puede ser mayor al máximo");
-        return false;
-      }
-    }
-    setPriceError("");
-    return true;
-  };
-
   useEffect(() => {
+    const validatePrices = () => {
+      if (minPrice && maxPrice) {
+        const min = Number(minPrice);
+        const max = Number(maxPrice);
+        if (min > max) {
+          setPriceError("El precio mínimo no puede ser mayor al máximo");
+          return false;
+        }
+      }
+      setPriceError("");
+      return true;
+    };
+
     const fetchProducts = async () => {
       if (!validatePrices()) return;
       try {
         setLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/all`, {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products/all`, {
           params: {
             nombre: nameFilter || undefined,
             minPrecio: minPrice || undefined,
@@ -74,10 +68,18 @@ function Productos({ addToCart, cartItems }: ProductosProps) {
             categoria: categoryFilter !== "todos" ? categoryFilter : undefined,
           },
         });
-        setProducts(response.data.data);
+        // Validar que la respuesta tenga la estructura esperada
+        const productsData = response.data?.data;
+        if (Array.isArray(productsData)) {
+          setProducts(productsData);
+        } else {
+          console.warn('La respuesta de la API no tiene el formato esperado:', response.data);
+          setProducts([]);
+        }
       } catch (error) {
         console.error("Error al cargar productos:", error);
         setError("Error al cargar productos");
+        setProducts([]); // Asegurar que products sea un array vacío en caso de error
       } finally {
         setLoading(false);
       }
@@ -94,7 +96,7 @@ function Productos({ addToCart, cartItems }: ProductosProps) {
   };
 
   const handleAddToCart = (product: Product) => {
-    const enCarrito = cartMap[product.id_producto] || 0;
+    const enCarrito = getCartItemQuantity(product.id_producto);
     if (enCarrito < (product.stock ?? 0)) {
       addToCart({
         id: product.id_producto,
@@ -186,7 +188,7 @@ function Productos({ addToCart, cartItems }: ProductosProps) {
           if (error) {
             return <div className="error-message">Error: {error}</div>;
           }
-          if (products.length === 0) {
+          if (!products || products.length === 0) {
             return (
               <div className="no-resultados">
                 <p>No se encontraron productos con los filtros seleccionados</p>
@@ -196,10 +198,10 @@ function Productos({ addToCart, cartItems }: ProductosProps) {
               </div>
             );
           }
-          return products.map((product) => {
+          return Array.isArray(products) ? products.map((product) => {
             const tipo = product.tipo?.nombre_tipo || "otros";
             const stockDisponible = product.stock ?? 0;
-            const enCarrito = cartMap[product.id_producto] || 0;
+            const enCarrito = getCartItemQuantity(product.id_producto);
             const agotado = stockDisponible - enCarrito <= 0;
             return (
               <div key={product.id_producto} className="producto-card">
@@ -235,7 +237,7 @@ function Productos({ addToCart, cartItems }: ProductosProps) {
                 </button>
               </div>
             );
-          });
+          }) : [];
         })()}
       </div>
     </div>
