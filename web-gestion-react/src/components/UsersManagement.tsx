@@ -61,6 +61,11 @@ export default function UsersManagement() {
     return 'outline'; // para 'cliente'
   };
 
+
+  // Estado para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   // Función para filtrar usuarios
   const filteredUsers = users.filter(user => {
     const matchesSearch = searchTerm === '' || 
@@ -78,12 +83,21 @@ export default function UsersManagement() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  // Calcular usuarios a mostrar en la página actual
+  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   // Función para limpiar filtros
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedRole('');
     setSelectedStatus('');
+    setCurrentPage(1);
   };
+  // Resetear página al cambiar filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedRole, selectedStatus]);
 
   // Funciones para manejar popups
   const handleViewDetails = (user: UserType) => {
@@ -363,7 +377,7 @@ export default function UsersManagement() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUsers.map((user) => (
+                    paginatedUsers.map((user) => (
                       <TableRow key={user.id_usuario} className="hover:bg-gray-50">
                         <TableCell className="font-medium">{user.id_usuario}</TableCell>
                         <TableCell>
@@ -426,6 +440,35 @@ export default function UsersManagement() {
                   )}
                 </TableBody>
               </Table>
+
+              {/* Paginación */}
+              {filteredUsers.length > 0 && (
+                <div className="flex justify-between items-center mt-4">
+                  <span className="text-sm text-gray-600 flex items-center h-8">
+                    Mostrando {((currentPage - 1) * pageSize) + 1}
+                    -{Math.min(currentPage * pageSize, filteredUsers.length)} de {filteredUsers.length}
+                  </span>
+                  <div className="flex gap-2 items-center h-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                    >
+                      ← Anterior
+                    </Button>
+                    <span className="text-sm px-2 flex items-center" style={{ minHeight: '2rem' }}>Página {currentPage} de {totalPages}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                    >
+                      Siguiente →
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

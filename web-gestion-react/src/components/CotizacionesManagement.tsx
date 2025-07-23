@@ -43,10 +43,15 @@ export default function CotizacionesManagement() {
   const [loadingCotizaciones, setLoadingCotizaciones] = useState(false);
   const [cotizacionesError, setCotizacionesError] = useState<string | null>(null);
   
+
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedEstado, setSelectedEstado] = useState<string>('');
   const [selectedTipo, setSelectedTipo] = useState<string>('');
+
+  // Estado para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // Estados para diálogos
   const [showPrecioDialog, setShowPrecioDialog] = useState(false);
@@ -101,6 +106,7 @@ export default function CotizacionesManagement() {
     }
   };
 
+
   // Función para filtrar y ordenar cotizaciones
   const filteredCotizaciones = cotizaciones
     .filter(cotizacion => {
@@ -117,11 +123,16 @@ export default function CotizacionesManagement() {
     })
     .sort((a, b) => b.id_producto_personalizado - a.id_producto_personalizado); // Ordenar por ID de mayor a menor
 
+  // Calcular cotizaciones a mostrar en la página actual
+  const totalPages = Math.ceil(filteredCotizaciones.length / pageSize);
+  const paginatedCotizaciones = filteredCotizaciones.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   // Función para limpiar filtros
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedEstado('');
     setSelectedTipo('');
+    setCurrentPage(1);
   };
 
   // Función para cargar cotizaciones
@@ -238,9 +249,15 @@ export default function CotizacionesManagement() {
     return { stats, total };
   };
 
+
   useEffect(() => {
     loadCotizaciones();
   }, []);
+
+  // Resetear página al cambiar filtros
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedEstado, selectedTipo]);
 
   // Verificar permisos - Solo tienda, fábrica y administradores activos (clientes y usuarios bloqueados NO pueden acceder)
   if (!usuario || 
@@ -391,7 +408,7 @@ export default function CotizacionesManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredCotizaciones.map((cotizacion) => {
+                    {paginatedCotizaciones.map((cotizacion) => {
                       const EstadoIcon = getEstadoIcon(cotizacion.estado);
                       return (
                         <TableRow key={cotizacion.id_producto_personalizado}>
@@ -463,6 +480,35 @@ export default function CotizacionesManagement() {
                   </TableBody>
                 </Table>
               </div>
+
+              {/* Paginación */}
+              {filteredCotizaciones.length > 0 && (
+                <div className="flex justify-between items-center mt-4">
+                  <span className="text-sm text-gray-600 flex items-center h-8">
+                    Mostrando {((currentPage - 1) * pageSize) + 1}
+                    -{Math.min(currentPage * pageSize, filteredCotizaciones.length)} de {filteredCotizaciones.length}
+                  </span>
+                  <div className="flex gap-2 items-center h-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                    >
+                      ← Anterior
+                    </Button>
+                    <span className="text-sm px-2 flex items-center" style={{ minHeight: '2rem' }}>Página {currentPage} de {totalPages}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                    >
+                      Siguiente →
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               {filteredCotizaciones.length === 0 && (
                 <div className="text-center py-8">
