@@ -75,6 +75,24 @@ function App() {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
   };
 
+  const addToCart = (product: Product) => {
+  setCartItems((prevItems) => {
+    const existingItem = prevItems.find((item) => item.id === product.id);
+    if (existingItem) {
+      // Incrementar cantidad
+      return prevItems.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    } else {
+      // Agregar nuevo producto
+      return [...prevItems, { ...product, quantity: 1 }];
+    }
+  });
+};
+
+
   // Función para actualizar cantidad en el carrito
   const updateCartItemQuantity = (productId: number, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -111,12 +129,13 @@ function App() {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/cotizar" element={<Cotizar />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/product/:id" element={<ProductDetail cartItems={cartItems} addToCart={addToCart} />} />
         <Route 
           path="/productos" 
           element={
             <Productos 
-               
+              addToCart={addToCart}
+              cartItems={cartItems}
             />
           } 
         />

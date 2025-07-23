@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/Login.css";
-import "../styles/animations.css";
-import puertaImg from "../assets/TerplacFoto1.png";
-import Notification from "../components/Notification";
-import { loginUser, getGoogleAuthUrl } from "../services/authService";
-import { getUserProfile } from "../services/userService";
+import "@styles/Login.css";
+import "@styles/animations.css";
+import puertaImg from "@assets/TerplacFoto1.png";
+import Notification from "@components/Notification";
+import { loginUser, getGoogleAuthUrl } from "@services/authService";
+import { getUserProfile } from "@services/userService";
 
 interface LoginProps {
   setUser: (user: any) => void;

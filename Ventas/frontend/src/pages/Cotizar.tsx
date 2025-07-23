@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getUserProfile } from '../services/userService';
-import { crearCotizacion, estaLogueado, type CotizacionData } from '../services/cotizarService';
+import { getUserProfile } from '@services/userService';
+import { crearCotizacion, estaLogueado, type CotizacionData } from '@services/cotizarService';
 import { 
   obtenerMateriales, 
   obtenerRellenos, 
@@ -8,9 +8,9 @@ import {
   obtenerRellenoPorId, 
   type Material as MaterialType, 
   type Relleno as RellenoType 
-} from '../services/materialesService';
-import Notification from '../components/Notification';
-import '../styles/Cotizar.css';
+} from '@services/materialesService';
+import Notification from '@components/Notification';
+import '@styles/Cotizar.css';
 
 // Constantes de validación
 const VALIDATION_RULES = {

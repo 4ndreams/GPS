@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/userInfo.css";
+import "@styles/userInfo.css";
 
 interface Compra {
   id: number;

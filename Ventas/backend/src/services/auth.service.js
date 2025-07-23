@@ -73,7 +73,17 @@ export async function loginService(user) {
     // Usar TokenService para generar el token con gestión de expiración
     const accessToken = TokenService.generateToken(payload);
 
-    return [accessToken, null];
+    // Devolver tanto el token como los datos del usuario
+    const userData = {
+      id_usuario: userFound.id_usuario,
+      nombre: userFound.nombre,
+      apellidos: userFound.apellidos,
+      email: userFound.email,
+      rut: userFound.rut,
+      rol: userFound.rol,
+    };
+
+    return [{ token: accessToken, user: userData }, null];
 
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
