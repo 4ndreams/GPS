@@ -24,18 +24,7 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
-        'http://localhost:5173', 
-        'http://localhost:3000',  // Para la app móvil en web
-        'http://localhost:443',   // Frontend en puerto 443
-        'http://localhost:444',   // Frontend en puerto 444
-        'http://192.168.1.105:3000', 
-        'http://192.168.1.105:19000',
-        'http://localhost:8081',
-        // Patrón para permitir cualquier puerto localhost (solo desarrollo)
-        /^http:\/\/localhost:\d+$/,
-        /^http:\/\/127\.0\.0\.1:\d+$/
-      ], 
+      origin: true,
       credentials: true
     }));
 
