@@ -1,26 +1,18 @@
 "use strict";
 import { EntitySchema } from "typeorm";
 
+
 const BodegaSchema = new EntitySchema({
   name: "Bodega",
-  tableName: "bodegas",
+  tableName: "bodega",
   columns: {
     id_bodega: {
       type: "int",
       primary: true,
       generated: true,
     },
-    nombre_producto: {
-      type: "varchar",
-      length: 255,
-      nullable: false,
-    },
     stock: {
       type: "int",
-      nullable: false,
-    },
-    costo_total: {
-      type: "numeric",
       nullable: false,
     },
     createdAt: {
@@ -35,6 +27,44 @@ const BodegaSchema = new EntitySchema({
       nullable: false,
     },
   },
+
+  relations: {
+    producto: {
+      type: "many-to-one",
+      target: "Producto", // nombre del schema relacionado
+      joinColumn: {
+        name: "id_producto", // esta es la columna que actúa como FK en esta tabla
+        referencedColumnName: "id_producto",
+      },
+      nullable: true, // ✅ esto permite que la relación sea opcional
+      eager: false,
+    },
+    material: {
+    type: "many-to-one",
+    target: "Material",
+    joinColumn: {
+      name: "id_material",
+      referencedColumnName: "id_material",
+    },
+    nullable: true,
+  },
+  relleno: {
+    type: "many-to-one",
+    target: "Relleno",
+    joinColumn: {
+      name: "id_relleno",
+      referencedColumnName: "id_relleno",
+    },
+    nullable: true,
+  },
+  compra: {
+      type: "one-to-many",
+      target: "Compra",
+      inverseSide: "bodega",
+      cascade: true,
+    },
+},
+
   indices: [
     {
       name: "idx_bodega_id",
@@ -45,3 +75,4 @@ const BodegaSchema = new EntitySchema({
 });
 
 export default BodegaSchema;
+

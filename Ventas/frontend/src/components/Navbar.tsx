@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import logo from "../assets/logo_terplac.svg";
-import logoMobile from "../assets/TERPLAC_T.png";
-import "../styles/Navbar.css";
+import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import logo from '@assets/logo_terplac.svg';
+import logoMobile from '@assets/TERPLAC_T.png';
+import '@styles/Navbar.css';
 
 type User = {
   nombre: string;
@@ -13,14 +13,14 @@ type User = {
 interface NavbarProps {
   readonly user: User;
   readonly onLogout?: () => void;
+  readonly cartItemCount: number;
 }
 
-function Navbar({ user, onLogout }: NavbarProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const cartItemCount = 1;
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
+  const [isOpen, setIsOpen] = useState(false); 
+  const [userMenuOpen, setUserMenuOpen] = useState(false); 
+  const userMenuRef = useRef<HTMLDivElement>(null); 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); 
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -59,53 +59,14 @@ function Navbar({ user, onLogout }: NavbarProps) {
         <button className="menu-toggle" onClick={toggleMenu}>
           <i className={`bi ${isOpen ? "bi-x-lg" : "bi-list"}`}></i>
         </button>
-        {/* Menú de navegación */}{" "}
-        <ul className={`navbar-menu ${isOpen ? "open" : ""}`}>
-          <li>
-            <Link
-              to="/"
-              className="navbar-link"
-              onClick={() => setIsOpen(false)}
-            >
-              Inicio
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/productos"
-              className="navbar-link"
-              onClick={() => setIsOpen(false)}
-            >
-              Productos
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/about-us"
-              className="navbar-link"
-              onClick={() => setIsOpen(false)}
-            >
-              Sobre Nosotros
-            </Link>
-          </li>
-          <li>
-            <a
-              href="#contacto"
-              className="navbar-link"
-              onClick={() => setIsOpen(false)}
-            >
-              Contacto
-            </a>
-          </li>
-          <li>
-            <Link
-              to="/cotizar"
-              className="navbar-link"
-              onClick={() => setIsOpen(false)}
-            >
-              Cotizar
-            </Link>
-          </li>
+
+        {/* Menú de navegación */}
+        <ul className={`navbar-menu ${isOpen ? 'open' : ''}`}>
+          <li><Link to="/" className="navbar-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
+          <li><Link to="/productos" className="navbar-link" onClick={() => setIsOpen(false)}>Productos</Link></li>
+          <li><Link to="/about-us" className="navbar-link" onClick={() => setIsOpen(false)}>Sobre Nosotros</Link></li>
+          <li><Link to="/contacto" className="navbar-link" onClick={() => setIsOpen(false)}>Contacto</Link></li>
+          <li><Link to="/cotizar" className="navbar-link" onClick={() => setIsOpen(false)}>Cotizar</Link></li>
         </ul>
         {/* Iconos (carrito y perfil) */}
         <div className="navbar-icons">

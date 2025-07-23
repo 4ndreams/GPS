@@ -10,6 +10,7 @@ import{
 } from "../services/producto_personalizado.service.js";
 import { ProductoPersonalizadoQueryValidation, ProductoPersonalizadoBodyValidation, ProductoPersonalizadoBodyValidationLoggedUser, ProductoPersonalizadoEstadoValidation } from "../validations/producto_personalizado.validation.js";
 import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
+import RutValidator from "../validations/rut.validation.js";
 
 // Función auxiliar para auto-completar datos del usuario logueado
 function autoCompleteUserData(req) {
@@ -21,8 +22,15 @@ function autoCompleteUserData(req) {
         req.body.nombre_apellido_contacto = `${req.user.nombre} ${req.user.apellidos}`;
     }
     
-    if (!req.body.rut_contacto && req.user.rut) {
-        req.body.rut_contacto = req.user.rut;
+    // Para usuarios logueados, el RUT es opcional
+    // Solo asignar si no se proporciona y el usuario tiene un RUT válido
+    if (!req.body.rut_contacto && req.user.rut && req.user.rut.trim() !== '') {
+        // Validar que el RUT sea válido antes de asignarlo
+        if (RutValidator.isValidRut(req.user.rut)) {
+            req.body.rut_contacto = req.user.rut;
+        } else {
+            console.warn(`⚠️ RUT del usuario ${req.user.email} no es válido: ${req.user.rut}. No se auto-completará.`);
+        }
     }
     
     if (!req.body.email_contacto && req.user.email) {
@@ -79,19 +87,27 @@ export async function createProductoPersonalizadoController(req, res) {
             ? ProductoPersonalizadoBodyValidationLoggedUser 
             : ProductoPersonalizadoBodyValidation;
         
+        console.log('🔍 Usando validación para:', isLoggedUser ? 'usuario logueado' : 'usuario anónimo');
+        
         const { error } = validation.validate(req.body);
         if (error) {
+            console.error('❌ Error de validación:', error.details[0].message);
             return handleErrorClient(res, 400, error.details[0].message);
         }
+        
+        console.log('✅ Validación exitosa, enviando al servicio...');
 
         const [newProductoPersonalizado, errorMessage] = await createProductoPersonalizadoService(req.body);
         
         if (errorMessage) {
+            console.error('❌ Error del servicio:', errorMessage);
             return handleErrorServer(res, 500, errorMessage);
         }
 
+        console.log('🎉 Producto personalizado creado exitosamente:', newProductoPersonalizado.id_producto_personalizado);
         return handleSuccess(res, 201, "Producto personalizado creado exitosamente", newProductoPersonalizado);
     } catch (error) {
+        console.error('💥 Error inesperado en createProductoPersonalizadoController:', error);
         return handleErrorServer(res, 500, "Error interno del servidor", error.message);
     }
 }

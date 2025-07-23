@@ -6,6 +6,7 @@ import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
 import { ACCESS_TOKEN_SECRET} from "../config/configEnv.js";
 import { addMinutes, isBefore } from "date-fns";
 import { sendLoginAlertEmail, sendVerificationEmail } from "../helpers/email.helper.js";
+import TokenService from "./token.service.js";
 
 
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -68,11 +69,20 @@ export async function loginService(user) {
       rol: userFound.rol,
     };
 
-    const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
-      expiresIn: "1d",
-    });
+    // Usar TokenService para generar el token con gestión de expiración
+    const accessToken = TokenService.generateToken(payload);
 
-    return [accessToken, null];
+    // Devolver tanto el token como los datos del usuario
+    const userData = {
+      id_usuario: userFound.id_usuario,
+      nombre: userFound.nombre,
+      apellidos: userFound.apellidos,
+      email: userFound.email,
+      rut: userFound.rut,
+      rol: userFound.rol,
+    };
+
+    return [{ token: accessToken, user: userData }, null];
 
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
@@ -141,7 +151,7 @@ export async function verifyEmailService(token) {
       rut: payload.rut,
       email: payload.email,
       password: payload.password,
-      rol: payload.rol || "Cliente", // Default role if not provided
+      rol: payload.rol || "cliente", // Default role if not provided
     });
 
     await userRepository.save(newUser);

@@ -1,7 +1,8 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-import ProductoSchema from "./producto.entity.js";
+import BodegaSchema from "./bodega.entity.js";
 import UsuarioSchema from "./user.entity.js";
+import ProductoSchema from "./producto.entity.js";
 
 const OrdenSchema = new EntitySchema({
   name: "Orden",
@@ -31,11 +32,37 @@ const OrdenSchema = new EntitySchema({
       default: () => "CURRENT_TIMESTAMP",
       nullable: false,
     },
+    fecha_entrega: {
+      type: "timestamp with time zone",
+      nullable: true,
+    },
     estado: {
       type: "varchar",
       length: 50,
       default: "Pendiente",
       nullable: false,
+    },
+    prioridad: {
+      type: "varchar",
+      length: 20,
+      default: "Media",
+      nullable: true,
+    },
+    transportista: {
+      type: "varchar",
+      length: 255,
+      nullable: true,
+    },
+    tipo: {
+      type: "varchar",
+      length: 50,
+      default: "normal",
+      nullable: true,
+    },
+    observaciones: {
+      type: "varchar",
+      length: 500,
+      nullable: true
     },
     createdAt: {
       type: "timestamp with time zone",
@@ -48,29 +75,41 @@ const OrdenSchema = new EntitySchema({
       onUpdate: "CURRENT_TIMESTAMP",
       nullable: false,
     },
-    id_producto: {
+     id_usuario: {
       type: "int",
       nullable: false,
     },
-     id_usuario: {
+    id_bodega: {
+      type: "int",
+      nullable: false,
+    },
+    id_producto: {
       type: "int",
       nullable: false,
     },
   },
   relations: {
-    producto: {
-      type: "many-to-one",
-      target: ProductoSchema,
-      joinColumn: {
-        name: "id_producto",
-      },
-      nullable: false,
-    },
     usuario: {
       type: "many-to-one",
       target: UsuarioSchema,
       joinColumn: {
         name: "id_usuario",
+      },
+      nullable: false,
+    },
+    bodega: {
+      type: "many-to-one",
+      target: BodegaSchema, 
+      joinColumn: {
+        name: "id_bodega",
+      },
+      nullable: false,
+    },
+    producto: {
+      type: "many-to-one",
+      target: ProductoSchema, 
+      joinColumn: {
+        name: "id_producto",
       },
       nullable: false,
     },
@@ -80,6 +119,10 @@ const OrdenSchema = new EntitySchema({
       name: "idx_orden_id",
       columns: ["id_orden"],
       unique: true,
+    },
+    {
+      name: "idx_orden_bodega",
+      columns: ["id_bodega"],
     },
     {
       name: "idx_orden_producto",

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getImagePath } from "../utils/getImagePath";
-import "../styles/ProductDetail.css";
+import { getImagePath } from "@utils/getImagePath";
+import "@styles/ProductDetail.css";
 
 interface Producto {
   id_producto: number;
@@ -18,7 +18,26 @@ interface Producto {
   imagen?: string;
 }
 
-const ProductDetail = () => {
+
+interface CartItem {
+  id: number;
+  quantity: number;
+}
+
+
+interface ProductDetailProps {
+  cartItems: CartItem[];
+  addToCart: (item: {
+    id: number;
+    nombre: string;
+    precio: number;
+    imagen: string;
+    categoria: string;
+    quantity: number;
+  }) => void;
+}
+
+const ProductDetail = ({ cartItems, addToCart }: ProductDetailProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [producto, setProducto] = useState<Producto | null>(null);
@@ -41,30 +60,26 @@ const ProductDetail = () => {
     fetchProducto();
   }, [id]);
 
+
   if (loading) return <p>Cargando producto...</p>;
   if (!producto) return <p>Producto no encontrado.</p>;
 
-  // Agregar al carrito en localStorage
+  // Calcular stock disponible en tiempo real
+  const enCarrito = cartItems.find(item => item.id === producto.id_producto)?.quantity || 0;
+  const stockDisponible = (producto.stock ?? 0) - enCarrito;
+  const agotado = stockDisponible <= 0;
+
+  // Usar la función global addToCart igual que en Productos.tsx
   const handleAddToCart = () => {
-    const storedCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const exists = storedCart.find((item: any) => item.id === producto.id_producto);
-    if (exists) {
-      const updatedCart = storedCart.map((item: any) =>
-        item.id === producto.id_producto
-          ? { ...item, cantidad: item.cantidad + 1 }
-          : item
-      );
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-    } else {
-      const newItem = {
-        id: producto.id_producto,
-        nombre: producto.nombre_producto,
-        precio: producto.precio,
-        cantidad: 1,
-        imagen: producto.imagen,
-      };
-      localStorage.setItem("cart", JSON.stringify([...storedCart, newItem]));
-    }
+    if (!producto) return;
+    addToCart({
+      id: producto.id_producto,
+      nombre: producto.nombre_producto,
+      precio: producto.precio,
+      imagen: producto.imagen || "default.jpeg",
+      categoria: producto.tipo?.nombre_tipo || "otros",
+      quantity: 1,
+    });
   };
 
   const isLoggedIn = !!localStorage.getItem("token");
@@ -150,6 +165,7 @@ const ProductDetail = () => {
                 : "/img/puertas/default.jpeg"
             }
             alt={producto.nombre_producto}
+            className={agotado ? 'img-agotada' : ''}
             onError={(e) => {
               e.currentTarget.src = "/img/puertas/default.jpeg";
             }}
@@ -158,21 +174,27 @@ const ProductDetail = () => {
         <div className="detalle-info">
           <h1>{producto.nombre_producto}</h1>
           <p><strong>Precio:</strong> ${Number(producto.precio).toLocaleString("es-CL")}</p>
-          <p><strong>Stock:</strong> {producto.stock}</p>
+          <p><strong>Stock disponible:</strong> {stockDisponible}</p>
           <p><strong>Descripción:</strong> {producto.descripcion || "Sin descripción"}</p>
           <p><strong>Dimensiones:</strong> {producto.medida_ancho} x {producto.medida_largo} x {producto.medida_alto} cm</p>
           <p><strong>Tipo:</strong> {producto.tipo?.nombre_tipo}</p>
           <p><strong>Material:</strong> {producto.material?.nombre_material}</p>
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <button className="btn-comprar" onClick={handleBuyNow}>
+            <button
+              className="btn-comprar"
+              onClick={handleBuyNow}
+              disabled={agotado}
+              style={agotado ? { opacity: 0.7, cursor: 'not-allowed' } : {}}
+            >
               Comprar ahora
             </button>
             <button
               className="btn-comprar"
-              style={{ backgroundColor: "#fff", color: "#e53935", border: "2px solid #e53935" }}
-              onClick={() => { handleAddToCart(); alert("Producto agregado al carrito."); }}
+              style={{ backgroundColor: "#fff", color: "#e53935", border: "2px solid #e53935", opacity: agotado ? 0.7 : 1, cursor: agotado ? 'not-allowed' : 'pointer' }}
+              onClick={() => { if (!agotado) { handleAddToCart(); alert("Producto agregado al carrito."); } }}
+              disabled={agotado}
             >
-              Agregar al carrito
+              {agotado ? 'Sin stock' : 'Agregar al carrito'}
             </button>
           </div>
         </div>

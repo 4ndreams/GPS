@@ -30,3 +30,4 @@ export const SMTP_HOST = process.env.SMTP_HOST;
 export const SMTP_PORT = process.env.SMTP_PORT;
 export const SMTP_SECURE = process.env.SMTP_SECURE;
 export const VITE_API_BASE_URL = process.env.VITE_API_BASE_URL;
+export const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS;

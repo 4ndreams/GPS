@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getUserProfile } from "../services/userService";
-import "../styles/Checkout.css";
+import { getUserProfile } from "@services/userService";
+import "@styles/Checkout.css";
 
 interface CartItem {
   id: number;

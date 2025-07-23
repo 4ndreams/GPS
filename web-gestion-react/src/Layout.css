@@ -1,0 +1,16 @@
+.app-layout {
+  display: flex;
+  max-width: 1600px;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+  width: 100%; 
+  position: absolute
+}
+
+.main-content {
+  flex-grow: 1;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}

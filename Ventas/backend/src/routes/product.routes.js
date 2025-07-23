@@ -8,17 +8,16 @@ import {
   deleteProduct,
 } from "../controllers/product.controller.js";
 import { authenticateJwt } from "../middlewares/authentication.middleware.js";
-import { isAdmin } from "../middlewares/autorization.middleware.js";
+import { isAdmin, authorizeRoles } from "../middlewares/autorization.middleware.js";
 
 const router = Router();
 
-router.get("/", getProducts);
+router.get("/all", getProducts);
 router.get("/:id", getProductById);
 
-router.use(authenticateJwt, isAdmin); // 🔒 Solo admin puede crear/editar/borrar
-
-router.post("/", createProduct);
-router.patch("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+// Permisos específicos por endpoint
+router.post("/", authenticateJwt, authorizeRoles(["administrador", "fabrica"]), createProduct);
+router.patch("/:id", authenticateJwt, authorizeRoles(["administrador"]), updateProduct);
+router.delete("/:id", authenticateJwt, authorizeRoles(["administrador"]), deleteProduct);
 
 export default router;

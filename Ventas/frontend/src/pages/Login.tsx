@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../styles/Login.css";
-import "../styles/animations.css";
-import puertaImg from "../assets/TerplacFoto1.png";
-import Notification from "../components/Notification";
-import { loginUser, getGoogleAuthUrl } from "../services/authService";
-import { getUserProfile } from "../services/userService";
+import "@styles/Login.css";
+import "@styles/animations.css";
+import puertaImg from "@assets/TerplacFoto1.png";
+import Notification from "@components/Notification";
+import { loginUser, getGoogleAuthUrl } from "@services/authService";
+import { getUserProfile } from "@services/userService";
 
 interface LoginProps {
   setUser: (user: any) => void;
@@ -15,7 +15,6 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
   const navigate = useNavigate(); 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);

@@ -1,6 +1,7 @@
 "use strict";
 import { EntitySchema } from "typeorm";
 import UsuarioSchema from "./user.entity.js"; 
+
 const VentaSchema = new EntitySchema({
   name: "Venta",
   tableName: "venta",
@@ -27,19 +28,32 @@ const VentaSchema = new EntitySchema({
       default: () => "CURRENT_TIMESTAMP",
       nullable: false,
     },
-    id_usuario: {
+    informacion: {
+      type: "varchar",
+      length: 150,
+      default: "No hay informacion",
+      nullable: true,
+    },
+    cantidad: {
       type: "int",
+      default: 0,
       nullable: false,
     },
+    precio_venta: {
+      type: "int",
+      default: 0,
+      nullable: false,
+    },
+
   },
   relations: {
     usuario: {
       type: "many-to-one",
-      target: () => "Usuario",
+      target: "Usuario",
       joinColumn: {
         name: "id_usuario",
       },
-      inverseSide: "venta",
+      nullable: true,
     },
   },
   indices: [
@@ -47,10 +61,6 @@ const VentaSchema = new EntitySchema({
       name: "idx_venta_id",
       columns: ["id_venta"],
       unique: true,
-    },
-    {
-      name: "idx_venta_id_usuario",
-      columns: ["id_usuario"],
     },
   ],
 });
