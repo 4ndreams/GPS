@@ -66,7 +66,11 @@ function Productos({ addToCart, cartItems }: ProductosProps) {
       if (!validatePrices()) return;
       try {
         setLoading(true);
+<<<<<<< Updated upstream
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/all`, {
+=======
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/`, {
+>>>>>>> Stashed changes
           params: {
             nombre: nameFilter || undefined,
             minPrecio: minPrice || undefined,

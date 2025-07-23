@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import transporter from "../config/mailer.config.js";
-import { ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
+import { ACCESS_TOKEN_SECRET, HOST, PORT, FRONTEND_URL } from "../config/configEnv.js";
 
 // Función auxiliar para mostrar el tipo de puerta de forma legible
 function formatTipoPuerta(tipo_puerta) {
@@ -17,7 +17,7 @@ function formatTipoPuerta(tipo_puerta) {
 export async function sendLoginAlertEmail(email) {
   const token = jwt.sign({ email }, ACCESS_TOKEN_SECRET, { expiresIn: "2m" });
 
-  const resetLink = `http://${process.env.HOST}:${process.env.PORT}/api/recover-password?token=${token}`;
+  const resetLink = `${FRONTEND_URL}/recover-password?token=${token}`;
   // HTML de prueba
   const htmlContent = `
     <!DOCTYPE html>
