@@ -1,4 +1,4 @@
-import React from "react";
+import { useMemo } from "react";
 import useGetComprasMes from "@/hooks/Funciones_Leandro/compras_mes";
 import useVentasTotalesPorMes from "@/hooks/Funciones_Leandro/ventas_mes";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
@@ -44,7 +44,6 @@ const renderCustomizedLabel = ({
   );
 };
 
-
 type Props = {
   id_bodega?: number | string | number[];
   fecha_inicial?: string;
@@ -56,16 +55,20 @@ export default function ComprasVsVentasPieChart({
   fecha_inicial,
   fecha_final,
 }: Props) {
-  const { total: totalCompras = 0, loading: loadingCompras, error: errorCompras } = useGetComprasMes({
+  // ✅ Memoizamos los bodies para evitar llamadas innecesarias
+  const comprasBody = useMemo(() => ({
     id_bodega,
     fecha_inicial,
     fecha_final,
-  });
+  }), [id_bodega, fecha_inicial, fecha_final]);
 
-  const { total: totalVentas = 0, loading: loadingVentas, error: errorVentas } = useVentasTotalesPorMes({
+  const ventasBody = useMemo(() => ({
     fecha_inicial,
     fecha_final,
-  });
+  }), [fecha_inicial, fecha_final]);
+
+  const { total: totalCompras = 0, loading: loadingCompras, error: errorCompras } = useGetComprasMes(comprasBody);
+  const { total: totalVentas = 0, loading: loadingVentas, error: errorVentas } = useVentasTotalesPorMes(ventasBody);
 
   if (loadingCompras || loadingVentas) return <p>Cargando datos...</p>;
   if (errorCompras && errorVentas) return <p>Error al cargar datos: no se encontraron compras ni ventas </p>;
@@ -75,7 +78,6 @@ export default function ComprasVsVentasPieChart({
   const hasCompras = totalCompras > 0;
   const hasVentas = totalVentas > 0;
 
-  // Mensajes si no hay datos
   if (!hasCompras && !hasVentas) return <p>No se encontraron compras ni ventas.</p>;
   if (!hasCompras) return <p>No se encontraron compras.</p>;
   if (!hasVentas) return <p>No se encontraron ventas.</p>;
@@ -108,7 +110,7 @@ export default function ComprasVsVentasPieChart({
                 fill="#8884d8"
                 dataKey="value"
               >
-                {data.map((entry, index) => (
+                {data.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index]} />
                 ))}
               </Pie>
@@ -136,4 +138,3 @@ export default function ComprasVsVentasPieChart({
     </div>
   );
 }
-

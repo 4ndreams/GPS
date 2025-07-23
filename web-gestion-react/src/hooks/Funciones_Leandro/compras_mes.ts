@@ -7,11 +7,11 @@ import type {
 } from "@services/bodega.service";
 
 const useGetComprasMes = (body: ComprasFiltroBody) => {
-  const [compras,   setCompras]   = useState<Compra[]>([]);
-  const [total,     setTotal]     = useState<number>(0);
-  const [cantidad,  setCantidad]  = useState<number>(0);
-  const [loading,   setLoading]   = useState<boolean>(true);
-  const [error,     setError]     = useState<string | null>(null);
+  const [compras, setCompras] = useState<Compra[]>([]);
+  const [total, setTotal] = useState<number>(0);
+  const [cantidad, setCantidad] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!body) return;
@@ -31,7 +31,6 @@ const useGetComprasMes = (body: ComprasFiltroBody) => {
           setError(res.message || "Error desconocido");
         }
       } catch (err: unknown) {
-        // Normalizamos cualquier forma de error a string
         let mensaje = "Error al obtener compras";
         if (err instanceof Error) {
           mensaje = err.message;
@@ -45,10 +44,11 @@ const useGetComprasMes = (body: ComprasFiltroBody) => {
     };
 
     fetch();
-  }, [JSON.stringify(body)]); // detecta cambios en body
+  }, [body]); // gracias al useMemo, body solo cambia si sus valores internos cambian
 
   return { compras, total, cantidad, loading, error };
 };
 
 export default useGetComprasMes;
+
 

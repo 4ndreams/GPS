@@ -38,9 +38,10 @@ export default function useVentasTotalesPorMes(body: Body) {
     };
 
     fetch();
-  }, [JSON.stringify(body)]);
+  }, [body]); // ✅ Dependencia correcta
 
   return { total, loading, error };
 }
+
 
 

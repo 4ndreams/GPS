@@ -1,4 +1,4 @@
-import React from "react";
+import  { useMemo } from "react";
 import useGetComprasMes from "@Funciones_Leandro/compras_mes";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
@@ -40,7 +40,6 @@ const renderCustomizedLabel = ({
   );
 };
 
-
 type Props = {
   id_bodega?: number | string | number[];
   fecha_inicial?: string;
@@ -52,11 +51,14 @@ export default function MaterialStockPieChart({
   fecha_inicial,
   fecha_final,
 }: Props) {
-  const { compras, loading, error } = useGetComprasMes({
+  // ✅ Memorizar el body para evitar ejecuciones innecesarias del hook
+  const filtroCompras = useMemo(() => ({
     id_bodega,
     fecha_inicial,
     fecha_final,
-  });
+  }), [id_bodega, fecha_inicial, fecha_final]);
+
+  const { compras, loading, error } = useGetComprasMes(filtroCompras);
 
   if (loading) return <p>Cargando materiales...</p>;
   if (error) return <p>Error: no se encontraron compras</p>;
@@ -164,5 +166,6 @@ export default function MaterialStockPieChart({
     </div>
   );
 }
+
 
 
