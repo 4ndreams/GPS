@@ -35,7 +35,6 @@ router.use('/bodega',bodegaRoutes);
 router.use('/imagen', imagenRoutes);
 router.use('/tipo', tipoRoutes);
 router.use('/material', materialRoutes);
-router.use('/producto', productoRoutes); 
 router.use('/orden', ordenRoutes);
 router.use('/despachos', despachoRoutes);
 router.use('/venta', ventaRoutes);
