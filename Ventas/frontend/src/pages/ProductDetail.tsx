@@ -19,14 +19,8 @@ interface Producto {
 }
 
 
-interface CartItem {
-  id: number;
-  quantity: number;
-}
-
-
 interface ProductDetailProps {
-  cartItems: CartItem[];
+  getCartItemQuantity: (productId: number) => number;
   addToCart: (item: {
     id: number;
     nombre: string;
@@ -37,7 +31,7 @@ interface ProductDetailProps {
   }) => void;
 }
 
-const ProductDetail = ({ cartItems, addToCart }: ProductDetailProps) => {
+const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [producto, setProducto] = useState<Producto | null>(null);
@@ -64,8 +58,8 @@ const ProductDetail = ({ cartItems, addToCart }: ProductDetailProps) => {
   if (loading) return <p>Cargando producto...</p>;
   if (!producto) return <p>Producto no encontrado.</p>;
 
-  // Calcular stock disponible en tiempo real
-  const enCarrito = cartItems.find(item => item.id === producto.id_producto)?.quantity || 0;
+  // Calcular stock disponible en tiempo real usando la función del carrito
+  const enCarrito = getCartItemQuantity(producto.id_producto);
   const stockDisponible = (producto.stock ?? 0) - enCarrito;
   const agotado = stockDisponible <= 0;
 

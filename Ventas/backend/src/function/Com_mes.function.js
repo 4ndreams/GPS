@@ -1,5 +1,6 @@
 "use strict";
 import compras from "../entity/compra.entity.js";
+import ventas from "../entity/venta.entity.js";
 import Bodega from "../entity/bodega.entity.js";
 import { AppDataSource } from "../config/configDb.js";
 
@@ -7,10 +8,20 @@ import { AppDataSource } from "../config/configDb.js";
 
 export async function compras_totales_filtradas(body) {
     try {
-        let { fecha_inicial, fecha_final, id_bodega , id_material , id_relleno , tipo} = body || {};
-
+        console.log("Cuerpo de la solicitud:", body);
+        let { fecha_inicial, fecha_final, id_bodega ,tipo} = body || {};
+        console.log("Cuerpo de la solicitud:", body);
         const añoActual = new Date().getFullYear();
-
+        const mesActual = new Date().getMonth() + 1;
+        const diaActual = new Date().getDate();
+        if (!fecha_inicial || !fecha_final) {
+            fecha_inicial = `${añoActual}-01-01`;
+            fecha_final = `${añoActual}-${mesActual}-${diaActual}`;
+        }else if(!fecha_inicial && fecha_final) {
+            return [null, "Debe especificar una fecha inicial"];
+        }else if(fecha_inicial && !fecha_final) {
+            return [null, "Debe especificar una fecha final"];
+        }
         const fechaInicio = new Date(fecha_inicial);
         const fechaFin = new Date(fecha_final);
         const hoy = new Date();
@@ -126,10 +137,73 @@ export async function compras_totales_filtradas(body) {
         return [null, "Error al obtener compras totales filtradas"];
     }
 }
+export async function ventasTotalesPorMes (body) {
+    try {
+        console.log("Cuerpo de la solicitud:", body);
+        let { fecha_inicial, fecha_final } = body || {};
+        
+        const añoActual = new Date().getFullYear();
+        const mesActual = new Date().getMonth() + 1;
+        const diaActual = new Date().getDate();
 
+        if (!fecha_inicial && !fecha_final) {
+            fecha_inicial = `${añoActual}-01-01`;
+            fecha_final = `${añoActual}-${mesActual}-${diaActual}`;
+        } else if (!fecha_inicial && fecha_final) {
+            return [null, "Debe especificar una fecha inicial"];
+        } else if (fecha_inicial && !fecha_final) {
+            return [null, "Debe especificar una fecha final"];
+        }
 
+        const fechaInicio = new Date(fecha_inicial);
+        const fechaFin = new Date(fecha_final);
+        const hoy = new Date();
+        const fechaFinOriginal = new Date(fecha_final);
 
+        fechaFin.setDate(fechaFin.getDate() + 1); // incluir el último día completo
 
+        if (isNaN(fechaInicio) || isNaN(fechaFin)) {
+            return [null, "Formato de fecha inválido"];
+        }
 
+        if (fechaFin < fechaInicio) {
+            return [null, "La fecha final no puede ser anterior a la fecha inicial"];
+        }
 
+        if (fechaInicio > hoy || fechaFinOriginal > hoy) {
+            return [null, "Las fechas no pueden ser mayores a la fecha actual"];
+        }
 
+        const repoVentas = AppDataSource.getRepository(ventas);
+
+        const todasLasVentas = await repoVentas.find({
+            relations: { usuario: true }
+        });
+
+        const todasLasventasaprovechadas = todasLasVentas.filter(venta => venta.estado_pago === "Pagado");
+
+        const ventasPorMes = todasLasventasaprovechadas.filter(venta => {
+            const fechaPago = new Date(venta.fecha_pago);
+            return fechaPago >= fechaInicio && fechaPago <= fechaFin;
+        });
+
+        if (ventasPorMes.length === 0) {
+            return [null, `No se encontraron ventas en el rango ${fecha_inicial} a ${fecha_final}`];
+        }
+
+        const totalVentas = ventasPorMes.reduce(
+            (total, venta) => total + Number(venta.precio_venta),
+            0
+        );
+        const totalCantidades = ventasPorMes.reduce(
+            (total, venta) => total + Number(venta.cantidad),
+            0
+        );
+
+        return [{ ventas: ventasPorMes, total: totalVentas, cantidad: totalCantidades }, null];
+
+    } catch (error) {
+        console.error("Error en ventasTotalesPorMes:", error);
+        return [null, "Error al obtener las ventas totales"];
+    }
+}

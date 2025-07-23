@@ -2,6 +2,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import { getUserProfile } from './services/userService.ts';
 import { TokenService } from './services/tokenService.ts';
+import { useCart } from './hooks/useCart.ts';
 
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -21,93 +22,35 @@ import Navbar from './components/Navbar';
 import './App.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
-interface Product {
-  id: number;
-  nombre: string;
-  precio: number;
-  imagen: string;
-  categoria: string;
-  quantity: number;
-}
-
-interface CartItem extends Product {
-  quantity: number;
-}
-
 function App() {
   const location = useLocation();
   const hideNavbarRoutes = ["/login", "/register"];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   
   const [user, setUser] = useState(null);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  
+  // Usar el hook del carrito
+  const {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateCartItemQuantity,
+    getCartItemQuantity,
+    cartItemCount,
+  } = useCart();
 
-  // Cargar datos iniciales
+  // Cargar perfil de usuario
   useEffect(() => {
-    
-    
-    // Cargar carrito guardado
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
-
-    // Cargar perfil de usuario
     getUserProfile()
       .then((data) => setUser(data))
       .catch(() => setUser(null));
   }, []);
-
-  // Guardar carrito en localStorage cuando cambia
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
 
   const handleLogout = async () => {
     // Usar el servicio de tokens para cerrar sesión correctamente
     await TokenService.logoutFromBackend();
     setUser(null);
   };
-
-  // Función para eliminar del carrito
-  const removeFromCart = (productId: number) => {
-    // Eliminar del carrito
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-  };
-
-  const addToCart = (product: Product) => {
-  setCartItems((prevItems) => {
-    const existingItem = prevItems.find((item) => item.id === product.id);
-    if (existingItem) {
-      // Incrementar cantidad
-      return prevItems.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      // Agregar nuevo producto
-      return [...prevItems, { ...product, quantity: 1 }];
-    }
-  });
-};
-
-
-  // Función para actualizar cantidad en el carrito
-  const updateCartItemQuantity = (productId: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  const cartItemCount = cartItems.reduce(
-    (total, item) => total + item.quantity, 
-    0
-  );
 
   return (
     <>
@@ -129,13 +72,13 @@ function App() {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/cotizar" element={<Cotizar />} />
-        <Route path="/product/:id" element={<ProductDetail cartItems={cartItems} addToCart={addToCart} />} />
+        <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} getCartItemQuantity={getCartItemQuantity} />} />
         <Route 
           path="/productos" 
           element={
             <Productos 
               addToCart={addToCart}
-              cartItems={cartItems}
+              getCartItemQuantity={getCartItemQuantity}
             />
           } 
         />
