@@ -9,7 +9,7 @@ interface HomeProps {
 }
 
 // Usamos forwardRef para pasar el ref desde App.tsx hacia la sección contacto
-const Home = forwardRef<HTMLElement, HomeProps>((props, ref) => {
+const Home = forwardRef<HTMLElement, HomeProps>((_, ref) => {
   const heroContentRef = useRef<HTMLDivElement>(null);
 
   const cardRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
