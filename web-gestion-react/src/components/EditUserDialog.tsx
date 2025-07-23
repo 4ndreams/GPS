@@ -27,6 +27,7 @@ interface EditUserDialogProps {
 
 interface UserFormData {
   nombre: string;
+  apellidos: string;
   email: string;
   rut: string;
   rol: 'cliente' | 'fabrica' | 'tienda' | 'administrador';
@@ -37,6 +38,7 @@ interface UserFormData {
 export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated }: EditUserDialogProps) {
   const [formData, setFormData] = useState<UserFormData>({
     nombre: '',
+    apellidos: '',
     email: '',
     rut: '',
     rol: 'cliente',
@@ -96,6 +98,7 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
         
         setFormData({
           nombre: userData.nombre || '',
+          apellidos: userData.apellidos || '',
           email: userData.email || '',
           rut: cleanRut(userData.rut || ''), // Limpiar RUT al cargar
           rol: userData.rol || 'cliente',
@@ -131,6 +134,7 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
   const getValidationErrors = (formData: UserFormData) => {
     return {
       nombre: validateField('nombre', formData.nombre),
+      apellidos: validateField('apellidos', formData.apellidos),
       email: validateField('email', formData.email),
       rut: validateField('rut', formData.rut),
       password: validatePassword(formData.password)
@@ -181,6 +185,7 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
     try {
       const dataToSend: any = {
         nombre: formData.nombre,
+        apellidos: formData.apellidos,
         email: formData.email,
         rut: formData.rut,
         rol: formData.rol,
@@ -270,6 +275,20 @@ export default function EditUserDialog({ isOpen, onClose, userId, onUserUpdated 
                     />
                     {validationErrors.nombre && (
                       <span className="text-red-500 text-xs">{validationErrors.nombre}</span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="user-apellidos" className="text-sm font-medium">Apellidos</label>
+                    <Input
+                      id="user-apellidos"
+                      value={formData.apellidos}
+                      onChange={(e) => handleChange('apellidos', e.target.value)}
+                      placeholder="Apellidos del usuario"
+                      className={validationErrors.apellidos ? 'border-red-500' : ''}
+                    />
+                    {validationErrors.apellidos && (
+                      <span className="text-red-500 text-xs">{validationErrors.apellidos}</span>
                     )}
                   </div>
 

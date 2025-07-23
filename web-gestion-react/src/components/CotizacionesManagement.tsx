@@ -200,7 +200,7 @@ export default function CotizacionesManagement() {
   };
 
   const formatearMedidas = (ancho: number, alto: number, largo: number): string => {
-    return `${ancho}×${alto}×${largo}`;
+    return `${ancho} × ${alto} × ${largo} `;
   };
 
   const formatearTipoPuerta = (tipo: string): string => {
@@ -499,7 +499,24 @@ export default function CotizacionesManagement() {
                 </div>
                 <div>
                   <Label className="font-medium">Teléfono</Label>
-                  <p className="text-sm">{selectedCotizacion.telefono_contacto}</p>
+                  {selectedCotizacion.telefono_contacto ? (
+                    <a
+                      href={`https://wa.me/569${selectedCotizacion.telefono_contacto}?text=${encodeURIComponent(
+                        `*¡Hola ${selectedCotizacion.nombre_apellido_contacto}!* \n\nTe contactamos desde TERPLAC por tu cotización.\n-----------------------------\n*Tipo de puerta:* ${formatearTipoPuerta(selectedCotizacion.tipo_puerta)}\n*Medidas:* ${formatearMedidas(selectedCotizacion.medida_ancho, selectedCotizacion.medida_alto, selectedCotizacion.medida_largo)}cm\n*Material:* ${selectedCotizacion.material.nombre_material}\n*Relleno:* ${selectedCotizacion.relleno.nombre_relleno}\n-----------------------------\n¿Tienes dudas o quieres avanzar con tu pedido? ¡Responde este mensaje y te ayudamos!\n- El equipo TERPLAC -`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-green-600 hover:underline flex items-center gap-1"
+                    >
+                      +56 9 {selectedCotizacion.telefono_contacto}
+                      {/* Ícono oficial de WhatsApp */}
+                      <svg className="h-4 w-4 text-green-500" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 3C9.373 3 4 8.373 4 15c0 2.637.86 5.09 2.48 7.16L4 29l7.09-2.44A12.93 12.93 0 0 0 16 27c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 22.917c-2.13 0-4.21-.62-5.97-1.8l-.43-.27-4.21 1.45 1.44-4.09-.28-.44A9.93 9.93 0 0 1 6 15c0-5.514 4.486-10 10-10s10 4.486 10 10-4.486 10-10 10zm5.44-7.54c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.89-.79-1.49-1.77-1.67-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.8.37-.27.3-1.05 1.02-1.05 2.5 0 1.47 1.08 2.89 1.23 3.09.15.2 2.13 3.25 5.17 4.43.72.28 1.28.45 1.72.58.72.23 1.37.2 1.88.12.57-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.27-.2-.57-.35z"/>
+                      </svg>
+                    </a>
+                  ) : (
+                    <p className="text-sm text-gray-500">No especificado</p>
+                  )}
                 </div>
                 <div>
                   <Label className="font-medium">RUT</Label>
@@ -527,12 +544,9 @@ export default function CotizacionesManagement() {
                 </div>
               </div>
               <div className="col-span-2 space-y-3">
-                <div>
-                  <Label className="font-medium">Mensaje</Label>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedCotizacion.mensaje}</p>
-                </div>
+                {/* Estado y Precio debajo de Relleno */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="flex items-center gap-2">
                     <Label className="font-medium">Estado</Label>
                     <Badge 
                       variant={getEstadoBadgeVariant(selectedCotizacion.estado)} 
@@ -542,12 +556,17 @@ export default function CotizacionesManagement() {
                       {selectedCotizacion.estado}
                     </Badge>
                   </div>
-                  <div>
+                  <div className="flex items-center gap-2">
                     <Label className="font-medium">Precio</Label>
-                    <p className="text-sm font-medium text-green-600">
+                    <span className="text-sm font-medium text-green-600">
                       {formatearPrecio(selectedCotizacion.precio)}
-                    </p>
+                    </span>
                   </div>
+                </div>
+                {/* Mensaje al final */}
+                <div>
+                  <Label className="font-medium">Mensaje</Label>
+                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedCotizacion.mensaje}</p>
                 </div>
               </div>
             </div>

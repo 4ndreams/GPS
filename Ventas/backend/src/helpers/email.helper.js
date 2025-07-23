@@ -267,6 +267,7 @@ export async function sendCotizacionStatusChangeEmail(cotizacion, estadoAnterior
     medida_largo,
     tipo_puerta,
     estado,
+    precio,
     material, 
     relleno,
     usuario
@@ -348,6 +349,10 @@ export async function sendCotizacionStatusChangeEmail(cotizacion, estadoAnterior
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
                           <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Precio:</td>
+                          <td style="padding: 0.3rem 0; color: #28a745; font-weight: 700;">${precio ? `$${Number(precio).toLocaleString('es-CL')}` : 'Por confirmar'}</td>
                         </tr>
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Teléfono:</td>

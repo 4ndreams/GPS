@@ -153,24 +153,27 @@ export default function UsersManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Administración de Usuarios</h2>
-          <p className="text-gray-600">Configura a los usuarios del sistema</p>
+      <div className="flex flex-col gap-1 mb-6">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <User className="h-7 w-7 text-primary" />
+            <h2 className="text-2xl font-bold tracking-tight">Administración de Usuarios</h2>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <Button 
+              onClick={() => setShowCreateDialog(true)} 
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <User className="h-4 w-4 mr-2" />
+              Crear Usuario
+            </Button>
+            <Button onClick={loadUsers} disabled={loadingUsers} variant="outline">
+              <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? "animate-spin" : ""}`} />
+              {loadingUsers ? "Cargando..." : "Actualizar"}
+            </Button>
+          </div>
         </div>
-        <div className="flex space-x-2">
-          <Button 
-            onClick={() => setShowCreateDialog(true)} 
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <User className="h-4 w-4 mr-2" />
-            Crear Usuario
-          </Button>
-          <Button onClick={loadUsers} disabled={loadingUsers} variant="outline">
-            <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? "animate-spin" : ""}`} />
-            {loadingUsers ? "Cargando..." : "Actualizar"}
-          </Button>
-        </div>
+        <p className="text-gray-500 text-base ml-9">Configura a los usuarios del sistema</p>
       </div>
 
       {/* Estadísticas de usuarios */}

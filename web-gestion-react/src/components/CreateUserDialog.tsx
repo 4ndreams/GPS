@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { 
   UserPlus, 
   Mail,
   Shield,
   Save,
-  X,
   RefreshCw,
   AlertTriangle,
   Lock
@@ -187,21 +187,17 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="max-w-md w-full mx-4">
-        <Card className="max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-md w-full mx-4 p-0">
+        <Card className="max-h-[90vh] overflow-y-auto border-none shadow-none">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <UserPlus className="h-5 w-5" />
                 <span>Crear Nuevo Usuario</span>
               </div>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
             </CardTitle>
           </CardHeader>
-          
           <CardContent className="space-y-4">
             {error && (
               <div className="flex items-center space-x-2 text-red-600 py-4">
@@ -209,7 +205,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                 <span>{error}</span>
               </div>
             )}
-            
             {/* Información básica */}
             <div className="space-y-4">
               <div className="space-y-2">
@@ -225,7 +220,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                   <span className="text-red-500 text-xs">{validationErrors.nombre}</span>
                 )}
               </div>
-
               <div className="space-y-2">
                 <label htmlFor="create-user-apellidos" className="text-sm font-medium">Apellidos *</label>
                 <Input
@@ -239,7 +233,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                   <span className="text-red-500 text-xs">{validationErrors.apellidos}</span>
                 )}
               </div>
-
               <div className="space-y-2">
                 <label htmlFor="create-user-email" className="text-sm font-medium flex items-center">
                   <Mail className="h-4 w-4 mr-1" />
@@ -257,7 +250,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                   <span className="text-red-500 text-xs">{validationErrors.email}</span>
                 )}
               </div>
-
               <div className="space-y-2">
                 <label htmlFor="create-user-rut" className="text-sm font-medium">RUT *</label>
                 <Input
@@ -272,7 +264,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                   <span className="text-red-500 text-xs">{validationErrors.rut}</span>
                 )}
               </div>
-
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center">
                   <Shield className="h-4 w-4 mr-1" />
@@ -287,7 +278,7 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[10000]">
                     <SelectItem value="cliente">Cliente</SelectItem>
                     <SelectItem value="fabrica">Fábrica</SelectItem>
                     <SelectItem value="tienda">Tienda</SelectItem>
@@ -301,7 +292,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                   </Badge>
                 </div>
               </div>
-
               <div className="space-y-2">
                 <label htmlFor="create-user-password" className="text-sm font-medium flex items-center">
                   <Lock className="h-4 w-4 mr-1" />
@@ -319,7 +309,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                   <span className="text-red-500 text-xs">{validationErrors.password}</span>
                 )}
               </div>
-
               {/* Estado del usuario */}
               <div className="space-y-3 pt-2 border-t">
                 <div className="flex items-center space-x-2">
@@ -341,7 +330,6 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
                 )}
               </div>
             </div>
-
             {/* Botones de acción */}
             <div className="flex justify-end space-x-2 pt-4 border-t">
               <Button variant="outline" onClick={onClose} disabled={saving}>
@@ -363,7 +351,7 @@ export default function CreateUserDialog({ isOpen, onClose, onUserCreated }: Cre
             </div>
           </CardContent>
         </Card>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

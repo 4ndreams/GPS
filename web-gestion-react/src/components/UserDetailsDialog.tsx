@@ -3,6 +3,7 @@ import { userService, type User as UserType } from '../services/userService';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { 
   User, 
   Mail, 
@@ -10,8 +11,7 @@ import {
   Shield,
   AlertTriangle,
   CheckCircle2,
-  RefreshCw,
-  X
+  RefreshCw
 } from "lucide-react";
 
 interface UserDetailsDialogProps {
@@ -197,34 +197,27 @@ export default function UserDetailsDialog({ isOpen, onClose, userId }: UserDetai
   };
 
   return (
-    <>
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="max-w-md w-full mx-4">
-            <Card className="max-h-[80vh] overflow-y-auto">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <User className="h-5 w-5" />
-                    <span>Detalles del Usuario</span>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={onClose}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {renderContent()}
-                <div className="flex justify-end pt-4">
-                  <Button variant="outline" onClick={onClose}>
-                    Cerrar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-    </>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent className="max-w-md w-full mx-4 p-0">
+        <Card className="max-h-[80vh] overflow-y-auto border-none shadow-none">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <User className="h-5 w-5" />
+                <span>Detalles del Usuario</span>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {renderContent()}
+            <div className="flex justify-end pt-4">
+              <Button variant="outline" onClick={onClose}>
+                Cerrar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </DialogContent>
+    </Dialog>
   );
 }
