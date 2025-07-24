@@ -16,11 +16,11 @@ import Carrito from './pages/Carrito';
 import Checkout from './pages/Checkout';
 import Cotizar from './pages/Cotizar';
 import ProductDetail from './pages/ProductDetail.tsx';
-
 import Navbar from './components/Navbar';
 
 import './App.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { useCart } from 'hooks/useCart.ts';
 
 interface Product {
   id: number;
@@ -42,9 +42,6 @@ function App() {
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   
   const [user, setUser] = useState(null);
-<<<<<<< Updated upstream
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-=======
 
   // Ref para la sección de contacto
   const contactoRef = useRef<HTMLElement>(null);
@@ -60,17 +57,13 @@ function App() {
     getCartItemQuantity,
     cartItemCount,
   } = useCart();
->>>>>>> Stashed changes
 
   // Cargar datos iniciales
   useEffect(() => {
     
     
     // Cargar carrito guardado
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
+
 
     // Cargar perfil de usuario
     getUserProfile()
@@ -78,12 +71,6 @@ function App() {
       .catch(() => setUser(null));
   }, []);
 
-<<<<<<< Updated upstream
-  // Guardar carrito en localStorage cuando cambia
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
-=======
   // Efecto para hacer scroll cuando sea necesario
   useEffect(() => {
     if (pendingScrollToContacto && location.pathname === "/") {
@@ -99,7 +86,6 @@ function App() {
       }, 100); // pequeño delay para asegurar render
     }
   }, [pendingScrollToContacto, location]);
->>>>>>> Stashed changes
 
   const handleLogout = async () => {
     // Usar el servicio de tokens para cerrar sesión correctamente
@@ -107,48 +93,6 @@ function App() {
     setUser(null);
   };
 
-<<<<<<< Updated upstream
-  // Función para eliminar del carrito
-  const removeFromCart = (productId: number) => {
-    // Eliminar del carrito
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-  };
-
-  const addToCart = (product: Product) => {
-  setCartItems((prevItems) => {
-    const existingItem = prevItems.find((item) => item.id === product.id);
-    if (existingItem) {
-      // Incrementar cantidad
-      return prevItems.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      // Agregar nuevo producto
-      return [...prevItems, { ...product, quantity: 1 }];
-    }
-  });
-};
-
-
-  // Función para actualizar cantidad en el carrito
-  const updateCartItemQuantity = (productId: number, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  const cartItemCount = cartItems.reduce(
-    (total, item) => total + item.quantity, 
-    0
-  );
-
-=======
   // Función para manejar click en Contacto
   const handleContactoClick = () => {
     if (location.pathname === "/") {
@@ -166,7 +110,6 @@ function App() {
     }
   };
 
->>>>>>> Stashed changes
   return (
     <>
       {!shouldHideNavbar && (

@@ -8,7 +8,6 @@ import tipoRoutes from "./tipo.routes.js";
 import materialRoutes from "./material.routes.js";
 import ordenRoutes from "./orden.routes.js"; 
 import despachoRoutes from "./despacho.routes.js";
-import productoRoutes from "./producto.routes.js";
 import ventaRoutes from "./venta.routes.js"; 
 import itemCarritoRoutes from "./item_carrito.routes.js"; 
 import comprasRoutes from "./compras.routes.js";

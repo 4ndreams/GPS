@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useRef, useState, type Ref } from 'react';
 import TerplacFoto1 from '@assets/TerplacFoto1.png';
 import '@styles/Home.css';
 import '@styles/animations.css';

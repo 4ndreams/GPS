@@ -17,12 +17,9 @@ export class TokenService {
    */
   static generateToken(payload) {
     return jwt.sign(
-      {
-        ...payload,
-        iat: Math.floor(Date.now() / 1000), // Tiempo de emisión
-        exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRATION // Tiempo de expiración
-      },
-      ACCESS_TOKEN_SECRET
+      payload,
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: TOKEN_EXPIRATION } // por ejemplo, '24h' o 86400
     );
   }
 
