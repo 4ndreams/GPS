@@ -240,3 +240,37 @@ export async function getMyProductosPersonalizadosController(req, res) {
     }
 }
 
+export async function updatePrecioProductoPersonalizadoController(req, res) {
+    try {
+        const { id_producto_personalizado } = req.params;
+        const { precio } = req.body;
+
+        // Validar el ID del producto personalizado
+        const idValidation = ProductoPersonalizadoQueryValidation.validate({ id_producto_personalizado });
+        if (idValidation.error) {
+            return handleErrorClient(res, 400, idValidation.error.details[0].message);
+        }
+
+        // Validar que se proporcione el precio
+        if (!precio) {
+            return handleErrorClient(res, 400, "El precio es obligatorio");
+        }
+
+        // Validar que el precio sea un número entero mayor a 0
+        if (!Number.isInteger(precio) || precio <= 0) {
+            return handleErrorClient(res, 400, "El precio debe ser un número entero mayor a 0");
+        }
+
+        const [updatedProductoPersonalizado, errorMessage] = await updateProductoPersonalizadoService(Number(id_producto_personalizado), { precio });
+        
+        if (errorMessage) {
+            return handleErrorClient(res, 404, errorMessage);
+        }
+
+        return handleSuccess(res, 200, "Precio del producto personalizado actualizado exitosamente", updatedProductoPersonalizado);
+    } catch (error) {
+        console.error(error);
+        return handleErrorServer(res, 500, "Error interno del servidor");
+    }
+}
+

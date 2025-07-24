@@ -118,6 +118,7 @@ export class TokenService {
         email: user.email,
         rut: user.rut,
         rol: user.rol,
+        flag_blacklist: user.flag_blacklist 
       };
 
       const newToken = this.generateToken(newTokenPayload);
@@ -152,7 +153,8 @@ export class TokenService {
         user: {
           email: decoded.email,
           rol: decoded.rol,
-          nombreCompleto: decoded.nombreCompleto
+          nombreCompleto: decoded.nombreCompleto,
+          flag_blacklist: decoded.flag_blacklist,
         }
       };
     } catch (error) {

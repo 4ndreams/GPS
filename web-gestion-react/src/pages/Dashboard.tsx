@@ -1,11 +1,14 @@
 "use client"
 
-import React, { useState, useEffect, useContext } from "react"
+import { useState, useEffect, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../contexts/AuthContext"
+
 import DashboardStats from "../components/DashboardStats"
 import OrdenesTable from "../components/OrdenesTable"
 import NotificacionesPanel from "../components/NotificacionesPanel"
+import UsersManagement from "../components/UsersManagement"
+import CotizacionesManagement from "../components/CotizacionesManagement"
 
 interface OrdenDespacho {
   id: string;
@@ -185,6 +188,7 @@ export default function Dashboard() {
   const authContext = useContext(AuthContext)
   const navigate = useNavigate()
   const [selectedRows, setSelectedRows] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState<'ordenes' | 'usuarios' | 'cotizaciones'>('ordenes')
 
   useEffect(() => {
     if (!authContext?.usuario) {
@@ -231,33 +235,72 @@ export default function Dashboard() {
             Dashboard TERPLAC
           </h1>
           <p className="text-gray-600 mt-1">
-            Sistema de Gestión de Despachos - Bienvenido, {authContext.usuario.nombre}
+            Sistema de Gestión de Despachos, Usuarios y Cotizaciones - Bienvenido, {authContext.usuario.nombre}
           </p>
         </div>
       </div>
 
-      {/* Estadísticas */}
-      <DashboardStats ordenesDespacho={ordenesDespacho} />
-
-      {/* Contenido principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Tabla de órdenes */}
-        <div className="lg:col-span-2">
-          <OrdenesTable
-            ordenesDespacho={ordenesDespacho}
-            selectedRows={selectedRows}
-            onSelectRow={handleSelectRow}
-            onSelectAll={handleSelectAll}
-            onRefresh={handleRefresh}
-            onExport={handleExport}
-          />
-        </div>
-
-        {/* Panel de notificaciones */}
-        <div className="lg:col-span-1">
-          <NotificacionesPanel notificaciones={notificaciones} />
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-2 mb-2">
+        <button
+          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
+            ${activeTab === 'ordenes'
+              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
+              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
+          `}
+          onClick={() => setActiveTab('ordenes')}
+        >Órdenes</button>
+        <button
+          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
+            ${activeTab === 'usuarios'
+              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
+              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
+          `}
+          onClick={() => setActiveTab('usuarios')}
+        >Usuarios</button>
+        <button
+          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
+            ${activeTab === 'cotizaciones'
+              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
+              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
+          `}
+          onClick={() => setActiveTab('cotizaciones')}
+        >Cotizaciones</button>
       </div>
+
+      {/* Estadísticas solo para Órdenes */}
+      {activeTab === 'ordenes' && <DashboardStats ordenesDespacho={ordenesDespacho} />}
+
+      {/* Contenido principal según la pestaña activa */}
+      {activeTab === 'ordenes' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Tabla de órdenes */}
+          <div className="lg:col-span-2">
+            <OrdenesTable
+              ordenesDespacho={ordenesDespacho}
+              selectedRows={selectedRows}
+              onSelectRow={handleSelectRow}
+              onSelectAll={handleSelectAll}
+              onRefresh={handleRefresh}
+              onExport={handleExport}
+            />
+          </div>
+          {/* Panel de notificaciones */}
+          <div className="lg:col-span-1">
+            <NotificacionesPanel notificaciones={notificaciones} />
+          </div>
+        </div>
+      )}
+      {activeTab === 'usuarios' && (
+        <div>
+          <UsersManagement />
+        </div>
+      )}
+      {activeTab === 'cotizaciones' && (
+        <div>
+          <CotizacionesManagement />
+        </div>
+      )}
     </div>
   )
 }

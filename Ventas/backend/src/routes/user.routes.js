@@ -7,6 +7,7 @@ import {
   deleteUser,
   getUser,
   getUsers,
+  createUser,
   updateUser,
   getProfile,
   updateProfile,
@@ -26,6 +27,7 @@ router.get("/detail/:id_usuario/activity", getUserActivity);
 
 router
   .get("/", getUsers) 
+  .post("/", createUser)
   .get("/detail/:id_usuario", getUser) 
   .patch("/detail/:id_usuario", updateUser)
   .delete("/detail/:id_usuario", deleteUser); 

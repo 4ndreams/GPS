@@ -52,8 +52,8 @@ const UserInfo = () => {
               <td>{new Date(compra.fecha).toLocaleDateString()}</td>
               <td>
                 <ul>
-                  {compra.productos.map((prod, idx) => (
-                    <li key={idx}>
+                  {compra.productos.map((prod) => (
+                    <li key={prod.nombre}>
                       {prod.nombre} x {prod.cantidad}
                     </li>
                   ))}
