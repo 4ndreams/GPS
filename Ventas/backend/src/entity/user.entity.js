@@ -88,25 +88,25 @@ const UsuarioSchema = new EntitySchema({
         },
     },
     relations: {
-        itemCarrito: {
-            type: "one-to-many",
-            target: ItemCarritoSchema,
-            inverseSide: "venta",
-        },
-        venta: {
-            type: "one-to-many",
-            target: VentaSchema,
-            joinColumn: {
-                name: "id_usuario",
-            },
-            nullable: true, // Permite que un usuario no tenga ventas
-            inverseSide: "usuario",
-        },
-        eventos: {
-            type: "one-to-many",
-            target: UserEventSchema,
-            inverseSide: "usuario", 
-        },
+        // itemCarrito: {
+        //     type: "one-to-many",
+        //     target: ItemCarritoSchema,
+        //     inverseSide: "venta",
+        // },
+        // venta: {
+        //     type: "one-to-many",
+        //     target: VentaSchema,
+        //     joinColumn: {
+        //         name: "id_usuario",
+        //     },
+        //     nullable: true, // Permite que un usuario no tenga ventas
+        //     inverseSide: "usuario",
+        // },
+        // eventos: {
+        //     type: "one-to-many",
+        //     target: UserEventSchema,
+        //     inverseSide: "usuario", 
+        // },
     },
     
     indices: [

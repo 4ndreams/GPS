@@ -5,7 +5,8 @@ import { authenticateJwt } from "../middlewares/authentication.middleware.js";
 import { isFabricaOrAdmin } from "../middlewares/autorization.middleware.js";
 
 const router = Router();
-
+router.use(authenticateJwt);
+router.use(isFabricaOrAdmin);
 router.put("/", async (req, res) => {
     const body = req.body;
     const [message, error] = await añadir_puertas(body);

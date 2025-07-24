@@ -2,6 +2,7 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from "react";
 import { getUserProfile } from './services/userService.ts';
 import { TokenService } from './services/tokenService.ts';
+import { useCart } from './hooks/useCart.ts';
 
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -20,20 +21,6 @@ import Navbar from './components/Navbar';
 
 import './App.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { useCart } from 'hooks/useCart.ts';
-
-interface Product {
-  id: number;
-  nombre: string;
-  precio: number;
-  imagen: string;
-  categoria: string;
-  quantity: number;
-}
-
-interface CartItem extends Product {
-  quantity: number;
-}
 
 function App() {
   const location = useLocation();
@@ -58,14 +45,8 @@ function App() {
     cartItemCount,
   } = useCart();
 
-  // Cargar datos iniciales
+  // Cargar perfil de usuario
   useEffect(() => {
-    
-    
-    // Cargar carrito guardado
-
-
-    // Cargar perfil de usuario
     getUserProfile()
       .then((data) => setUser(data))
       .catch(() => setUser(null));
@@ -131,13 +112,13 @@ function App() {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/cotizar" element={<Cotizar />} />
-        <Route path="/product/:id" element={<ProductDetail cartItems={cartItems} addToCart={addToCart} />} />
+        <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} getCartItemQuantity={getCartItemQuantity} />} />
         <Route 
           path="/productos" 
           element={
             <Productos 
               addToCart={addToCart}
-              cartItems={cartItems}
+              getCartItemQuantity={getCartItemQuantity}
             />
           } 
         />
