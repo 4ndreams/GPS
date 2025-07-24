@@ -37,6 +37,7 @@ function App() {
     updateCartItemQuantity,
     getCartItemQuantity,
     cartItemCount,
+    clearCart,
   } = useCart();
 
   // Cargar perfil de usuario
@@ -70,7 +71,15 @@ function App() {
         <Route path="/verified-email" element={<VerifiedEmail />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/checkout" element={<Checkout />} />
+        <Route 
+          path="/checkout" 
+          element={
+            <Checkout 
+              cartItems={cartItems}
+              clearCart={clearCart}
+            />
+          } 
+        />
         <Route path="/cotizar" element={<Cotizar />} />
         <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} getCartItemQuantity={getCartItemQuantity} />} />
         <Route 
