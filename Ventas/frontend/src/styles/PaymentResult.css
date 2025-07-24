@@ -1,0 +1,154 @@
+.payment-result-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 100px);
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+.payment-result-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.success-icon,
+.failure-icon,
+.pending-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  color: #28a745;
+}
+
+.failure-icon {
+  color: #dc3545;
+}
+
+.pending-icon {
+  color: #ffc107;
+}
+
+.payment-result-card h2 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.payment-result-card > p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.payment-details,
+.failure-details,
+.pending-details,
+.next-steps {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.payment-details h3,
+.failure-details h3,
+.pending-details h3,
+.next-steps h3 {
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.payment-details p,
+.failure-details p,
+.pending-details p {
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.failure-details ul,
+.pending-details ul,
+.next-steps ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.failure-details li,
+.pending-details li,
+.next-steps li {
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.action-buttons .btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.action-buttons .btn-primary {
+  background: #007bff;
+  color: white;
+}
+
+.action-buttons .btn-primary:hover {
+  background: #0056b3;
+}
+
+.action-buttons .btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.action-buttons .btn-secondary:hover {
+  background: #545b62;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .payment-result-container {
+    padding: 1rem;
+  }
+  
+  .payment-result-card {
+    padding: 2rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+  }
+}
+
+/* Estilos adicionales para el wallet de Mercado Pago */
+.mercadopago-wallet {
+  margin: 1rem 0;
+}
+
+.checkout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

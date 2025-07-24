@@ -36,18 +36,18 @@
 
 .cart-item .item-name {
   font-weight: 600;
-  color: #333;
+  color: #000000;
 }
 
 .cart-item .item-quantity,
 .cart-item .item-unit-price {
   font-size: 0.9rem;
-  color: #666;
+  color: #333;
 }
 
 .cart-item .item-price {
   font-weight: 600;
-  color: #2c3e50;
+  color: #333;
   white-space: nowrap;
 }
 
