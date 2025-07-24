@@ -10,6 +10,8 @@ import {
   type Relleno as RellenoType 
 } from '@services/materialesService';
 import Notification from '@components/Notification';
+import { formatRut } from '@utils/validations';
+
 import '@styles/Cotizar.css';
 
 // Constantes de validación
@@ -218,12 +220,34 @@ function Cotizar() {
     return null;
   };
 
+  
+  // Valida el RUT incluyendo el dígito verificador
   const validateRut = (value: string): string | null => {
     if (!value.trim()) {
       return 'El RUT es requerido';
     }
     if (!VALIDATION_RULES.rut.pattern.test(value)) {
       return 'El formato del RUT no es válido (ej: 12345678-9)';
+    }
+    const [rutBody, dv] = value.split('-');
+    if (!rutBody || !dv) {
+      return 'El formato del RUT no es válido (ej: 12345678-9)';
+    }
+    // Calcular dígito verificador
+    let sum = 0;
+    let multiplier = 2;
+    for (let i = rutBody.length - 1; i >= 0; i--) {
+      sum += parseInt(rutBody[i]) * multiplier;
+      multiplier = multiplier === 7 ? 2 : multiplier + 1;
+    }
+    const remainder = sum % 11;
+    const calculatedDv = 11 - remainder;
+    let dvExpected = '';
+    if (calculatedDv === 11) dvExpected = '0';
+    else if (calculatedDv === 10) dvExpected = 'K';
+    else dvExpected = calculatedDv.toString();
+    if (dvExpected.toUpperCase() !== dv.toUpperCase()) {
+      return 'El RUT ingresado no es válido';
     }
     return null;
   };
@@ -267,6 +291,7 @@ function Cotizar() {
       case 'telefono_contacto':
         return validateTelefono(value);
       case 'rut_contacto':
+        // Usar validación local
         return validateRut(value);
       case 'email_contacto':
         return validateEmail(value);
@@ -282,26 +307,37 @@ function Cotizar() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
+    const { name, value, type } = e.target;
+    let newValue = value;
+
+    // Formateo especial para el RUT de contacto
+    if (name === 'rut_contacto' && typeof newValue === 'string') {
+      newValue = formatRut(newValue);
+      if (newValue.length > 10) {
+        newValue = newValue.substring(0, 10);
+      }
+    }
+
     // Manejar cambio de tipo de puerta - resetear espesor
     if (name === 'tipo_puerta') {
-      handleTipoPuertaChange(value);
+      handleTipoPuertaChange(newValue);
       return;
     }
-    
-    // Actualizar el campo normalmente
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Validar el campo en tiempo real
-    const error = validateField(name, value);
-    setValidationErrors(prev => ({
-      ...prev,
-      [name]: error
-    }));
-    
+
+    // Actualizar el estado del formulario
+    setFormData(prev => ({ ...prev, [name]: newValue }));
+
+    // Validar en tiempo real solo para campos de texto
+    if (type !== 'checkbox') {
+      const error = validateField(name, newValue as string);
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: error
+      }));
+    }
+
     // Manejar selecciones especiales
-    handleMaterialRelleno(name, value);
+    handleMaterialRelleno(name, newValue);
   };
 
   const handleTipoPuertaChange = (value: string) => {
@@ -404,6 +440,7 @@ function Cotizar() {
   const validateStepInfoContacto = (errors: ValidationErrors) => {
     if (!isLoggedIn) {
       const nombreError = validateNombre(formData.nombre_apellido_contacto);
+      // Validar rut_contacto con validations.ts
       const rutError = validateRut(formData.rut_contacto);
       const emailError = validateEmail(formData.email_contacto);
       
@@ -647,24 +684,18 @@ function Cotizar() {
                 </div>
 
                 <div className="field-group">
-                  <label htmlFor="medida_espesor">Espesor *</label>
-                  <select 
-                    id="medida_espesor"
-                    name="medida_espesor" 
-                    value={formData.medida_espesor} 
-                    onChange={handleChange} 
-                    className={validationErrors.medida_espesor ? 'error' : ''}
-                    required 
-                    disabled={!formData.tipo_puerta}
-                  >
-                    <option value="">Selecciona un espesor</option>
+                  <label>Espesor *</label>
+                  <div style={{ minHeight: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%' }}>
                     {formData.tipo_puerta === 'puertaPaso' && (
-                      <option value="45">45mm - Puertas de paso</option>
+                      <span style={{ fontWeight: 500, width: '100%' }}>45mm - Puertas de paso</span>
                     )}
                     {formData.tipo_puerta === 'puertaCloset' && (
-                      <option value="18">18mm - Puertas de closet</option>
+                      <span style={{ fontWeight: 500, width: '100%' }}>18mm - Puertas de closet</span>
                     )}
-                  </select>
+                    {!formData.tipo_puerta && (
+                      <span style={{ color: '#888', width: '100%' }}>Selecciona un tipo de puerta</span>
+                    )}
+                  </div>
                   {validationErrors.medida_espesor && (
                     <span className="error-text">{validationErrors.medida_espesor}</span>
                   )}
@@ -838,17 +869,20 @@ function Cotizar() {
               
               <div className="field-group">
                 <label htmlFor="telefono_contacto">Teléfono de contacto *</label>
-                <input 
-                  id="telefono_contacto"
-                  type="tel" 
-                  name="telefono_contacto" 
-                  value={formData.telefono_contacto} 
-                  onChange={handleChange} 
-                  placeholder="Ej: 91234567"
-                  maxLength={8}
-                  className={validationErrors.telefono_contacto ? 'error' : ''}
-                  required 
-                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ whiteSpace: 'nowrap', fontWeight: 500, color: '#555' }}>+569</span>
+                  <input 
+                    id="telefono_contacto"
+                    type="tel" 
+                    name="telefono_contacto" 
+                    value={formData.telefono_contacto} 
+                    onChange={handleChange} 
+                    placeholder="Ej: 91234567"
+                    maxLength={8}
+                    className={validationErrors.telefono_contacto ? 'error' : ''}
+                    required 
+                  />
+                </div>
                 {validationErrors.telefono_contacto && (
                   <span className="error-text">{validationErrors.telefono_contacto}</span>
                 )}

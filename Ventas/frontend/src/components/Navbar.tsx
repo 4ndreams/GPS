@@ -24,8 +24,8 @@ function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleMenu = () => {
@@ -34,7 +34,10 @@ function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
         setUserMenuOpen(false);
       }
     }
@@ -52,10 +55,9 @@ function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
             className="logo-navbar"
           />
         </Link>
-
         {/* Botón hamburguesa solo en pantallas pequeñas */}
         <button className="menu-toggle" onClick={toggleMenu}>
-          <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
+          <i className={`bi ${isOpen ? "bi-x-lg" : "bi-list"}`}></i>
         </button>
 
         {/* Menú de navegación */}
@@ -66,16 +68,13 @@ function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
           <li><Link to="/contacto" className="navbar-link" onClick={() => setIsOpen(false)}>Contacto</Link></li>
           <li><Link to="/cotizar" className="navbar-link" onClick={() => setIsOpen(false)}>Cotizar</Link></li>
         </ul>
-
         {/* Iconos (carrito y perfil) */}
         <div className="navbar-icons">
           <div className="cart-icon-wrapper">
             <Link to="/carrito" className="position-relative text-dark">
               <i className="bi bi-cart"></i>
               {cartItemCount > 0 && (
-                <span className="cart-badge">
-                  {cartItemCount}
-                </span>
+                <span className="cart-badge">{cartItemCount}</span>
               )}
             </Link>
           </div>
@@ -94,7 +93,11 @@ function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
               <div className="user-dropdown">
                 {user ? (
                   <>
-                    <Link to="/profile" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                    <Link
+                      to="/profile"
+                      className="dropdown-item"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
                       Perfil
                     </Link>
                     <Link
@@ -110,10 +113,18 @@ function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                    <Link
+                      to="/login"
+                      className="dropdown-item"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
                       Iniciar sesión
                     </Link>
-                    <Link to="/register" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                    <Link
+                      to="/register"
+                      className="dropdown-item"
+                      onClick={() => setUserMenuOpen(false)}
+                    >
                       Registrarse
                     </Link>
                   </>

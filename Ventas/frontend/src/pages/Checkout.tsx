@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserProfile } from "@services/userService";
+import { getImagePath } from "@utils/getImagePath";
 import "@styles/Checkout.css";
 
 interface CartItem {
   id: number;
   nombre: string;
   precio: number;
-  cantidad: number;
+  imagen: string;
+  categoria: string;
+  quantity: number;
 }
 
 interface ContactInfo {
@@ -17,8 +20,12 @@ interface ContactInfo {
   telefono: string;
 }
 
-const Checkout: React.FC = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+interface CheckoutProps {
+  cartItems: CartItem[];
+  clearCart: () => void;
+}
+
+const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     nombre: "",
     apellidos: "",
@@ -27,20 +34,8 @@ const Checkout: React.FC = () => {
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Cargar carrito simulado (o desde localStorage)
+  // Cargar información del usuario si está logueado
   useEffect(() => {
-    const stored = localStorage.getItem("cart");
-    if (stored) {
-      setCart(JSON.parse(stored));
-    } else {
-      // aqui van los productos
-      setCart([
-        { id: 1, nombre: "Puerta Geno Enchape Wenge", precio: 105000, cantidad: 1 },
-        { id: 3, nombre: "Moldura Roble 2m", precio: 45000, cantidad: 2 },
-      ]);
-    }
-    
-    // Cargar información del usuario si está logueado
     loadUserProfile();
   }, []);
 
@@ -72,7 +67,46 @@ const Checkout: React.FC = () => {
     });
   };
 
-  const total = cart.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  // Manejar el proceso de pago
+  const handlePayment = () => {
+    // Validar campos requeridos
+    if (!contactInfo.nombre || !contactInfo.apellidos || !contactInfo.email || !contactInfo.telefono) {
+      alert('Por favor completa todos los campos de contacto antes de proceder al pago.');
+      return;
+    }
+
+    // Aquí podrías agregar lógica adicional como enviar la orden al backend
+    console.log('Procesando pago con datos:', {
+      contactInfo,
+      cartItems,
+      total
+    });
+
+    // Después del pago exitoso, limpiar el carrito
+    // clearCart();
+    
+    // Redirigir a página de confirmación o mostrar mensaje de éxito
+    alert('¡Pedido procesado exitosamente! Te contactaremos pronto.');
+  };
+
+  const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.precio * item.quantity, 0);
+
+  // Si el carrito está vacío, mostrar mensaje
+  if (cartItems.length === 0) {
+    return (
+      <div className="checkout-wrapper">
+        <div className="checkout-page">
+          <div className="empty-cart">
+            <h2>Tu carrito está vacío</h2>
+            <p>Agrega algunos productos antes de proceder al checkout.</p>
+            <Link to="/productos" className="btn btn-primary">
+              Ver productos
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="checkout-wrapper">
@@ -193,14 +227,16 @@ const Checkout: React.FC = () => {
               <h2 className="section-title">Pago</h2>
             </div>
             <div className="payment-link">
-              <Link
-                to={`https://checkout.example.com?amount=${total}`}
+              <button
+                onClick={handlePayment}
                 className="checkout-button"
-                target="_blank"
-                rel="noopener noreferrer"
+                disabled={cartItems.length === 0}
               >
-                Pagar con WebPay
-              </Link>
+                Procesar Pedido - ${total.toLocaleString("es-CL")}
+              </button>
+              <p className="payment-note">
+                Al procesar el pedido, nos contactaremos contigo para coordinar el pago y retiro.
+              </p>
             </div>
           </div>
         </section>
@@ -215,10 +251,24 @@ const Checkout: React.FC = () => {
                 <h2 className="section-title-alt">Resumen de tu compra</h2>
               </div>
               <div className="cart-list">
-                {cart.map(item => (
+                {cartItems.map((item: CartItem) => (
                   <div key={item.id} className="cart-item">
-                    <span className="item-name">{item.nombre} (x{item.cantidad})</span>
-                    <span className="item-price">${(item.precio * item.cantidad).toLocaleString("es-CL")}</span>
+                    <div className="item-image">
+                      <img 
+                        src={getImagePath(`${item.categoria}/${item.imagen}`)} 
+                        alt={item.nombre}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
+                        }}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                      />
+                    </div>
+                    <div className="item-details">
+                      <span className="item-name">{item.nombre}</span>
+                      <span className="item-quantity">Cantidad: {item.quantity}</span>
+                      <span className="item-unit-price">Precio unitario: ${item.precio.toLocaleString("es-CL")}</span>
+                    </div>
+                    <span className="item-price">${(item.precio * item.quantity).toLocaleString("es-CL")}</span>
                   </div>
                 ))}
               </div>

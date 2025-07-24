@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* Blanco */
+    --background: 0 0% 98%; /* Blanco */
     --foreground: 0 0% 0%; /* Negro */
     --card: 0 0% 100%; /* Blanco */
     --card-foreground: 0 0% 0%; /* Negro */
@@ -56,5 +56,17 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    padding-left: 2vw !important;
+    padding-right: 2vw !important;
+    box-sizing: border-box;
+  }
+  .app-layout {
+    border-left: 1px solid hsl(var(--border)) !important;
+    border-right: 1px solid hsl(var(--border)) !important;
+    background: #fff !important;
+    box-sizing: border-box;
+  }
+  .main-content {
+    background: #fff !important;
   }
 }

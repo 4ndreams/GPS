@@ -67,3 +67,34 @@ export const loginWithFacebook = async () => {
 export const verifyEmail = async (token: string) => {
   return axios.get(`${import.meta.env.VITE_API_BASE_URL}/verify-email`, { params: { token } });
 };
+
+// Función para obtener el perfil del usuario actual
+export const getUserProfile = async () => {
+  try {
+    const token = TokenService.getToken();
+    if (!token) {
+      throw new Error('No hay token de autenticación');
+    }
+    
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return response.data.data;
+  } catch (error: any) {
+    console.error("Error al obtener perfil:", error.response?.data ?? error.message);
+    throw error;
+  }
+};
+
+// Función para verificar si el usuario actual es administrador
+export const isCurrentUserAdmin = async (): Promise<boolean> => {
+  try {
+    const userProfile = await getUserProfile();
+    return userProfile.rol === 'administrador';
+  } catch (error) {
+    console.error("Error verificando rol de admin:", error);
+    return false;
+  }
+};

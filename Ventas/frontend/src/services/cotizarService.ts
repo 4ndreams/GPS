@@ -30,6 +30,7 @@ export interface CotizacionResponse {
   medida_largo: number;
   tipo_puerta: string;
   estado: string;
+  precio?: number; // Precio opcional, se asigna desde gestión
   createdAt: string;
   updatedAt: string;
   material: {

@@ -93,7 +93,6 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
           <div><div className="profile-label">Apellido</div><div className="profile-value">{user.apellidos}</div></div>
           <div><div className="profile-label">Email</div><div className="profile-value">{user.email}</div></div>
           <div><div className="profile-label">RUT</div><div className="profile-value">{user.rut}</div></div>
-          <div><div className="profile-label">Teléfono</div><div className="profile-value">{user.telefono ?? "No registrado"}</div></div>
         </div>
         <div className="profile-newsletter-box">
           <div className="profile-label" style={{ fontWeight: 600 }}>Boletín informativo</div>
