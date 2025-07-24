@@ -62,11 +62,12 @@ export default function ReportesPage() {
     );
   };
 
-  const datosCheckout = {
-    id_bodega: seleccionadas.join(','),
-    fecha_inicial: date?.from ? format(date.from, 'yyyy-MM-dd') : null,
-    fecha_final: date?.to ? format(date.to, 'yyyy-MM-dd') : null
-  };
+const datosCheckout = {
+  id_bodega: seleccionadas.length > 0 ? seleccionadas.join(',') : undefined,
+  ...(date?.from ? { fecha_inicial: format(date.from, 'yyyy-MM-dd') } : undefined),
+  ...(date?.to ? { fecha_final: format(date.to, 'yyyy-MM-dd') } : undefined)
+};
+
 
   const renderGrafico = () => {
     switch (graficoSeleccionado) {

@@ -26,7 +26,30 @@ declare module "@services/bodega.service" {
       producto: unknown | null; // mejor que `any`
     };
   };
+export interface BackendResponse<T = unknown> {
+  status: string;
+  message?: string;
+  data?: T;
+}
 
+export function filtro(): Promise<BackendResponse<{ bodegasConMaterial: BodegaRaw[]; bodegasConRelleno: BodegaRaw[] }>>;
+
+interface Material {
+  nombre_material: string;
+  caracteristicas: string | null;
+}
+
+interface Relleno {
+  nombre_relleno: string;
+  caracteristicas: string | null;
+}
+
+interface BodegaRaw {
+  id_bodega: number;
+  stock: number;
+  material: Material | null;
+  relleno: Relleno | null;
+}
   export type ComprasTotalesFiltradasResponse = {
     status: "Success" | "Error";
     message: string;
