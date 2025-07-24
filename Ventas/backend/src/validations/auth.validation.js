@@ -38,14 +38,12 @@ export const authValidation = Joi.object({
     }),
 
   password: Joi.string()
-    .min(8)
+    .min(6)
     .max(26)
-    .pattern(/^[a-zA-Z0-9]+$/)
     .required()
     .messages({
       "string.empty": "La contraseña no puede estar vacía.",
       "any.required": "La contraseña es obligatoria.",
-      "string.pattern.base": "La contraseña solo puede contener letras y números.",
     }),
 }).unknown(false);
 export const registerValidation = Joi.object({
@@ -97,7 +95,7 @@ export const registerValidation = Joi.object({
     }),
 
   password: Joi.string()
-    .min(8)
+    .min(6)
     .max(26)
     .pattern(/^[a-zA-Z0-9]+$/)
     .required()
