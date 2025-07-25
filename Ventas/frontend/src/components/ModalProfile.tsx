@@ -8,6 +8,7 @@ type ModalProfileProps = {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClose: () => void;
   onSave: () => void;
+  onChangePassword?: (current: string, newPass: string) => Promise<boolean>;
 };
 
 const ModalProfile: React.FC<ModalProfileProps> = ({
@@ -16,13 +17,27 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
   onChange,
   onClose,
   onSave,
+  onChangePassword,
 }) => {
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string | null}>({});
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Limpiar errores cuando se cierra el modal
   useEffect(() => {
     if (!isOpen) {
       setValidationErrors({});
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordError(null);
+      setPasswordSuccess(null);
     }
   }, [isOpen]);
 
@@ -75,6 +90,40 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
 
     // Si no hay errores, guardar
     onSave();
+  };
+
+  const handlePasswordChange = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("Debes completar todos los campos de contraseña.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("La nueva contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (newPassword.length > 26) {
+      setPasswordError("La nueva contraseña debe tener máximo 26 caracteres.");
+      return;
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(newPassword)) {
+      setPasswordError("La contraseña solo puede contener letras y números.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Las contraseñas no coinciden.");
+      return;
+    }
+    setPasswordError(null);
+    if (onChangePassword) {
+      const ok = await onChangePassword(currentPassword, newPassword);
+      if (ok) {
+        setPasswordSuccess("Contraseña actualizada correctamente");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setTimeout(() => setPasswordSuccess(null), 2500);
+      }
+    }
   };
 
   if (!isOpen) return null;
@@ -136,6 +185,76 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
             )}
             <span className="help-text">Formato: 12345678-9 (sin puntos)</span>
           </label>
+
+          <hr style={{ margin: '1.5rem 0' }} />
+          <h3 style={{ marginBottom: 8 }}>Cambiar contraseña</h3>
+          <label>
+            Contraseña actual:
+            <div className="password-input-wrapper">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                placeholder="Contraseña actual"
+              />
+              <button
+                type="button"
+                className="toggle-password-btn"
+                onClick={() => setShowCurrentPassword(prev => !prev)}
+                tabIndex={-1}
+                aria-label={showCurrentPassword ? "Ocultar contraseña" : "Ver contraseña"}
+              >
+                {showCurrentPassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+              </button>
+            </div>
+          </label>
+          <label>
+            Nueva contraseña:
+            <div className="password-input-wrapper">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                placeholder="Nueva contraseña"
+                minLength={8}
+                maxLength={26}
+              />
+              <button
+                type="button"
+                className="toggle-password-btn"
+                onClick={() => setShowNewPassword(prev => !prev)}
+                tabIndex={-1}
+                aria-label={showNewPassword ? "Ocultar contraseña" : "Ver contraseña"}
+              >
+                {showNewPassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+              </button>
+            </div>
+          </label>
+          <label>
+            Confirmar nueva contraseña:
+            <div className="password-input-wrapper">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                placeholder="Confirmar nueva contraseña"
+                minLength={8}
+                maxLength={26}
+              />
+              <button
+                type="button"
+                className="toggle-password-btn"
+                onClick={() => setShowConfirmPassword(prev => !prev)}
+                tabIndex={-1}
+                aria-label={showConfirmPassword ? "Ocultar contraseña" : "Ver contraseña"}
+              >
+                {showConfirmPassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+              </button>
+            </div>
+          </label>
+          {passwordError && <span className="error-text">{passwordError}</span>}
+          {passwordSuccess && <span className="success-text" style={{ color: 'green', display: 'block', marginTop: 8 }}>{passwordSuccess}</span>}
+          <button className="save-btn" type="button" style={{ marginTop: 8, marginBottom: 16 }} onClick={handlePasswordChange}>Actualizar contraseña</button>
         </div>
 
         <footer className="modal-actions">

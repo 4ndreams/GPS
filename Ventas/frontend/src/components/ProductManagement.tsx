@@ -13,17 +13,22 @@ interface Material {
   nombre_material: string;
 }
 
-interface Product {
+// Usar ProductData para el formulario/modal
+interface ProductData {
   id_producto?: number;
   nombre_producto: string;
-  precio: number;
-  stock: number;
+  precio: string | number;
+  stock: string | number;
   descripcion?: string;
   medida_ancho: string;
   medida_largo: string;
   medida_alto: string;
-  id_material: number;
-  id_tipo: number;
+  id_material: number | string;
+  id_tipo: number | string;
+}
+
+// Product para la lista
+interface Product extends ProductData {
   tipo?: Tipo;
   material?: Material;
 }
@@ -36,11 +41,11 @@ interface Props {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function ProductManagement({ userRole, token }: Props) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]) ;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editData, setEditData] = useState<Product | null>(null);
+  const [editData, setEditData] = useState<ProductData | null>(null);
   const [tipos, setTipos] = useState<Tipo[]>([]);
   const [materiales, setMateriales] = useState<Material[]>([]);
 
@@ -66,8 +71,16 @@ function ProductManagement({ userRole, token }: Props) {
         axios.get(`${API_BASE_URL}/tipos`),
         axios.get(`${API_BASE_URL}/materiales`),
       ]);
-      setTipos(resTipos.data);
-      setMateriales(resMateriales.data);
+      const tiposData = Array.isArray(resTipos.data)
+        ? resTipos.data
+        : resTipos.data.data;
+      const materialesData = Array.isArray(resMateriales.data)
+        ? resMateriales.data
+        : resMateriales.data.data;
+      const tiposArray = Array.isArray(tiposData) ? tiposData : [];
+      setTipos(tiposArray.flat().filter(Boolean));
+      const materialesArray = Array.isArray(materialesData) ? materialesData : [];
+      setMateriales(materialesArray.flat().filter(Boolean));
     } catch (e) {
       console.error("Error al cargar tipos o materiales", e);
     }
@@ -80,11 +93,16 @@ function ProductManagement({ userRole, token }: Props) {
     }
   }, [userRole]);
 
+  // LOGS para depuración
+  console.log("tipos:", tipos);
+  console.log("materiales:", materiales);
+
+  // Crear producto
   const openCreateModal = () => {
     setEditData({
       nombre_producto: "",
-      precio: 0,
-      stock: 0,
+      precio: "",
+      stock: "",
       descripcion: "",
       medida_ancho: "",
       medida_largo: "",
@@ -95,8 +113,20 @@ function ProductManagement({ userRole, token }: Props) {
     setIsModalOpen(true);
   };
 
+  // Editar producto
   const openEditModal = (product: Product) => {
-    setEditData(product);
+    setEditData({
+      id_producto: product.id_producto,
+      nombre_producto: product.nombre_producto,
+      precio: product.precio.toString(),
+      stock: product.stock.toString(),
+      descripcion: product.descripcion || "",
+      medida_ancho: product.medida_ancho,
+      medida_largo: product.medida_largo,
+      medida_alto: product.medida_alto,
+      id_material: product.material?.id_material ?? product.id_material,
+      id_tipo: product.tipo?.id_tipo ?? product.id_tipo,
+    });
     setIsModalOpen(true);
   };
 
@@ -105,16 +135,24 @@ function ProductManagement({ userRole, token }: Props) {
     setEditData(null);
   };
 
-  const handleSaveProduct = async (productData: Product) => {
+  // Guardar producto (crear o editar)
+  const handleSaveProduct = async (productData: ProductData) => {
     try {
-      if (editData && editData.id_producto) {
+      const parsedProduct: Product = {
+        ...productData,
+        precio: Number(productData.precio),
+        stock: Number(productData.stock),
+        id_material: Number(productData.id_material),
+        id_tipo: Number(productData.id_tipo),
+      };
+      if (productData.id_producto) {
         await axios.patch(
-          `${API_BASE_URL}/products/${editData.id_producto}`,
-          productData,
+          `${API_BASE_URL}/products/${productData.id_producto}`,
+          parsedProduct,
           axiosConfig
         );
       } else {
-        await axios.post(`${API_BASE_URL}/products`, productData, axiosConfig);
+        await axios.post(`${API_BASE_URL}/products`, parsedProduct, axiosConfig);
       }
       fetchProducts();
       closeModal();
@@ -123,14 +161,15 @@ function ProductManagement({ userRole, token }: Props) {
     }
   };
 
+  // Manejar cambios en el formulario
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     if (!editData) return;
     const { name, value } = e.target;
     setEditData({
       ...editData,
-      [name]: name === "precio" || name === "stock" ? Number(value) : value,
+      [name]: value,
     });
   };
 
@@ -151,12 +190,16 @@ function ProductManagement({ userRole, token }: Props) {
       <h2 className="pm-title">Panel de Gestión de Productos</h2>
 
       <div className="pm-form">
-        <button type="button" onClick={openCreateModal}>
+        <button
+          type="button"
+          onClick={openCreateModal}
+          disabled={tipos.length === 0 || materiales.length === 0}
+        >
           Crear nuevo producto
         </button>
       </div>
 
-      <ul className="pm-list">
+      <ul className="pm-list pm-list-scroll">
         {products.length > 0 ? (
           products.map((p) => (
             <li className="pm-item" key={p.id_producto}>
@@ -191,7 +234,9 @@ function ProductManagement({ userRole, token }: Props) {
           materiales={materiales}
           onChange={handleChange}
           onClose={closeModal}
-          onSave={handleSaveProduct}
+          onSubmit={handleSaveProduct}
+          loadingTipos={tipos.length === 0}
+          loadingMateriales={materiales.length === 0}
         />
       )}
     </div>
