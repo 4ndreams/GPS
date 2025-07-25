@@ -60,7 +60,7 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
       if (!validatePrices()) return;
       try {
         setLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/products/all`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/all`, {
           params: {
             nombre: nameFilter || undefined,
             minPrecio: minPrice || undefined,
