@@ -1,38 +1,98 @@
+/* Más formas decorativas a la izquierda */
+.cotizar-bg-decor .cotizar-extra-shape5 {
+  position: absolute;
+  left: 3vw;
+  top: 38vh;
+  width: 54px;
+  height: 54px;
+  background: #EC221F;
+  opacity: 0.09;
+  border-radius: 50%;
+  z-index: 0;
+}
+.cotizar-bg-decor .cotizar-extra-shape6 {
+  position: absolute;
+  left: 7vw;
+  bottom: 24vh;
+  width: 36px;
+  height: 36px;
+  background: #ffeaea;
+  opacity: 0.13;
+  border-radius: 50%;
+  z-index: 0;
+}
+.cotizar-bg-decor .cotizar-extra-shape7 {
+  position: absolute;
+  left: 1vw;
+  bottom: 8vh;
+  width: 28px;
+  height: 28px;
+  background: #EC221F;
+  opacity: 0.07;
+  border-radius: 50%;
+  z-index: 0;
+}
 .cotizar-page {
-  margin-top: 2.5rem;
-  padding: 2rem;
-  background: #ffffff;
-  min-height: calc(100vh - 100px);
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #fff 60%, #ffeaea 100%);
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* Responsive para la página principal */
 @media (max-width: 1200px) {
   .cotizar-form {
-    max-width: 900px;
+    max-width: 800px;
+  }
+  .cotizar-page {
+    padding: 0;
   }
 }
 
 @media (max-width: 992px) {
   .cotizar-page {
-    padding: 1.5rem;
+    padding: 0;
   }
-  
   .cotizar-form {
     max-width: 100%;
     padding: 1.5rem;
   }
-  
   .step-item {
     min-width: 100px;
+  .cotizar-form {
+    max-width: 480px;
+    margin: 2.5rem auto;
+    background: #ffffff;
+    padding: 1.5rem 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
   }
-  
+  }
   .step-label {
     font-size: 0.75rem;
     max-width: 90px;
   }
-  
   .form-row .field-group {
     min-width: 200px;
+  }
+}
+@media (max-width: 1200px) {
+  .cotizar-form {
+    max-width: 90vw;
+  }
+  .cotizar-page {
+    padding: 0;
   }
 }
 
@@ -55,27 +115,42 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .cotizar-page {
-    margin-top: 1rem;
+    padding: 0;
+  }
+  .cotizar-form {
+    max-width: 98vw;
     padding: 1rem;
   }
-  
+  .step-item {
+    min-width: 100px;
+  }
+  .step-label {
+    font-size: 0.75rem;
+    max-width: 90px;
+  }
+  .form-row .field-group {
+    min-width: 200px;
+  }
+}
+@media (max-width: 768px) {
+  .cotizar-page {
+    margin-top: 0;
+    padding: 0;
+  }
   .cotizar-form {
     padding: 1rem;
     border-radius: 6px;
   }
-  
   .form-row .field-group {
     min-width: 100%;
   }
-  
   .steps-indicator {
     overflow-x: auto;
     padding: 0 10px;
     justify-content: flex-start;
   }
-  
   .step-item {
     min-width: 80px;
     flex-shrink: 0;
@@ -160,14 +235,63 @@
 }
 
 .cotizar-form {
-  max-width: 1000px;
-  margin: 0 auto;
+  max-width: 700px;
+  min-width: 340px;
+  margin: 2.5rem auto;
   background: #ffffff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2.2rem 2.2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px 0 rgba(236, 34, 31, 0.10), 0 1.5px 8px 0 rgba(0,0,0,0.08);
   width: 100%;
   box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+/* Círculos decorativos seguros */
+.cotizar-bg-decor .cotizar-extra-shape1 {
+  position: absolute;
+  left: 2vw;
+  top: 8vh;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle at 60% 40%, #EC221F 0%, #ffeaea 100%);
+  opacity: 0.10;
+  border-radius: 50%;
+  z-index: 0;
+}
+.cotizar-bg-decor .cotizar-extra-shape2 {
+  position: absolute;
+  right: 8vw;
+  top: 18vh;
+  width: 40px;
+  height: 40px;
+  background: #EC221F;
+  opacity: 0.07;
+  border-radius: 50%;
+  z-index: 0;
+}
+.cotizar-bg-decor .cotizar-extra-shape3 {
+  position: absolute;
+  left: 10vw;
+  bottom: 12vh;
+  width: 38px;
+  height: 38px;
+  background: #ffeaea;
+  opacity: 0.13;
+  border-radius: 50%;
+  z-index: 0;
+}
+.cotizar-bg-decor .cotizar-extra-shape4 {
+  position: absolute;
+  right: 4vw;
+  bottom: 8vh;
+  width: 28px;
+  height: 28px;
+  background: #EC221F;
+  opacity: 0.08;
+  border-radius: 50%;
+  z-index: 0;
 }
 
 .field-group {
@@ -447,6 +571,7 @@ hr {
 .current-step-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 15px;
   margin-bottom: 30px;
   padding: 20px;
@@ -454,6 +579,7 @@ hr {
   color: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(236, 34, 31, 0.3);
+  text-align: center;
 }
 
 .current-step-header i {
@@ -466,6 +592,7 @@ hr {
   font-size: 1.5rem;
   font-weight: 600;
   color: #ffffff;
+  text-align: center;
 }
 
 /* Contenido del paso */

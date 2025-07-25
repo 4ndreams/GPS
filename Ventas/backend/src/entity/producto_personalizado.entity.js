@@ -69,6 +69,10 @@ const ProductoPersonalizadoSchema = new EntitySchema({
         default: "Solicitud Recibida", 
         nullable: false,
         },
+        precio: {
+        type: "int",
+        nullable: true,
+        },
         createdAt: {
             type: "timestamp with time zone",
             default: () => "CURRENT_TIMESTAMP",

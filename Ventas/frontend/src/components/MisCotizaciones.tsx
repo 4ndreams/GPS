@@ -62,34 +62,34 @@ const MisCotizaciones: React.FC = () => {
   const getEstadoColor = (estado: string): string => {
     switch (estado) {
       case 'Solicitud Recibida':
-        return '#3498db'; // Azul
+        return '#6b7280'; // Gris (outline style)
       case 'En Proceso':
-        return '#f39c12'; // Naranja
+        return '#9ca3af'; // Gris claro (secondary style)
       case 'Lista para retirar':
-        return '#27ae60'; // Verde
+        return '#374151'; // Gris oscuro (default style)
       case 'Cancelada':
-        return '#e74c3c'; // Rojo
+        return '#dc2626'; // Rojo (destructive style)
       case 'Producto Entregado':
-        return '#2ecc71'; // Verde más brillante
+        return '#16a34a'; // Verde (success style)
       default:
-        return '#95a5a6'; // Gris
+        return '#6b7280'; // Gris (outline style)
     }
   };
 
   const getEstadoIcon = (estado: string): string => {
     switch (estado) {
       case 'Solicitud Recibida':
-        return 'bi-clock-history';
+        return 'bi-clock';
       case 'En Proceso':
         return 'bi-gear-fill';
       case 'Lista para retirar':
-        return 'bi-check-circle-fill';
+        return 'bi-box-seam';
       case 'Cancelada':
         return 'bi-x-circle-fill';
       case 'Producto Entregado':
-        return 'bi-truck';
+        return 'bi-box-seam';
       default:
-        return 'bi-question-circle';
+        return 'bi-clock';
     }
   };
 
@@ -116,6 +116,19 @@ const MisCotizaciones: React.FC = () => {
       default:
         return 'Tipo no especificado';
     }
+  };
+
+  const formatearPrecio = (precio: number): string => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(precio);
+  };
+
+  const mostrarPrecio = (cotizacion: CotizacionResponse): boolean => {
+    return cotizacion.estado !== 'Solicitud Recibida' && cotizacion.precio !== undefined && cotizacion.precio > 0;
   };
 
   if (loading) {
@@ -252,7 +265,15 @@ const MisCotizaciones: React.FC = () => {
                 <i className={`bi ${getEstadoIcon(cotizacion.estado)}`}></i>
                 <span className="estado-text">{cotizacion.estado}</span>
               </div>
-              <span className="cotizacion-id">#{cotizacion.id_producto_personalizado}</span>
+              <div className="header-right">
+                {mostrarPrecio(cotizacion) && (
+                  <div className="precio-badge">
+                    <i className="bi bi-currency-dollar"></i>
+                    <span className="precio-text">{formatearPrecio(cotizacion.precio!)}</span>
+                  </div>
+                )}
+                <span className="cotizacion-id">#{cotizacion.id_producto_personalizado}</span>
+              </div>
             </div>
 
             {/* Contenido principal */}

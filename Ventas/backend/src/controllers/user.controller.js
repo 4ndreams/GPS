@@ -4,13 +4,13 @@ import {
   deleteUserService,
   getUserService,
   getUsersService,
+  createUserService,
   updateUserService,
   getProfileService,
   updateProfileService,
 } from "../services/user.service.js";
 import {
   userBodyValidation,
-  userQueryValidation,
 } from "../validations/user.validation.js";
 import {
   handleErrorClient,
@@ -33,13 +33,15 @@ const detalleVentaRepo = AppDataSource.getRepository(DetalleVentaSchema);
 
 export async function getUser(req, res) {
   try {
-    const { rut, id, email } = req.query;
+    // Obtener id_usuario desde los parámetros de la URL
+    const { id_usuario } = req.params;
 
-    const { error } = userQueryValidation.validate({ rut, id, email });
+    // Validar que el id_usuario esté presente
+    if (!id_usuario) {
+      return handleErrorClient(res, 400, "id_usuario es requerido");
+    }
 
-    if (error) return handleErrorClient(res, 400, error.message);
-
-    const [user, errorUser] = await getUserService({ rut, id, email });
+    const [user, errorUser] = await getUserService({ id: id_usuario });
 
     if (errorUser) return handleErrorClient(res, 404, errorUser);
 
@@ -63,26 +65,11 @@ export async function getUsers(req, res) {
   }
 }
 
-export async function updateUser(req, res) {
+export async function createUser(req, res) {
   try {
-    const { rut, id, email } = req.query;
     const { body } = req;
 
-    const { error: queryError } = userQueryValidation.validate({
-      rut,
-      id,
-      email,
-    });
-
-    if (queryError) {
-      return handleErrorClient(
-        res,
-        400,
-        "Error de validación en la consulta",
-        queryError.message
-      );
-    }
-
+    // Validar el body con la validación existente
     const { error: bodyError } = userBodyValidation.validate(body);
 
     if (bodyError)
@@ -93,7 +80,52 @@ export async function updateUser(req, res) {
         bodyError.message
       );
 
-    const [user, userError] = await updateUserService({ rut, id, email }, body);
+    // Crear el usuario
+    const [user, userError] = await createUserService(body);
+
+    if (userError)
+      return handleErrorClient(
+        res,
+        400,
+        "Error creando el usuario",
+        userError
+      );
+
+    handleSuccess(res, 201, "Usuario creado correctamente", user);
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
+
+export async function updateUser(req, res) {
+  try {
+    // Obtener id_usuario desde los parámetros de la URL
+    const { id_usuario } = req.params;
+    const { body } = req;
+
+    // Validar que el id_usuario esté presente
+    if (!id_usuario) {
+      return handleErrorClient(
+        res,
+        400,
+        "Error de validación en la consulta",
+        "id_usuario es requerido"
+      );
+    }
+
+    // Validar el body con la validación existente
+    const { error: bodyError } = userBodyValidation.validate(body);
+
+    if (bodyError)
+      return handleErrorClient(
+        res,
+        400,
+        "Error de validación en los datos enviados",
+        bodyError.message
+      );
+
+    // Usar el id_usuario desde params en lugar de query
+    const [user, userError] = await updateUserService({ id: id_usuario }, body);
 
     if (userError)
       return handleErrorClient(
@@ -111,27 +143,16 @@ export async function updateUser(req, res) {
 
 export async function deleteUser(req, res) {
   try {
-    const { rut, id, email } = req.query;
+    // Obtener id_usuario desde los parámetros de la URL
+    const { id_usuario } = req.params;
 
-    const { error: queryError } = userQueryValidation.validate({
-      rut,
-      id,
-      email,
-    });
-
-    if (queryError) {
-      return handleErrorClient(
-        res,
-        400,
-        "Error de validación en la consulta",
-        queryError.message
-      );
+    // Validar que el id_usuario esté presente
+    if (!id_usuario) {
+      return handleErrorClient(res, 400, "id_usuario es requerido");
     }
 
     const [userDelete, errorUserDelete] = await deleteUserService({
-      rut,
-      id,
-      email,
+      id: id_usuario,
     });
 
     if (errorUserDelete)
@@ -194,8 +215,6 @@ export async function updateProfile(req, res) {
 }
 
 export const getUserActivity = async (req, res) => {
-  const { id_usuario } = req.params;
-
   try {
     const { id_usuario } = req.params;
     const result = await getUserActivityService({
