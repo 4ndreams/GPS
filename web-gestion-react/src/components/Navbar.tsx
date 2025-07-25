@@ -1,7 +1,7 @@
 // src/components/Navbar.tsx
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, AlertTriangle, BarChart3, LogOut, Search, Bell, User, Settings, Download, RefreshCw } from 'lucide-react';
+import { Home, AlertTriangle, BarChart3, LogOut, Search, Bell, User, Settings, Download } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -61,7 +61,7 @@ export default function Navbar() {
       <div className="navbar-links">
         <NavLink to="/" className="nav-link" end>
           <Home className="nav-icon" />
-          <span>Dashboard</span>
+          <span>Administración</span>
         </NavLink>
         <NavLink to="/ordenes" className="nav-link">
           <AlertTriangle className="nav-icon" />
@@ -88,12 +88,6 @@ export default function Navbar() {
             className="pl-10 w-48 md:w-60 lg:w-72 bg-white/10 border-white/20 text-white placeholder-white/70 focus:text-white"
           />
         </div>
-
-        {/* Sincronizar */}
-        <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-          <RefreshCw className="h-4 w-4 mr-1" />
-          Sincronizar
-        </Button>
 
         {/* Notificaciones */}
         <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
