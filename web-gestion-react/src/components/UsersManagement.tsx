@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Notification from './Notification';
 import { useAuth } from '../hooks/useAuth';
 import { userService, type User as UserType } from '../services/userService';
 import UserDetailsDialog from './UserDetailsDialog';
@@ -60,7 +61,12 @@ export default function UsersManagement() {
     if (rol === 'tienda') return 'outline';
     return 'outline'; // para 'cliente'
   };
-
+  // Estado para notificaciones
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'warning' | 'info';
+    title: string;
+    message?: string;
+  } | null>(null);
 
   // Estado para paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,20 +122,35 @@ export default function UsersManagement() {
   };
 
   const handleUserUpdated = () => {
-    loadUsers(); // Recargar usuarios después de editar
+    loadUsers();
     setShowEditDialog(false);
     setSelectedUser(null);
+    setNotification({
+      type: 'success',
+      title: 'Usuario actualizado',
+      message: 'El usuario se actualizó correctamente.'
+    });
   };
 
   const handleUserDeleted = () => {
-    loadUsers(); // Recargar usuarios después de eliminar
+    loadUsers();
     setShowDeleteDialog(false);
     setSelectedUser(null);
+    setNotification({
+      type: 'success',
+      title: 'Usuario eliminado',
+      message: 'El usuario fue eliminado correctamente.'
+    });
   };
 
   const handleUserCreated = () => {
-    loadUsers(); // Recargar usuarios después de crear
+    loadUsers();
     setShowCreateDialog(false);
+    setNotification({
+      type: 'success',
+      title: 'Usuario creado',
+      message: 'El usuario fue creado correctamente.'
+    });
   };
 
   // Función para cargar usuarios
@@ -158,6 +179,14 @@ export default function UsersManagement() {
     loadUsers();
   }, []);
 
+  // Auto-dismiss de la notificación
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   // Verificar autorización después de todos los hooks
   const isAdmin = usuario?.rol === 'administrador';
   if (!isAdmin) {
@@ -165,7 +194,18 @@ export default function UsersManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Notificación global en esquina superior derecha */}
+      {notification && (
+        <div className="fixed top-6 right-6 z-50 w-[350px] max-w-full">
+          <Notification
+            type={notification.type}
+            title={notification.title}
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col gap-1 mb-6">
         <div className="flex items-center justify-between w-full">
