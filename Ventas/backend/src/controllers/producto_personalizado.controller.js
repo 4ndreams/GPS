@@ -206,8 +206,12 @@ export async function updateEstadoProductoPersonalizadoController(req, res) {
         }
 
         const [updatedProductoPersonalizado, errorMessage] = await updateEstadoProductoPersonalizadoService(Number(id_producto_personalizado), estado);
-        
+
         if (errorMessage) {
+            // Si el error es por precio nulo o vacío, devolver 400
+            if (errorMessage.includes("precio es nulo o vacío")) {
+                return handleErrorClient(res, 400, errorMessage);
+            }
             return handleErrorClient(res, 404, errorMessage);
         }
 
