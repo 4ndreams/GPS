@@ -25,7 +25,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const hideNavbarRoutes = ["/login", "/register"];
+  const hideNavbarRoutes = ["/login", "/register", "/recover-password"];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   
   const [user, setUser] = useState(null);

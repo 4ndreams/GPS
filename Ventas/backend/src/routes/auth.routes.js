@@ -9,7 +9,8 @@ import {
   recoverPassword, 
   verifyEmail, 
   refreshToken, 
-  getTokenInfo 
+  getTokenInfo, 
+  forgotPasswordRequest 
 } from "../controllers/auth.controller.js";
 
 const router = Router();
@@ -21,6 +22,7 @@ router
   .post("/refresh-token", refreshToken)
   .get("/token-info", getTokenInfo)
   .post("/recover-password", recoverPassword)
+  .post("/forgot-password", forgotPasswordRequest)
   .get("/verify-email", verifyEmail);
 
 router.get("/auth/facebook",

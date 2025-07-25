@@ -9,6 +9,7 @@ import { recoverPassword } from "@services/authService";
 const RecoverPassword: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,34 @@ const RecoverPassword: React.FC = () => {
   const params = new URLSearchParams(location.search);
   const token = params.get("token");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Nuevo: Solicitar email si no hay token
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes("@")) {
+      setNotification({ message: "Ingresa un correo válido.", type: "error" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNotification({ message: data.message || "Si el correo existe, se ha enviado un enlace para reestablecer la contraseña.", type: "success" });
+      } else {
+        setNotification({ message: data.message || "Error al solicitar recuperación.", type: "error" });
+      }
+    } catch (err) {
+      setNotification({ message: "Error de red al solicitar recuperación.", type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
       setNotification({ message: "Token inválido o ausente.", type: "error" });
@@ -57,60 +85,91 @@ const RecoverPassword: React.FC = () => {
         <img src={puertaImg} alt="Terplac fondo" className="background-img" />
         <div className="text-overlay-login">
           <div className="dot"></div>
-          <h1>Recupera tu contraseña</h1>
-          <p>Ingresa una nueva contraseña para tu cuenta.</p>
+          <h1>{token ? "Restablecer contraseña" : "Recupera tu contraseña"}</h1>
+          <p>{token ? "Ingresa una nueva contraseña para tu cuenta." : "Ingresa tu correo electrónico para recibir un enlace de recuperación."}</p>
         </div>
       </div>
       <div className="right-side">
-        <form className="form" onSubmit={handleSubmit}>
-          <div className="back-home-row">
-            <Link to="/login" className="back-home-btn">
-              <i className="bi bi-arrow-left"></i> Volver al login
-            </Link>
-          </div>
-          <div className="form-header">
-            <h2>Restablecer contraseña</h2>
-          </div>
-          <label>Nueva contraseña</label>
-          <div className="password-input-wrapper">
+        {!token ? (
+          <form className="form" onSubmit={handleEmailSubmit}>
+            <div className="back-home-row">
+              <Link to="/login" className="back-home-btn">
+                <i className="bi bi-arrow-left"></i> Volver al login
+              </Link>
+            </div>
+            <div className="form-header">
+              <h2>Recuperar contraseña</h2>
+            </div>
+            <label>Correo electrónico</label>
+            <input
+              type="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+            />
+            {notification && (
+              <Notification
+                message={notification.message}
+                type={notification.type}
+                onClose={() => setNotification(null)}
+              />
+            )}
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? "Enviando..." : "Enviar enlace de recuperación"}
+            </button>
+          </form>
+        ) : (
+          <form className="form" onSubmit={handlePasswordSubmit}>
+            <div className="back-home-row">
+              <Link to="/login" className="back-home-btn">
+                <i className="bi bi-arrow-left"></i> Volver al login
+              </Link>
+            </div>
+            <div className="form-header">
+              <h2>Restablecer contraseña</h2>
+            </div>
+            <label>Nueva contraseña</label>
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Nueva contraseña"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="toggle-password-btn"
+                onClick={() => setShowPassword(prev => !prev)}
+                tabIndex={-1}
+                aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
+              >
+                {showPassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+              </button>
+            </div>
+            <label>Confirmar contraseña</label>
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="Nueva contraseña"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
+              placeholder="Confirma la nueva contraseña"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
               required
               minLength={6}
             />
-            <button
-              type="button"
-              className="toggle-password-btn"
-              onClick={() => setShowPassword(prev => !prev)}
-              tabIndex={-1}
-              aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
-            >
-              {showPassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
+            {notification && (
+              <Notification
+                message={notification.message}
+                type={notification.type}
+                onClose={() => setNotification(null)}
+              />
+            )}
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? "Actualizando..." : "Actualizar contraseña"}
             </button>
-          </div>
-          <label>Confirmar contraseña</label>
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Confirma la nueva contraseña"
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
-            required
-            minLength={6}
-          />
-          {notification && (
-            <Notification
-              message={notification.message}
-              type={notification.type}
-              onClose={() => setNotification(null)}
-            />
-          )}
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? "Actualizando..." : "Actualizar contraseña"}
-          </button>
-        </form>
+          </form>
+        )}
       </div>
     </div>
   );

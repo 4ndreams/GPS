@@ -4,6 +4,8 @@ import { AppDataSource } from "./configDb.js";
 import Producto from "../entity/producto.entity.js";
 import MaterialSchema from "../entity/material.entity.js";
 import TipoSchema from "../entity/tipo.entity.js";
+import UsuarioSchema from "../entity/user.entity.js";
+import { encryptPassword } from "../helpers/bcrypt.helper.js";
 
 async function testConnection() {
   try {
@@ -145,6 +147,67 @@ async function testConnection() {
       console.log("=> Productos de ejemplo insertados correctamente.");
     } else {
       console.log("=> Ya existen productos en la base de datos.");
+    }
+
+    // === USUARIOS DE EJEMPLO ===
+    const usuarioRepo = AppDataSource.getRepository(UsuarioSchema);
+    const usuariosEjemplo = [
+      {
+        nombre: "Admin",
+        apellidos: "Ejemplo",
+        email: "admin@ejemplo.com",
+        password: "admin123",
+        rol: "administrador",
+        rut: null
+      },
+      {
+        nombre: "Tienda",
+        apellidos: "Ejemplo",
+        email: "tienda@ejemplo.com",
+        password: "tienda123",
+        rol: "tienda",
+        rut: null
+      },
+      {
+        nombre: "Fabrica",
+        apellidos: "Ejemplo",
+        email: "fabrica@ejemplo.com",
+        password: "fabrica123",
+        rol: "fabrica",
+        rut: null
+      },
+      {
+        nombre: "Cliente",
+        apellidos: "Ejemplo",
+        email: "cliente@ejemplo.com",
+        password: "cliente123",
+        rol: "cliente",
+        rut: null
+      }
+    ];
+    for (const userData of usuariosEjemplo) {
+      const existingUser = await usuarioRepo.findOne({ where: { email: userData.email } });
+      if (!existingUser) {
+        const hashedPassword = await encryptPassword(userData.password);
+        const newUser = usuarioRepo.create({
+          nombre: userData.nombre,
+          apellidos: userData.apellidos,
+          rut: userData.rut,
+          email: userData.email,
+          password: hashedPassword,
+          rol: userData.rol,
+          correoVerificado: true,
+          flag_blacklist: false,
+          intentosFallidos: 0,
+          fechaBloqueo: null,
+          tokenVerificacion: null,
+          verificacionTokenExpiracion: null
+        });
+        await usuarioRepo.save(newUser);
+        console.log(`=> Usuario de ejemplo creado: ${userData.email} (${userData.rol})`);
+      } else {
+        console.log(`=> Ya existe el usuario de ejemplo: ${userData.email}`);
+      }
     }
   } catch (error) {
     console.error("Error al inicializar datos de ejemplo:", error);

@@ -10,6 +10,12 @@ import {
   handleErrorServer,
   handleSuccess,
 } from "../handlers/responseHandlers.js";
+import { sendLoginAlertEmail } from "../helpers/email.helper.js";
+import { sendForgotPasswordEmail } from "../helpers/email.helper.js";
+import { AppDataSource } from "../config/configDb.js";
+import UsuarioSchema from "../entity/user.entity.js";
+import jwt from "jsonwebtoken";
+import { ACCESS_TOKEN_SECRET } from "../config/configEnv.js";
 
 export async function login(req, res) {
   try {
@@ -195,6 +201,28 @@ export async function getTokenInfo(req, res) {
       shouldRefresh: tokenInfo.shouldRefresh,
       user: tokenInfo.user
     });
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
+
+// Nueva función para solicitar recuperación de contraseña (olvidé mi contraseña)
+export async function forgotPasswordRequest(req, res) {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return handleErrorClient(res, 400, "El email es requerido");
+    }
+    const userRepository = AppDataSource.getRepository(UsuarioSchema);
+    const user = await userRepository.findOne({ where: { email } });
+    if (!user) {
+      // Ahora sí respondemos explícitamente que no existe
+      return handleErrorClient(res, 404, "No existe una cuenta asociada a ese email");
+    }
+    // Generar token de recuperación válido por 10 minutos
+    const token = jwt.sign({ email }, ACCESS_TOKEN_SECRET, { expiresIn: "10m" });
+    await sendForgotPasswordEmail(email, token);
+    return handleSuccess(res, 200, "Se ha enviado un enlace para reestablecer la contraseña a tu correo");
   } catch (error) {
     handleErrorServer(res, 500, error.message);
   }
