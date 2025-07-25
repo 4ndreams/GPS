@@ -192,15 +192,20 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
         
         const estadoAnterior = exists.estado;
         
+        // Validar que el precio no sea null ni vacío antes de cambiar el estado
+        if (exists.precio === null || exists.precio === "" || typeof exists.precio === "undefined") {
+            return [null, "No se le ha ingresado un precio a la cotización."];
+        }
+
         // Actualizar solo el estado
         await repository.update({ id_producto_personalizado }, { estado });
-        
+
         // Obtener el registro actualizado con relaciones
         const updated = await repository.findOne({
             where: { id_producto_personalizado },
             relations: ["relleno", "material", "usuario"]
         });
-        
+
         // Enviar email de cambio de estado solo si el estado realmente cambió
         if (estadoAnterior !== estado) {
             try {
@@ -209,7 +214,7 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
                 console.error(`❌ Error al enviar email de cambio de estado para cotización #${updated.id_producto_personalizado}:`, emailError.message);
             }
         }
-        
+
         return [updated, null];
     } catch (error) {
         return [error, "Error al actualizar el estado del producto personalizado"];
