@@ -21,6 +21,7 @@ interface CartItem {
   precio: number;
   imagen: string;
   categoria: string;
+  stock: number;
   quantity: number;
 }
 
@@ -104,6 +105,7 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
         precio: product.precio,
         imagen: product.imagen || "default.jpeg",
         categoria: product.tipo?.nombre_tipo || "otros",
+        stock: product.stock ?? 0,
         quantity: 1,
       });
     }

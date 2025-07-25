@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserProfile } from "@services/userService";
+import { createPaymentOrder } from "@services/paymentService";
 import { getImagePath } from "@utils/getImagePath";
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import "@styles/Checkout.css";
 
 interface CartItem {
@@ -17,7 +19,6 @@ interface ContactInfo {
   nombre: string;
   apellidos: string;
   email: string;
-  telefono: string;
 }
 
 interface CheckoutProps {
@@ -29,10 +30,19 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     nombre: "",
     apellidos: "",
-    email: "",
-    telefono: "",
+    email: ""
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  // Inicializar Mercado Pago
+  useEffect(() => {
+    const publicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
+    if (publicKey) {
+      initMercadoPago(publicKey);
+    }
+  }, []);
 
   // Cargar información del usuario si está logueado
   useEffect(() => {
@@ -49,8 +59,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
       setContactInfo({
         nombre: userData.nombre || "",
         apellidos: userData.apellidos || "",
-        email: userData.email || "",
-        telefono: userData.telefono || "",
+        email: userData.email || ""
       });
       setIsLoggedIn(true);
     } catch (error) {
@@ -68,25 +77,37 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
   };
 
   // Manejar el proceso de pago
-  const handlePayment = () => {
+  const handlePayment = async () => {
     // Validar campos requeridos
-    if (!contactInfo.nombre || !contactInfo.apellidos || !contactInfo.email || !contactInfo.telefono) {
+    if (!contactInfo.nombre || !contactInfo.apellidos || !contactInfo.email) {
       alert('Por favor completa todos los campos de contacto antes de proceder al pago.');
       return;
     }
 
-    // Aquí podrías agregar lógica adicional como enviar la orden al backend
-    console.log('Procesando pago con datos:', {
-      contactInfo,
-      cartItems,
-      total
-    });
+    setIsProcessingPayment(true);
 
-    // Después del pago exitoso, limpiar el carrito
-    // clearCart();
-    
-    // Redirigir a página de confirmación o mostrar mensaje de éxito
-    alert('¡Pedido procesado exitosamente! Te contactaremos pronto.');
+    try {
+      // Crear la orden en el backend y obtener el preference_id de Mercado Pago
+      const orderData = {
+        contactInfo,
+        items: cartItems,
+        total
+      };
+
+      const response = await createPaymentOrder(orderData);
+      
+      if (response.success && response.preferenceId) {
+        setPreferenceId(response.preferenceId);
+        // El componente Wallet se renderizará automáticamente cuando preferenceId tenga valor
+      } else {
+        throw new Error('Error al crear la preferencia de pago');
+      }
+    } catch (error) {
+      console.error('Error procesando pago:', error);
+      alert('Error al procesar el pago. Por favor intenta nuevamente.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.precio * item.quantity, 0);
@@ -159,18 +180,6 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                     required
                   />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="telefono">Teléfono</label>
-                  <input
-                    type="tel"
-                    id="telefono"
-                    name="telefono"
-                    value={contactInfo.telefono}
-                    onChange={handleContactChange}
-                    placeholder="Tu número de teléfono"
-                    required
-                  />
-                </div>
               </div>
               {!isLoggedIn && (
                 <p className="login-suggestion">
@@ -227,15 +236,37 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
               <h2 className="section-title">Pago</h2>
             </div>
             <div className="payment-link">
-              <button
-                onClick={handlePayment}
-                className="checkout-button"
-                disabled={cartItems.length === 0}
-              >
-                Procesar Pedido - ${total.toLocaleString("es-CL")}
-              </button>
+              {!preferenceId ? (
+                <button
+                  onClick={handlePayment}
+                  className="checkout-button"
+                  disabled={cartItems.length === 0 || isProcessingPayment}
+                >
+                  {isProcessingPayment ? 'Preparando pago...' : `Pagar con Mercado Pago - $${total.toLocaleString("es-CL")}`}
+                </button>
+              ) : (
+                <div className="mercadopago-wallet">
+                  <Wallet 
+                    initialization={{ 
+                      preferenceId: preferenceId,
+                      redirectMode: 'self'
+                    }}
+                    onReady={() => {
+                      console.log('Wallet listo');
+                    }}
+                    onError={(error) => {
+                      console.error('Error en Mercado Pago:', error);
+                      alert('Error en el proceso de pago. Por favor intenta nuevamente.');
+                      setPreferenceId(null);
+                    }}
+                  />
+                </div>
+              )}
               <p className="payment-note">
-                Al procesar el pedido, nos contactaremos contigo para coordinar el pago y retiro.
+                {!preferenceId 
+                  ? 'Al procesar el pedido serás redirigido a Mercado Pago para completar el pago.'
+                  : 'Completa tu pago con Mercado Pago de forma segura.'
+                }
               </p>
             </div>
           </div>
@@ -266,7 +297,6 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                     <div className="item-details">
                       <span className="item-name">{item.nombre}</span>
                       <span className="item-quantity">Cantidad: {item.quantity}</span>
-                      <span className="item-unit-price">Precio unitario: ${item.precio.toLocaleString("es-CL")}</span>
                     </div>
                     <span className="item-price">${(item.precio * item.quantity).toLocaleString("es-CL")}</span>
                   </div>

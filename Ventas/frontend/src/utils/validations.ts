@@ -109,20 +109,6 @@ export function validateNombre(nombre: string): string | null {
   return null;
 }
 
-// Validación de teléfono
-export function validateTelefono(telefono: string): string | null {
-  if (!telefono.trim()) {
-    return 'El teléfono es requerido';
-  }
-  
-  // Permitir formato chileno: +56 9 1234 5678 o 9 1234 5678 o 912345678
-  const telefonoPattern = /^(\+56\s?)?([2-9]\d{8}|9\d{8})$/;
-  if (!telefonoPattern.test(telefono.replace(/\s/g, ''))) {
-    return 'El formato del teléfono no es válido';
-  }
-  
-  return null;
-}
 
 // Validación de contraseña
 export function validatePassword(password: string): string | null {
@@ -147,8 +133,6 @@ export function validateField(name: string, value: string): string | null {
       return validateRut(value);
     case 'email':
       return validateEmail(value);
-    case 'telefono':
-      return validateTelefono(value);
     case 'password':
       return validatePassword(value);
     default:

@@ -146,20 +146,6 @@ export default function LoginPage() {
             </form>
           </CardContent>
         </Card>
-
-        {/* Información de credenciales de prueba */}
-        <Card className="mt-4 bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <h3 className="text-sm font-medium text-blue-800 mb-2">
-              Credenciales de prueba:
-            </h3>
-            <div className="space-y-1 text-xs text-blue-700">
-              <div><strong>Admin:</strong> admin@gps.com / admin123</div>
-              <div><strong>Operador:</strong> maria@gps.com / maria123</div>
-              <div><strong>Vendedor:</strong> carlos@gps.com / carlos123</div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

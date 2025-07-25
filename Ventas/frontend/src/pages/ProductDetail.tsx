@@ -29,6 +29,7 @@ interface ProductDetailProps {
     precio: number;
     imagen: string;
     categoria: string;
+    stock: number;
     quantity: number;
   }) => void;
 }
@@ -95,6 +96,7 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
       precio: producto.precio,
       imagen: producto.imagen || "default.jpeg",
       categoria: producto.tipo?.nombre_tipo || "otros",
+      stock: producto.stock ?? 0,
       quantity: 1,
     });
   };
