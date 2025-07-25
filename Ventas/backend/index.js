@@ -32,6 +32,7 @@ async function setupServer() {
         'http://192.168.1.105:19000',
         'http://localhost:8081'
       ], 
+      origin: true,
       credentials: true
     }));
 
