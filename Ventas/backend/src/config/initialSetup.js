@@ -205,10 +205,20 @@ async function testConnection() {
         });
         await usuarioRepo.save(newUser);
         console.log(`=> Usuario de ejemplo creado: ${userData.email} (${userData.rol})`);
+        console.log(`   Contraseña: ${userData.password}`);
       } else {
-        console.log(`=> Ya existe el usuario de ejemplo: ${userData.email}`);
+        console.log(`=> Ya existe el usuario de ejemplo: ${userData.email} (${userData.rol})`);
+        console.log(`   Contraseña: ${userData.password}`);
       }
     }
+    
+    // Mostrar resumen de usuarios de ejemplo
+    console.log("\n=== RESUMEN DE USUARIOS DE EJEMPLO ===");
+    console.log("Credenciales para acceder al sistema:");
+    usuariosEjemplo.forEach(user => {
+      console.log(`• ${user.email} (${user.rol}) - Contraseña: ${user.password}`);
+    });
+    console.log("=====================================\n");
   } catch (error) {
     console.error("Error al inicializar datos de ejemplo:", error);
   }

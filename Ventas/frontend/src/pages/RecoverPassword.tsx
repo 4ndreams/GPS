@@ -56,8 +56,16 @@ const RecoverPassword: React.FC = () => {
       setNotification({ message: "Token inválido o ausente.", type: "error" });
       return;
     }
-    if (!newPassword || newPassword.length < 6) {
-      setNotification({ message: "La contraseña debe tener al menos 6 caracteres.", type: "error" });
+    if (!newPassword || newPassword.length < 8) {
+      setNotification({ message: "La contraseña debe tener al menos 8 caracteres.", type: "error" });
+      return;
+    }
+    if (newPassword.length > 26) {
+      setNotification({ message: "La contraseña debe tener máximo 26 caracteres.", type: "error" });
+      return;
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(newPassword)) {
+      setNotification({ message: "La contraseña solo puede contener letras y números.", type: "error" });
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -137,7 +145,8 @@ const RecoverPassword: React.FC = () => {
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
+                maxLength={26}
               />
               <button
                 type="button"
@@ -156,7 +165,8 @@ const RecoverPassword: React.FC = () => {
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
+              maxLength={26}
             />
             {notification && (
               <Notification
