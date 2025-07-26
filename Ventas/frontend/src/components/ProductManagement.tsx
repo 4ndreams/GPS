@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "@styles/productManagement.css";
 import ModalProduct from "./ModalProduct";
@@ -14,7 +14,6 @@ interface Material {
   nombre_material: string;
 }
 
-// Usar ProductData para el formulario/modal
 interface ProductData {
   id_producto?: number;
   nombre_producto: string;
@@ -28,7 +27,6 @@ interface ProductData {
   id_tipo: number | string;
 }
 
-// Product para la lista
 interface Product extends ProductData {
   tipo?: Tipo;
   material?: Material;
@@ -42,15 +40,19 @@ interface Props {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function ProductManagement({ userRole, token }: Props) {
-  const [products, setProducts] = useState<Product[]>([]) ;
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState<ProductData | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tipos, setTipos] = useState<Tipo[]>([]);
   const [materiales, setMateriales] = useState<Material[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<{id: number, name: string} | null>(null);
+  const [productToDelete, setProductToDelete] = useState<{ id: number, name: string } | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const axiosConfig = {
     headers: { Authorization: `Bearer ${token}` },
@@ -62,7 +64,7 @@ function ProductManagement({ userRole, token }: Props) {
       const res = await axios.get(`${API_BASE_URL}/products`, axiosConfig);
       setProducts(res.data.data);
       setError("");
-    } catch (e) {
+    } catch {
       setError("Error al cargar productos");
     }
     setLoading(false);
@@ -74,16 +76,10 @@ function ProductManagement({ userRole, token }: Props) {
         axios.get(`${API_BASE_URL}/tipos`),
         axios.get(`${API_BASE_URL}/materiales`),
       ]);
-      const tiposData = Array.isArray(resTipos.data)
-        ? resTipos.data
-        : resTipos.data.data;
-      const materialesData = Array.isArray(resMateriales.data)
-        ? resMateriales.data
-        : resMateriales.data.data;
-      const tiposArray = Array.isArray(tiposData) ? tiposData : [];
-      setTipos(tiposArray.flat().filter(Boolean));
-      const materialesArray = Array.isArray(materialesData) ? materialesData : [];
-      setMateriales(materialesArray.flat().filter(Boolean));
+      const tiposData = Array.isArray(resTipos.data) ? resTipos.data : resTipos.data.data;
+      const materialesData = Array.isArray(resMateriales.data) ? resMateriales.data : resMateriales.data.data;
+      setTipos(tiposData.flat().filter(Boolean));
+      setMateriales(materialesData.flat().filter(Boolean));
     } catch (e) {
       console.error("Error al cargar tipos o materiales", e);
     }
@@ -96,11 +92,6 @@ function ProductManagement({ userRole, token }: Props) {
     }
   }, [userRole]);
 
-  // LOGS para depuración
-  console.log("tipos:", tipos);
-  console.log("materiales:", materiales);
-
-  // Crear producto
   const openCreateModal = () => {
     setEditData({
       nombre_producto: "",
@@ -113,10 +104,11 @@ function ProductManagement({ userRole, token }: Props) {
       id_material: materiales[0]?.id_material || 1,
       id_tipo: tipos[0]?.id_tipo || 1,
     });
+    setSelectedImage(null);
+    setImagePreview(null);
     setIsModalOpen(true);
   };
 
-  // Editar producto
   const openEditModal = (product: Product) => {
     setEditData({
       id_producto: product.id_producto,
@@ -130,50 +122,57 @@ function ProductManagement({ userRole, token }: Props) {
       id_material: product.material?.id_material ?? product.id_material,
       id_tipo: product.tipo?.id_tipo ?? product.id_tipo,
     });
+    setSelectedImage(null);
+    setImagePreview(null);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditData(null);
+    setSelectedImage(null);
+    setImagePreview(null);
   };
 
-  // Guardar producto (crear o editar)
   const handleSaveProduct = async (productData: ProductData) => {
     try {
-      const parsedProduct: Product = {
+      const parsedProduct = {
         ...productData,
         precio: Number(productData.precio),
         stock: Number(productData.stock),
         id_material: Number(productData.id_material),
         id_tipo: Number(productData.id_tipo),
       };
+
+      // 1. Guardar producto
+      let savedProduct;
       if (productData.id_producto) {
-        await axios.patch(
-          `${API_BASE_URL}/products/${productData.id_producto}`,
-          parsedProduct,
-          axiosConfig
-        );
+        await axios.patch(`${API_BASE_URL}/products/${productData.id_producto}`, parsedProduct, axiosConfig);
+        savedProduct = { id_producto: productData.id_producto };
       } else {
-        await axios.post(`${API_BASE_URL}/products`, parsedProduct, axiosConfig);
+        const res = await axios.post(`${API_BASE_URL}/products`, parsedProduct, axiosConfig);
+        savedProduct = res.data.data;
       }
+
+      // 2. Si hay imagen, subirla
+      if (selectedImage && savedProduct?.id_producto) {
+        const formData = new FormData();
+        formData.append("file", selectedImage);
+        formData.append("id_producto", String(savedProduct.id_producto));
+
+        await axios.post(`${API_BASE_URL}/imagenes`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
+
       fetchProducts();
       closeModal();
     } catch {
       setError("Error al guardar producto");
     }
-  };
-
-  // Manejar cambios en el formulario
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    if (!editData) return;
-    const { name, value } = e.target;
-    setEditData({
-      ...editData,
-      [name]: value,
-    });
   };
 
   const handleDeleteClick = (id: number, name: string) => {
@@ -183,13 +182,24 @@ function ProductManagement({ userRole, token }: Props) {
 
   const handleDeleteConfirm = async () => {
     if (!productToDelete) return;
-    
     try {
       await axios.delete(`${API_BASE_URL}/products/${productToDelete.id}`, axiosConfig);
       fetchProducts();
       setProductToDelete(null);
     } catch {
       setError("Error al eliminar producto");
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -218,15 +228,8 @@ function ProductManagement({ userRole, token }: Props) {
               <p>${Number(p.precio).toLocaleString("es-CL")}</p>
               <p>{p.stock} unidades</p>
               <div>
-                <button className="edit-btn" onClick={() => openEditModal(p)}>
-                  Editar
-                </button>
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDeleteClick(p.id_producto!, p.nombre_producto)}
-                >
-                  Eliminar
-                </button>
+                <button className="edit-btn" onClick={() => openEditModal(p)}>Editar</button>
+                <button className="delete-btn" onClick={() => handleDeleteClick(p.id_producto!, p.nombre_producto)}>Eliminar</button>
               </div>
             </li>
           ))
@@ -247,6 +250,15 @@ function ProductManagement({ userRole, token }: Props) {
           onSubmit={handleSaveProduct}
           loadingTipos={tipos.length === 0}
           loadingMateriales={materiales.length === 0}
+          extraFields={
+            <>
+              <label>
+                Imagen del producto:
+                <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
+              </label>
+              {imagePreview && <img src={imagePreview} alt="Preview" style={{ maxHeight: "150px", marginTop: "8px" }} />}
+            </>
+          }
         />
       )}
 

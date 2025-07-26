@@ -98,3 +98,17 @@ export const isCurrentUserAdmin = async (): Promise<boolean> => {
     return false;
   }
 };
+
+// Función para recuperar/restablecer contraseña
+export const recoverPassword = async (token: string, newPassword: string) => {
+  try {
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/recover-password`, {
+      token,
+      newPassword
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Error al restablecer contraseña:", error.response?.data ?? error.message);
+    throw error;
+  }
+};

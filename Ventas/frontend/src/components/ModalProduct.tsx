@@ -27,7 +27,7 @@ interface ProductData {
 interface ModalProductProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ProductData) => void;
+  onSubmit: (data: FormData) => void;
   editData: ProductData | null;
   tipos: Tipo[];
   materiales: Material[];
@@ -57,6 +57,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     descripcion: "",
   });
 
+  const [file, setFile] = useState<File | null>(null);
+
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -84,6 +86,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         descripcion: "",
       });
     }
+    setFile(null);
   }, [editData]);
 
   const handleChange = (
@@ -93,9 +96,25 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, String(value));
+    });
+
+    if (file) {
+      data.append("imagen", file);
+    }
+
+    onSubmit(data);
     onClose();
   };
 
@@ -108,7 +127,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
           <h2>{editData && editData.id_producto ? "Editar Producto" : "Crear Producto"}</h2>
           <button className="close-btn" type="button" onClick={onClose}>&times;</button>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="modal-body">
             <label>
               Nombre
@@ -194,7 +213,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 {loadingTipos ? (
                   <option disabled>Cargando tipos...</option>
                 ) : (
-                  (Array.isArray(tipos) ? tipos.filter(Boolean) : []).map((tipo) => (
+                  tipos.map((tipo) => (
                     <option key={tipo.id_tipo} value={tipo.id_tipo}>
                       {tipo.nombre_tipo}
                     </option>
@@ -214,7 +233,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 {loadingMateriales ? (
                   <option disabled>Cargando materiales...</option>
                 ) : (
-                  (Array.isArray(materiales) ? materiales.filter(Boolean) : []).map((material) => (
+                  materiales.map((material) => (
                     <option key={material.id_material} value={material.id_material}>
                       {material.nombre_material}
                     </option>
@@ -222,9 +241,22 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 )}
               </select>
             </label>
+
+            {/* 🔽 Campo para subir imagen al final del formulario */}
+            <label>
+              Imagen del producto
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+            </label>
           </div>
+
           <div className="modal-actions">
-            <button className="save-btn" type="submit">{editData && editData.id_producto ? "Guardar cambios" : "Crear"}</button>
+            <button className="save-btn" type="submit">
+              {editData && editData.id_producto ? "Guardar cambios" : "Crear"}
+            </button>
             <button className="cancel-btn" type="button" onClick={onClose}>
               Cancelar
             </button>
