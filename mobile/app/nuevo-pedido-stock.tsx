@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Producto {
   id_producto: number;
@@ -19,26 +20,31 @@ interface ProductoSolicitado {
 }
 
 export default function NuevoPedidoStock() {
+  const { user } = useAuth();
   const [productos, setProductos] = useState<Producto[]>([]);
   const [productosSolicitados, setProductosSolicitados] = useState<ProductoSolicitado[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<number | null>(null);
-  const [cantidad, setCantidad] = useState('0');
+  const [cantidad, setCantidad] = useState('1');
   const [prioridad, setPrioridad] = useState<'Baja' | 'Media' | 'Alta' | 'Urgente'>('Media');
   const [observaciones, setObservaciones] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Constantes para el pedido de stock
+  const BODEGA_DEFECTO = 3;
+
   useEffect(() => {
     cargarProductos();
   }, []);
 
+
+
   const cargarProductos = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/producto');
-      setProductos(response.data.data);
+      const response = await api.get('/products/all');
+      setProductos(response.data.data || []);
     } catch (error) {
-      console.error('Error al cargar productos:', error);
       Alert.alert('Error', 'No se pudieron cargar los productos');
     } finally {
       setLoading(false);
@@ -47,7 +53,7 @@ export default function NuevoPedidoStock() {
 
   const agregarProducto = () => {
     if (!selectedProducto || parseInt(cantidad) <= 0) {
-      Alert.alert('Error', 'Selecciona un producto y una cantidad válida');
+      Alert.alert('Error', 'Selecciona un producto y una cantidad válida (mayor a 0)');
       return;
     }
 
@@ -57,8 +63,12 @@ export default function NuevoPedidoStock() {
       return;
     }
 
-    const producto = productos.find(p => p.id_producto === selectedProducto);
-    if (!producto) return;
+    const producto = productos.find(p => p.id_producto === selectedProducto || p.id_producto.toString() === selectedProducto.toString());
+    
+    if (!producto) {
+      Alert.alert('Error', 'No se encontró el producto seleccionado');
+      return;
+    }
 
     const nuevoProducto: ProductoSolicitado = {
       id_producto: selectedProducto,
@@ -68,7 +78,8 @@ export default function NuevoPedidoStock() {
 
     setProductosSolicitados(prev => [...prev, nuevoProducto]);
     setSelectedProducto(null);
-    setCantidad('0');
+    setCantidad('1');
+    Alert.alert('Éxito', `${producto.nombre_producto} agregado al pedido`);
   };
 
   const eliminarProducto = (id_producto: number) => {
@@ -94,35 +105,52 @@ export default function NuevoPedidoStock() {
       return;
     }
 
+    if (!user) {
+      Alert.alert('Error', 'Debes estar autenticado para crear un pedido');
+      return;
+    }
+
     try {
       setSaving(true);
 
-      // Crear pedidos individuales para cada producto
+      // Crear una orden por cada producto
       for (const producto of productosSolicitados) {
-        await api.post('/orden/test', {
-          id_producto: producto.id_producto,
+        const ordenData = {
           cantidad: producto.cantidad,
+          origen: 'Tienda',
+          destino: 'Fabrica',
+          fecha_envio: new Date().toISOString(),
           estado: 'Pendiente',
           prioridad,
-          observaciones: observaciones.trim(),
+          observaciones: observaciones.trim() || null,
           tipo: 'stock',
-          fecha_solicitud: new Date().toISOString(),
-        });
+          id_producto: producto.id_producto,
+          id_usuario: parseInt(user.id),
+          id_bodega: BODEGA_DEFECTO
+        };
+
+        await api.post('/orden', ordenData);
       }
 
+      // Navegar al dashboard de ventas con parámetros para ir a pedidos stock
+      router.replace({
+        pathname: '/(tabs)/dashboard-ventas',
+        params: { tab: 'pedidos-stock' }
+      });
+      
       Alert.alert(
         'Éxito',
-        'Pedido de stock creado exitosamente',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.back(),
-          },
-        ]
+        `Pedido de stock creado exitosamente.\n${productosSolicitados.length} orden(es) generada(s).`
       );
-    } catch (error) {
-      console.error('Error al crear pedido:', error);
-      Alert.alert('Error', 'No se pudo crear el pedido de stock');
+    } catch (error: any) {
+      let errorMessage = 'No se pudo crear el pedido de stock';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert('Error', errorMessage);
     } finally {
       setSaving(false);
     }
@@ -216,7 +244,10 @@ export default function NuevoPedidoStock() {
               <Text style={styles.sectionTitle}>Productos Solicitados</Text>
               <Text style={styles.sectionSubtitle}>Agrega los productos que necesitas</Text>
             </View>
-            <TouchableOpacity style={styles.agregarButton} onPress={agregarProducto}>
+            <TouchableOpacity 
+              style={styles.agregarButton} 
+              onPress={agregarProducto}
+            >
               <Ionicons name="add" size={16} color="#FFFFFF" />
               <Text style={styles.agregarButtonText}>Agregar</Text>
             </TouchableOpacity>
@@ -253,7 +284,7 @@ export default function NuevoPedidoStock() {
                 value={cantidad}
                 onChangeText={setCantidad}
                 keyboardType="numeric"
-                placeholder="0"
+                placeholder="1"
                 maxLength={5}
               />
             </View>
@@ -433,7 +464,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
   },
   agregarButton: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#22C55E', // Verde
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -516,7 +547,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
   },
   crearButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: '#22C55E', // Verde cuando esté habilitado
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

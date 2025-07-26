@@ -32,6 +32,7 @@ export default function LoginScreen() {
 
     try {
       const success = await login(email, password);
+
       if (success) {
         router.replace('/(tabs)');
       }
@@ -42,10 +43,12 @@ export default function LoginScreen() {
       } else if (error.response?.status === 404) {
         Alert.alert('Usuario no encontrado', 'No existe una cuenta con este correo electrónico.');
       } else {
-        Alert.alert('Error de conexión', 'No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.');
+        Alert.alert('Error de conexión', `No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.${error}`);
+
       }
     }
   };
+//consle error completo
 
   const handleGoogleLogin = async () => {
     const success = await loginWithGoogle();

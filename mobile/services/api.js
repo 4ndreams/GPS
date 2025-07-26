@@ -1,32 +1,16 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { TokenService } from './tokenService';
 
-// TokenService adaptado a plataforma
-const TokenService = {
-  async getToken() {
-    if (Platform.OS === 'web') {
-      return localStorage.getItem('token');
-    } else {
-      return await SecureStore.getItemAsync('token');
-    }
-  },
-  async removeToken() {
-    if (Platform.OS === 'web') {
-      localStorage.removeItem('token');
-    } else {
-      await SecureStore.deleteItemAsync('token');
-    }
-  },
-  async refreshTokenManually() {
-    // Aquí deberías implementar la lógica para renovar el token.
-    // Ej: llamar a /auth/refresh con refreshToken
-    return false; // o true si se logró
+// Función de logging condicional para producción
+const isDev = __DEV__;
+const log = (message, ...args) => {
+  if (isDev) {
+    console.log(message, ...args);
   }
 };
 
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
+  baseURL:  process.env.EXPO_PUBLIC_API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -36,11 +20,32 @@ const api = axios.create({
 // Interceptor request
 api.interceptors.request.use(
   async (config) => {
-    const token = await TokenService.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      log('🔍 Verificando token para petición:', config.method?.toUpperCase(), config.url);
+      const token = await TokenService.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        log('🔐 Token añadido a la petición:', `Bearer ${token.substring(0, 20)}...`);
+      } else {
+        log('⚠️ No hay token disponible para la petición');
+        log('🔍 Intentando verificar si el token se guardó recientemente...');
+        
+        // Pequeño delay para permitir que se complete el guardado del token
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const tokenRetry = await TokenService.getToken();
+        if (tokenRetry) {
+          config.headers.Authorization = `Bearer ${tokenRetry}`;
+          log('✅ Token encontrado en segundo intento:', `Bearer ${tokenRetry.substring(0, 20)}...`);
+        } else {
+          log('❌ Token definitivamente no disponible');
+        }
+      }
+      log('📤 Petición:', config.method?.toUpperCase(), config.url);
+      return config;
+    } catch (error) {
+      console.error('❌ Error en interceptor request:', error); // Mantener errores críticos
+      return config;
     }
-    return config;
   },
   (error) => Promise.reject(error)
 );
@@ -53,22 +58,10 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
-      try {
-        const renewed = await TokenService.refreshTokenManually();
-        if (renewed) {
-          const newToken = await TokenService.getToken();
-          if (newToken) {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            return api(originalRequest);
-          }
-        }
-      } catch (err) {
-        console.error('Error al renovar token:', err);
-      }
-
+      log('❌ Error 401: Token inválido o expirado');
+      
       await TokenService.removeToken();
-      console.log('❌ Token eliminado por sesión expirada');
+      log('❌ Token eliminado por sesión expirada');
     }
 
     return Promise.reject(error);
