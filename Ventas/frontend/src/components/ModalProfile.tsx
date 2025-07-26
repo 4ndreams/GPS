@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import "@styles/modal.css";
 import { formatRut, validateField } from "@utils/validations";
 
@@ -28,6 +29,8 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Nuevo: error global del backend
+  const [backendError, setBackendError] = useState<{ message: string; details?: string } | null>(null);
 
   // Limpiar errores cuando se cierra el modal
   useEffect(() => {
@@ -74,7 +77,7 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validar todos los campos antes de guardar
     const errors: {[key: string]: string | null} = {};
     errors.nombre = validateField('nombres', editData?.nombre || '');
@@ -89,7 +92,23 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
     }
 
     // Si no hay errores, guardar
-    onSave();
+    try {
+      setBackendError(null);
+      onSave(); // Llama al prop onSave para notificar al componente padre
+    } catch (err: any) {
+      // Mostrar solo el details del response.data si existe
+      let details = '';
+      if (err?.response?.data?.details) {
+        details = err.response.data.details;
+      } else if (err?.details) {
+        details = err.details;
+      }
+      if (details) {
+        setBackendError({ message: '', details });
+      } else {
+        setBackendError(null);
+      }
+    }
   };
 
   const handlePasswordChange = async () => {
@@ -115,20 +134,31 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
     }
     setPasswordError(null);
     if (onChangePassword) {
-      const ok = await onChangePassword(currentPassword, newPassword);
-      if (ok) {
-        setPasswordSuccess("Contraseña actualizada correctamente");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setTimeout(() => setPasswordSuccess(null), 2500);
+      try {
+        setBackendError(null);
+        const ok = await onChangePassword(currentPassword, newPassword);
+        if (ok) {
+          setPasswordSuccess("Contraseña actualizada correctamente");
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+          setTimeout(() => setPasswordSuccess(null), 2500);
+        }
+      } catch (err: any) {
+        if (err && (err.message || err.details)) {
+          setBackendError({ message: err.message, details: err.details });
+        } else if (typeof err === 'string') {
+          setBackendError({ message: err });
+        } else {
+          setBackendError({ message: 'Error desconocido' });
+        }
       }
     }
   };
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="modal-overlay">
       <div className="modal-container">
         <header className="modal-header">
@@ -137,6 +167,23 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
             &times;
           </button>
         </header>
+
+        {/* Mostrar error global del backend si existe */}
+        {backendError?.details && (
+          <div style={{
+            background: '#ffeaea',
+            border: '1.5px solid #e53935',
+            color: '#b71c1c',
+            borderRadius: 8,
+            padding: '16px 18px',
+            margin: '18px 0 10px 0',
+            fontWeight: 600,
+            fontSize: '1.08rem',
+            boxShadow: '0 2px 8px #e5393522'
+          }}>
+            <div style={{ fontWeight: 400, fontSize: '1.01rem', color: '#b71c1c' }}>{backendError.details}</div>
+          </div>
+        )}
 
         <div className="modal-body">
           <label>
@@ -264,6 +311,8 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default ModalProfile;

@@ -243,7 +243,6 @@ function ProductManagement({ userRole, token }: Props) {
           editData={editData}
           tipos={tipos}
           materiales={materiales}
-          onChange={handleChange}
           onClose={closeModal}
           onSubmit={handleSaveProduct}
           loadingTipos={tipos.length === 0}

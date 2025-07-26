@@ -28,7 +28,6 @@ interface ModalProductProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ProductData) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   editData: ProductData | null;
   tipos: Tipo[];
   materiales: Material[];
