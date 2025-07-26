@@ -4,6 +4,7 @@ import Layout from './Layout';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import OrdenesPage from './pages/OrdenesPage';
+import ProductosPage from './pages/ProductosPage';
 import ReportesPage from './pages/ReportesPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
 import AlertasPage from './pages/AlertasPage';
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="ordenes" element={<OrdenesPage />} />
+          <Route path="productos" element={<ProductosPage />} />
           <Route path="reportes" element={<ReportesPage />} />
           <Route path="configuracion" element={<ConfiguracionPage />} />
           <Route path="alertas" element={<AlertasPage />} />

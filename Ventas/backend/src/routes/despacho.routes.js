@@ -5,9 +5,9 @@ import { authorizeRoles } from '../middlewares/autorization.middleware.js';
 
 const router = Router();
 
-// 🚧 RUTAS TEMPORALES PARA RF 5 - SIN AUTENTICACIÓN PARA TESTING
+// 🔒 RUTAS CON AUTENTICACIÓN
 router
-    .post('/test', createDespachoController);
+    .post('/', authenticateJwt, authorizeRoles(['fabrica', 'administrador']), createDespachoController);
 
 // 🔒 RUTAS CON AUTENTICACIÓN ORIGINAL
 router

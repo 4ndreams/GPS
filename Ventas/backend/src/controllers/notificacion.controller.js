@@ -45,8 +45,9 @@ export async function createNotificacionController(req, res) {
 // Obtener todas las notificaciones
 export async function getNotificacionesController(req, res) {
     try {
-        const { limit } = req.query;
-        const [notificaciones, err] = await getNotificacionesService(limit ? parseInt(limit) : 50);
+        const { limit, leida } = req.query;
+        const soloNoLeidas = leida === 'false';
+        const [notificaciones, err] = await getNotificacionesService(limit ? parseInt(limit) : 50, soloNoLeidas);
 
         if (err) {
             return handleErrorClient(res, 400, err);

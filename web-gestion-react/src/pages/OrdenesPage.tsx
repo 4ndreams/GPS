@@ -1,61 +1,9 @@
 import React from 'react';
 import OrdenesTable from '../components/OrdenesTable';
-
-// Datos específicos de TERPLAC - Órdenes de despacho
-const ordenesDespacho = [
-  {
-    id: "OD-2025-001",
-    fecha: "2025-01-15",
-    trabajadorFabrica: "Carlos Mendoza",
-    estado: "completado",
-    prioridad: "normal",
-    totalProductos: 30,
-    valorTotal: 450000,
-    vendedora: "María González",
-  },
-  {
-    id: "OD-2025-002",
-    fecha: "2025-01-16",
-    trabajadorFabrica: "Luis Rodríguez",
-    estado: "alerta",
-    prioridad: "alta",
-    totalProductos: 45,
-    valorTotal: 380000,
-    vendedora: "María González",
-  },
-  {
-    id: "OD-2025-003",
-    fecha: "2025-01-17",
-    trabajadorFabrica: "Ana Martín",
-    estado: "pendiente",
-    prioridad: "normal",
-    totalProductos: 40,
-    valorTotal: 680000,
-    vendedora: undefined,
-  },
-  {
-    id: "OD-2025-004",
-    fecha: "2025-01-18",
-    trabajadorFabrica: "Pedro Silva",
-    estado: "en_transito",
-    prioridad: "alta",
-    totalProductos: 60,
-    valorTotal: 520000,
-    vendedora: undefined,
-  },
-  {
-    id: "OD-2025-005",
-    fecha: "2025-01-19",
-    trabajadorFabrica: "Roberto Vega",
-    estado: "rechazado",
-    prioridad: "crítica",
-    totalProductos: 20,
-    valorTotal: 180000,
-    vendedora: "María González",
-  },
-];
+import { useOrdenes } from '../hooks/useOrdenes';
 
 export default function OrdenesPage() {
+  const { ordenes, loading, error, refresh } = useOrdenes();
   const [selectedRows, setSelectedRows] = React.useState<string[]>([]);
 
   const handleSelectRow = (id: string) => {
@@ -68,19 +16,49 @@ export default function OrdenesPage() {
 
   const handleSelectAll = () => {
     setSelectedRows((prev: string[]) => 
-      prev.length === ordenesDespacho.length 
+      prev.length === ordenes.length 
         ? [] 
-        : ordenesDespacho.map(orden => orden.id)
+        : ordenes.map(orden => orden.id_orden.toString())
     );
   };
 
   const handleRefresh = () => {
-    console.log("Refrescando datos...");
+    refresh();
   };
 
   const handleExport = (format: string) => {
     console.log(`Exportando en formato ${format}...`);
   };
+
+  // Mostrar indicador de carga
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando órdenes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error si existe
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="text-red-600 text-lg mb-2">⚠️ Error al cargar órdenes</div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={refresh}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -98,7 +76,7 @@ export default function OrdenesPage() {
 
       {/* Tabla de órdenes */}
       <OrdenesTable
-        ordenesDespacho={ordenesDespacho}
+        ordenesDespacho={ordenes}
         selectedRows={selectedRows}
         onSelectRow={handleSelectRow}
         onSelectAll={handleSelectAll}

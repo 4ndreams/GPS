@@ -5,32 +5,25 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   Clock,
-  DollarSign,
   Truck,
   Factory
 } from "lucide-react"
-
-interface OrdenDespacho {
-  id: string;
-  estado: string;
-  valorTotal: number;
-  totalProductos: number;
-}
+import { type Orden } from '../services/ordenService';
 
 interface DashboardStatsProps {
-  ordenesDespacho: OrdenDespacho[]
+  ordenesDespacho: Orden[]
 }
 
 export default function DashboardStats({ ordenesDespacho }: DashboardStatsProps) {
   const stats = {
     totalOrdenes: ordenesDespacho.length,
-    completadas: ordenesDespacho.filter(o => o.estado === 'completado').length,
-    alertas: ordenesDespacho.filter(o => o.estado === 'alerta').length,
-    pendientes: ordenesDespacho.filter(o => o.estado === 'pendiente').length,
-    enTransito: ordenesDespacho.filter(o => o.estado === 'en_transito').length,
-    rechazadas: ordenesDespacho.filter(o => o.estado === 'rechazado').length,
-    valorTotal: ordenesDespacho.reduce((sum, o) => sum + o.valorTotal, 0),
-    totalProductos: ordenesDespacho.reduce((sum, o) => sum + o.totalProductos, 0)
+    pendientes: ordenesDespacho.filter(o => o.estado === 'Pendiente').length,
+    enProduccion: ordenesDespacho.filter(o => o.estado === 'En producción').length,
+    fabricadas: ordenesDespacho.filter(o => o.estado === 'Fabricada').length,
+    enTransito: ordenesDespacho.filter(o => o.estado === 'En tránsito').length,
+    recibidas: ordenesDespacho.filter(o => o.estado === 'Recibido').length,
+    recibidasConProblemas: ordenesDespacho.filter(o => o.estado === 'Recibido con problemas').length,
+    totalCantidad: ordenesDespacho.reduce((sum, o) => sum + o.cantidad, 0)
   }
 
   const statCards = [
@@ -42,25 +35,25 @@ export default function DashboardStats({ ordenesDespacho }: DashboardStatsProps)
       color: "text-blue-600"
     },
     {
-      title: "Completadas",
-      value: stats.completadas,
-      icon: CheckCircle2,
-      description: "Entregadas exitosamente",
-      color: "text-green-600"
-    },
-    {
-      title: "Con Alertas",
-      value: stats.alertas,
-      icon: AlertTriangle,
-      description: "Requieren atención",
-      color: "text-orange-600"
-    },
-    {
       title: "Pendientes",
       value: stats.pendientes,
       icon: Clock,
-      description: "En espera de recepción",
+      description: "En espera de procesamiento",
       color: "text-blue-600"
+    },
+    {
+      title: "En Producción",
+      value: stats.enProduccion,
+      icon: Factory,
+      description: "En proceso de fabricación",
+      color: "text-yellow-600"
+    },
+    {
+      title: "Fabricadas",
+      value: stats.fabricadas,
+      icon: CheckCircle2,
+      description: "Listas para despacho",
+      color: "text-green-600"
     },
     {
       title: "En Tránsito",
@@ -70,22 +63,22 @@ export default function DashboardStats({ ordenesDespacho }: DashboardStatsProps)
       color: "text-purple-600"
     },
     {
-      title: "Rechazadas",
-      value: stats.rechazadas,
-      icon: AlertTriangle,
-      description: "Con problemas",
-      color: "text-red-600"
-    },
-    {
-      title: "Valor Total",
-      value: `$${stats.valorTotal.toLocaleString()}`,
-      icon: DollarSign,
-      description: "Valor de todas las órdenes",
+      title: "Recibidas",
+      value: stats.recibidas,
+      icon: CheckCircle2,
+      description: "Entregadas exitosamente",
       color: "text-green-600"
     },
     {
-      title: "Total Productos",
-      value: stats.totalProductos,
+      title: "Con Problemas",
+      value: stats.recibidasConProblemas,
+      icon: AlertTriangle,
+      description: "Recibidas con problemas",
+      color: "text-red-600"
+    },
+    {
+      title: "Total Cantidad",
+      value: stats.totalCantidad,
       icon: Factory,
       description: "Unidades totales",
       color: "text-indigo-600"

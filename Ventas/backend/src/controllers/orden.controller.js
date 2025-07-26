@@ -7,6 +7,15 @@ import {
     deleteOrdenService,
     getOrdenesByFiltersService
 } from "../services/orden.service.js";
+import { 
+    createNotificacionService,
+    crearNotificacionRecepcionExitosa
+} from "../services/notificacion.service.js";
+import { 
+    getTiendaByNombreService,
+    getStockTiendaProductoService,
+    createTiendaService
+} from "../services/tienda.service.js";
 import { OrdenQueryValidation, OrdenBodyValidation } from "../validations/orden.validation.js";
 import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
 
@@ -70,6 +79,7 @@ export async function createOrdenController(req, res) {
     }
 }
 
+  
 export async function updateOrdenController(req, res) {
     try {
         const { id_orden } = req.params;
@@ -79,10 +89,97 @@ export async function updateOrdenController(req, res) {
             return handleErrorClient(res, 400, error.details[0].message);
         }
 
+        // 1. Obtener la orden antes de actualizar
+        const [ordenAntes, errAntes] = await getOrdenByIdService(Number(id_orden));
+        if (errAntes || !ordenAntes) {
+            return handleErrorClient(res, 404, errAntes || "Orden no encontrada");
+        }
+
+        // 2. Hacer el update de la orden
         const [updatedOrden, err] = await updateOrdenService(Number(id_orden), req.body);
         if (err) {
             return handleErrorClient(res, 404, err);
         }
+
+        // 3. SISTEMA DE NOTIFICACIONES - Crear notificaciones según el cambio de estado
+        const estadoAnterior = ordenAntes.estado;
+        const estadoNuevo = req.body.estado;
+
+        if (estadoNuevo && estadoAnterior !== estadoNuevo) {
+            try {
+                // Notificación cuando la orden pasa a "En tránsito"
+                if (estadoNuevo === "En tránsito" && estadoAnterior !== "En tránsito") {
+                    const mensaje = `Orden ${id_orden}: Despachada desde fábrica hacia ${updatedOrden.destino}`;
+                    
+                    await createNotificacionService({
+                        tipo: 'despacho_en_transito',
+                        mensaje,
+                        ordenId: id_orden,
+                        tiendaId: null,
+                        observaciones: `Transportista: ${updatedOrden.transportista || 'No especificado'}`,
+                        prioridad: 'normal'
+                    });
+
+                    console.log(`📦 Notificación creada: Orden ${id_orden} en tránsito`);
+                }
+
+                // Notificación cuando la orden es recibida
+                if ((estadoNuevo === "Recibido" || estadoNuevo === "Recibido con problemas") && 
+                    estadoAnterior !== "Recibido" && estadoAnterior !== "Recibido con problemas") {
+                    
+                    const tipoRecepcion = estadoNuevo === "Recibido" ? 'recepcion_exitosa' : 'recepcion_con_problemas';
+                    const mensaje = estadoNuevo === "Recibido" 
+                        ? `Orden ${id_orden}: Recepción completada exitosamente en ${updatedOrden.destino}`
+                        : `Orden ${id_orden}: Recepción con problemas en ${updatedOrden.destino}`;
+
+                    await createNotificacionService({
+                        tipo: tipoRecepcion,
+                        mensaje,
+                        ordenId: id_orden,
+                        tiendaId: null,
+                        observaciones: req.body.observaciones || 'Sin observaciones adicionales',
+                        prioridad: estadoNuevo === "Recibido" ? 'normal' : 'alta'
+                    });
+
+                    console.log(`📥 Notificación creada: Orden ${id_orden} recibida (${estadoNuevo})`);
+                }
+            } catch (notifError) {
+                console.error("Error creando notificación:", notifError);
+                // No fallar la actualización por error en notificación
+            }
+        }
+
+        // 4. Si el estado cambió a RECIBIDA y antes NO era RECIBIDA => actualizar stock en la tienda destino
+        if (
+            req.body.estado === "RECIBIDA" &&
+            ordenAntes.estado !== "RECIBIDA"
+        ) {
+            try {
+                // 1. Buscar la tienda por nombre
+                const tienda = await getTiendaByNombreService(ordenAntes.destino);
+                if (!tienda) {
+                    return handleErrorClient(res, 404, "Tienda destino no encontrada");
+                }
+                const id_tienda = tienda.id_tienda;
+                const id_producto = ordenAntes.id_producto;
+                const cantidad = ordenAntes.cantidad;
+
+                // 2. Buscar el stock de ese producto en la tienda
+                let tiendaProducto = await getStockTiendaProductoService(id_tienda, id_producto);
+
+                // 3. Sumar stock si existe, o crear el registro si no
+                if (tiendaProducto) {
+                    tiendaProducto.stock += cantidad;
+                    await tiendaProducto.save();
+                } else {
+                    await createTiendaService({ id_tienda, id_producto, stock: cantidad });
+                }
+            } catch (stockError) {
+                console.error("Error actualizando stock en tienda:", stockError);
+                return handleErrorServer(res, 500, "Error actualizando stock en tienda");
+            }
+        }
+
         return handleSuccess(res, 200, "Orden updated successfully", updatedOrden);
     } catch (error) {
         console.error(error);

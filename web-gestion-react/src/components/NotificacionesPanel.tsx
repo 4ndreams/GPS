@@ -35,6 +35,12 @@ export default function NotificacionesPanel({ notificaciones }: NotificacionesPa
         return <CheckCircle2 className="h-4 w-4 text-green-600" />
       case 'nueva_orden':
         return <Package className="h-4 w-4 text-blue-600" />
+      case 'despacho_en_transito':
+        return <Package className="h-4 w-4 text-blue-600" />
+      case 'recepcion_exitosa':
+        return <CheckCircle2 className="h-4 w-4 text-green-600" />
+      case 'recepcion_con_problemas':
+        return <AlertTriangle className="h-4 w-4 text-red-600" />
       default:
         return <Bell className="h-4 w-4 text-gray-600" />
     }
@@ -50,6 +56,12 @@ export default function NotificacionesPanel({ notificaciones }: NotificacionesPa
         return 'bg-green-50 border-green-200'
       case 'nueva_orden':
         return 'bg-blue-50 border-blue-200'
+      case 'despacho_en_transito':
+        return 'bg-blue-50 border-blue-200'
+      case 'recepcion_exitosa':
+        return 'bg-green-50 border-green-200'
+      case 'recepcion_con_problemas':
+        return 'bg-red-50 border-red-200'
       default:
         return 'bg-gray-50 border-gray-200'
     }

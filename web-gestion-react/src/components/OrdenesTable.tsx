@@ -15,7 +15,6 @@ import {
   Filter,
   Download,
   CheckCircle2,
-  XCircle,
   Truck,
   Clock,
   RefreshCw,
@@ -29,19 +28,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-interface OrdenDespacho {
-  id: string;
-  fecha: string;
-  trabajadorFabrica: string;
-  estado: string;
-  prioridad: string;
-  totalProductos: number;
-  valorTotal: number;
-  vendedora?: string;
-}
+import { type Orden } from '../services/ordenService';
 
 interface OrdenesTableProps {
-  ordenesDespacho: OrdenDespacho[]
+  ordenesDespacho: Orden[]
   selectedRows: string[]
   onSelectRow: (id: string) => void
   onSelectAll: () => void
@@ -63,39 +53,45 @@ export default function OrdenesTable({
 
   const getEstadoBadge = (estado: string) => {
     const estadoConfig = {
-      completado: {
-        variant: "default" as const,
-        className: "bg-green-100 text-green-800",
-        icon: CheckCircle2,
-        texto: "Completado",
-      },
-      alerta: {
-        variant: "destructive" as const,
-        className: "bg-orange-100 text-orange-800",
-        icon: AlertTriangle,
-        texto: "Con Alertas",
-      },
-      pendiente: {
+      "Pendiente": {
         variant: "secondary" as const,
         className: "bg-blue-100 text-blue-800",
         icon: Clock,
-        texto: "Pendiente Recepción",
+        texto: "Pendiente",
       },
-      en_transito: { 
+      "En producción": {
+        variant: "default" as const,
+        className: "bg-yellow-100 text-yellow-800",
+        icon: Package,
+        texto: "En Producción",
+      },
+      "Fabricada": {
+        variant: "default" as const,
+        className: "bg-green-100 text-green-800",
+        icon: CheckCircle2,
+        texto: "Fabricada",
+      },
+      "En tránsito": { 
         variant: "default" as const, 
         className: "bg-purple-100 text-purple-800", 
         icon: Truck, 
         texto: "En Tránsito" 
       },
-      rechazado: { 
+      "Recibido": { 
+        variant: "default" as const, 
+        className: "bg-green-100 text-green-800", 
+        icon: CheckCircle2, 
+        texto: "Recibido" 
+      },
+      "Recibido con problemas": { 
         variant: "destructive" as const, 
         className: "bg-red-100 text-red-800", 
-        icon: XCircle, 
-        texto: "Rechazado" 
+        icon: AlertTriangle, 
+        texto: "Recibido con Problemas" 
       },
     }
 
-    const config = estadoConfig[estado as keyof typeof estadoConfig] || estadoConfig.pendiente
+    const config = estadoConfig[estado as keyof typeof estadoConfig] || estadoConfig["Pendiente"]
     const Icon = config.icon
 
     return (
@@ -124,9 +120,9 @@ export default function OrdenesTable({
   }
 
   const filteredOrdenes = ordenesDespacho.filter(orden => {
-    const matchesSearch = orden.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         orden.trabajadorFabrica.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         orden.vendedora?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = orden.id_orden.toString().includes(searchTerm.toLowerCase()) ||
+                         orden.usuario?.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         orden.producto?.nombre_producto.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesEstado = filterEstado === "todos" || orden.estado === filterEstado
     const matchesPrioridad = filterPrioridad === "todos" || orden.prioridad === filterPrioridad
@@ -179,7 +175,7 @@ export default function OrdenesTable({
           <div className="flex items-center gap-2 flex-1">
             <Search className="h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Buscar por ID, trabajador o vendedora..."
+              placeholder="Buscar por ID, usuario o producto..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
@@ -193,11 +189,12 @@ export default function OrdenesTable({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="completado">Completado</SelectItem>
-                <SelectItem value="alerta">Con Alertas</SelectItem>
-                <SelectItem value="pendiente">Pendiente</SelectItem>
-                <SelectItem value="en_transito">En Tránsito</SelectItem>
-                <SelectItem value="rechazado">Rechazado</SelectItem>
+                <SelectItem value="Pendiente">Pendiente</SelectItem>
+                <SelectItem value="En producción">En Producción</SelectItem>
+                <SelectItem value="Fabricada">Fabricada</SelectItem>
+                <SelectItem value="En tránsito">En Tránsito</SelectItem>
+                <SelectItem value="Recibido">Recibido</SelectItem>
+                <SelectItem value="Recibido con problemas">Recibido con Problemas</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterPrioridad} onValueChange={setFilterPrioridad}>
@@ -226,38 +223,38 @@ export default function OrdenesTable({
                   />
                 </TableHead>
                 <TableHead>ID Orden</TableHead>
-                <TableHead>Trabajador</TableHead>
+                <TableHead>Usuario</TableHead>
                 <TableHead>Estado</TableHead>
                 <TableHead>Prioridad</TableHead>
-                <TableHead>Productos</TableHead>
-                <TableHead>Valor Total</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Vendedora</TableHead>
+                <TableHead>Producto</TableHead>
+                <TableHead>Cantidad</TableHead>
+                <TableHead>Fecha Solicitud</TableHead>
+                <TableHead>Origen</TableHead>
                 <TableHead className="w-12">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredOrdenes.map((orden) => (
-                <TableRow key={orden.id} className="hover:bg-gray-50">
+                <TableRow key={orden.id_orden} className="hover:bg-gray-50">
                   <TableCell>
                     <Checkbox
-                      checked={selectedRows.includes(orden.id)}
-                      onCheckedChange={() => onSelectRow(orden.id)}
+                      checked={selectedRows.includes(orden.id_orden.toString())}
+                      onCheckedChange={() => onSelectRow(orden.id_orden.toString())}
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{orden.id}</TableCell>
-                  <TableCell>{orden.trabajadorFabrica}</TableCell>
+                  <TableCell className="font-medium">{orden.id_orden}</TableCell>
+                  <TableCell>{orden.usuario?.nombre || "-"}</TableCell>
                   <TableCell>{getEstadoBadge(orden.estado)}</TableCell>
-                  <TableCell>{getPrioridadBadge(orden.prioridad)}</TableCell>
+                  <TableCell>{getPrioridadBadge(orden.prioridad || "normal")}</TableCell>
+                  <TableCell>{orden.producto?.nombre_producto || "-"}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Package className="h-3 w-3 text-gray-400" />
-                      {orden.totalProductos} unidades
+                      {orden.cantidad} unidades
                     </div>
                   </TableCell>
-                  <TableCell>${orden.valorTotal.toLocaleString()}</TableCell>
-                  <TableCell>{orden.fecha}</TableCell>
-                  <TableCell>{orden.vendedora || "-"}</TableCell>
+                  <TableCell>{new Date(orden.fecha_solicitud).toLocaleDateString()}</TableCell>
+                  <TableCell>{orden.origen || "-"}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

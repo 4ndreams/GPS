@@ -23,7 +23,11 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
+<<<<<<< Updated upstream
       origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:8081'], //Autorizamos más origenes  
+=======
+      origin: true,  // Permite solicitudes desde cualquier origen
+>>>>>>> Stashed changes
       credentials: true
     }));
 

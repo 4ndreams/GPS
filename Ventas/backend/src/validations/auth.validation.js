@@ -15,7 +15,11 @@ Joi.defaults(schema => schema.options({ messages: {
 
 // Valida dominio de email
 const domainEmailValidator = (value, helper) => {
+<<<<<<< Updated upstream
   const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl"];
+=======
+  const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl","@gps.com", "@terplac.com"];
+>>>>>>> Stashed changes
   
   if (!allowedDomains.some(domain => value.endsWith(domain))) {
     return helper.message(`El email electrónico debe finalizar en uno de los siguientes dominios: ${allowedDomains.join(", ")}.`);

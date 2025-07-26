@@ -12,7 +12,19 @@ export async function getTiendasService() {
     return null;
   }
 }
+// Busca una tienda por su nombre y retorna el registro (incluyendo id_tienda)
+export async function getTiendaByNombreService(nombre_tienda) {
+  try {
+    const tiendaRepository = AppDataSource.getRepository(Tienda);
+    return await tiendaRepository.findOne({ where: { nombre_tienda } });
+  } catch (error) {
+    console.error("Error al buscar tienda por nombre:", error);
+    return null;
+  }
+}
 
+
+//Services para buscar tienda por id
 export async function getTiendaByIdService(id) {
   try {
     const tiendaRepository = AppDataSource.getRepository(Tienda);
@@ -22,6 +34,20 @@ export async function getTiendaByIdService(id) {
     return tienda;
   } catch (error) {
     console.error("Error al obtener la tienda:", error);
+    return null;
+  }
+}
+
+//Services para buscar stock por tienda y producto
+export async function getStockTiendaProductoService(id_tienda, id_producto) {
+  try {
+    const tiendaRepository = AppDataSource.getRepository(Tienda);
+    const tienda = await tiendaRepository.findOne({
+      where: { id_tienda: id_tienda, id_producto: id_producto },
+    });
+    return tienda;
+  } catch (error) {
+    console.error("Error al obtener el stock de la tienda:", error);
     return null;
   }
 }

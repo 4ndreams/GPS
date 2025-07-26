@@ -1,12 +1,12 @@
 // src/routes/product.routes.ts
 import { Router } from "express";
 import {
-  createProduct,
-  getProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
-} from "../controllers/product.controller.js";
+  createProductoController as createProduct,
+  getProductosController as getProducts,
+  getProductoController as getProductById,
+  updateProductoController as updateProduct,
+  deleteProductoController as deleteProduct,
+} from "../controllers/producto.controller.js";
 import { authenticateJwt } from "../middlewares/authentication.middleware.js";
 import { isAdmin, authorizeRoles } from "../middlewares/autorization.middleware.js";
 

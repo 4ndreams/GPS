@@ -1,8 +1,9 @@
 // src/components/Navbar.tsx
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, AlertTriangle, BarChart3, LogOut, Search, Bell, User, Settings, Download, RefreshCw } from 'lucide-react';
+import { Home, AlertTriangle, BarChart3, LogOut, Search, Bell, User, Settings, Download, RefreshCw, Package } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useNotificaciones } from '../hooks/useNotificaciones';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ import './Navbar.css';
 
 export default function Navbar() {
   const { usuario, logout } = useAuth();
+  const { notificaciones, cantidadNoLeidas, marcarComoLeida } = useNotificaciones();
   const [searchTerm, setSearchTerm] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -27,27 +29,11 @@ export default function Navbar() {
     logout();
   };
 
-  // Datos de notificaciones (simulados)
-  const notificaciones = [
-    {
-      id: 1,
-      tipo: "alerta_faltante",
-      mensaje: "Orden OD-2025-002: Faltan 3 puertas MDF modelo PM-002",
-      tiempo: "hace 15 min",
-      leida: false,
-      orden: "OD-2025-002",
-    },
-    {
-      id: 2,
-      tipo: "rechazo_calidad",
-      mensaje: "Orden OD-2025-005: Rechazada por defectos de calidad",
-      tiempo: "hace 1 hora",
-      leida: false,
-      orden: "OD-2025-005",
-    },
-  ];
-
-  const notificacionesNoLeidas = notificaciones.filter(n => !n.leida).length;
+  const handleNotificacionClick = async (notif: { id: number; leida: boolean }) => {
+    if (!notif.leida) {
+      await marcarComoLeida(notif.id);
+    }
+  };
 
   return (
     <nav className="navbar">
@@ -66,6 +52,10 @@ export default function Navbar() {
         <NavLink to="/ordenes" className="nav-link">
           <AlertTriangle className="nav-icon" />
           <span>Órdenes</span>
+        </NavLink>
+        <NavLink to="/productos" className="nav-link">
+          <Package className="nav-icon" />
+          <span>Productos</span>
         </NavLink>
         <NavLink to="/reportes" className="nav-link">
           <BarChart3 className="nav-icon" />
@@ -100,9 +90,9 @@ export default function Navbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="relative bg-white/10 border-white/20 text-white hover:bg-white/20">
               <Bell className="h-4 w-4" />
-              {notificacionesNoLeidas > 0 && (
+              {cantidadNoLeidas > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs bg-red-500">
-                  {notificacionesNoLeidas}
+                  {cantidadNoLeidas}
                 </Badge>
               )}
             </Button>
@@ -112,7 +102,11 @@ export default function Navbar() {
             <DropdownMenuSeparator />
             <ScrollArea className="h-64">
               {notificaciones.map((notif) => (
-                <DropdownMenuItem key={notif.id} className={`p-3 ${!notif.leida ? "bg-blue-50" : ""}`}>
+                <DropdownMenuItem 
+                  key={notif.id} 
+                  className={`p-3 ${!notif.leida ? "bg-blue-50" : ""}`}
+                  onClick={() => handleNotificacionClick(notif)}
+                >
                   <div className="flex flex-col space-y-1 w-full">
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="text-xs">

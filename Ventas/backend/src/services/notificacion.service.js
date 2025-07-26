@@ -38,12 +38,12 @@ export async function createNotificacionService(notificacionData) {
     notificaciones.unshift(notificacion);
 
     // Si es una alerta crítica, agregarla a alertas activas
-    if (tipo === 'alerta_faltante' || tipo === 'defecto_calidad') {
+    if (tipo === 'alerta_faltante' || tipo === 'defecto_calidad' || tipo === 'recepcion_con_problemas') {
       alertasActivas.unshift(notificacion);
     }
 
     // Enviar email al administrador si es crítico
-    if (prioridad === 'crítica' || tipo === 'alerta_faltante') {
+    if (prioridad === 'crítica' || tipo === 'alerta_faltante' || tipo === 'recepcion_con_problemas') {
       await enviarEmailAlerta(notificacion);
     }
 
@@ -62,9 +62,15 @@ export async function createNotificacionService(notificacionData) {
 }
 
 // Obtener todas las notificaciones
-export async function getNotificacionesService(limit = 50) {
+export async function getNotificacionesService(limit = 50, soloNoLeidas = false) {
   try {
-    return [notificaciones.slice(0, limit), null];
+    let notificacionesFiltradas = notificaciones;
+    
+    if (soloNoLeidas) {
+      notificacionesFiltradas = notificaciones.filter(n => !n.leida);
+    }
+    
+    return [notificacionesFiltradas.slice(0, limit), null];
   } catch (error) {
     console.error("Error al obtener notificaciones:", error);
     return [[], error.message];

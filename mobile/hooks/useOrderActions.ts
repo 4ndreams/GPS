@@ -7,7 +7,7 @@ export interface UseOrderActionsReturn {
   procesando: ProcessingState;
   cambiarEstado: (id_orden: number, nuevoEstado: string, additionalData?: any) => Promise<void>;
   confirmarRecepcion: (id_orden: number, conProblema: boolean, observaciones?: string) => Promise<void>;
-  crearDespacho: (ordenes: number[], transportista: string, observaciones?: string, fotoUri?: string) => Promise<void>;
+  crearDespacho: (ordenes: number[], transportista: string, observaciones?: string) => Promise<void>;
 }
 
 export const useOrderActions = (onSuccess?: () => Promise<void>): UseOrderActionsReturn => {
@@ -36,7 +36,7 @@ export const useOrderActions = (onSuccess?: () => Promise<void>): UseOrderAction
         ...additionalData
       };
 
-      await api.put(`/orden/test/${id_orden}`, updateData);
+      await api.put(`/orden/${id_orden}`, updateData);
       console.log('✅ Estado cambiado exitosamente');
 
       if (onSuccess) {
@@ -72,8 +72,7 @@ export const useOrderActions = (onSuccess?: () => Promise<void>): UseOrderAction
   const crearDespacho = useCallback(async (
     ordenesIds: number[],
     transportista: string,
-    observaciones?: string,
-    fotoUri?: string
+    observaciones?: string
   ) => {
     if (ordenesIds.length === 0) {
       Alert.alert('Error', 'Debes seleccionar al menos una orden');
@@ -85,28 +84,37 @@ export const useOrderActions = (onSuccess?: () => Promise<void>): UseOrderAction
       return;
     }
 
-    if (!fotoUri) {
-      Alert.alert('Error', 'Debes subir una foto del despacho');
-      return;
-    }
-
     try {
       // Marcar todas las órdenes como procesando
       ordenesIds.forEach(id => setProcessing(id, true));
 
       const promises = ordenesIds.map(async (id_orden) => {
         try {
-          // Actualizar cada orden con estado "En tránsito" y la información del despacho
-          const updateData = {
+          // Obtener detalles de la orden
+          const ordenResponse = await api.get(`/orden/${id_orden}`);
+          const orden = ordenResponse.data.data;
+
+          // Crear despacho
+          const despachoData = {
+            id_producto: orden.producto.id_producto,
+            cantidad: orden.cantidad,
             estado: 'En tránsito',
-            transportista: transportista.trim(),
-            observaciones: `${observaciones ? observaciones.trim() + ' - ' : ''}Foto del despacho registrada`,
-            foto_despacho: fotoUri,
-            fecha_entrega: new Date().toISOString() // Marca cuando se despachó
+            origen: 'Fábrica Principal',
+            destino: 'Tienda',
+            observaciones: `Transportista: ${transportista.trim()}${observaciones ? ` - ${observaciones.trim()}` : ''}`,
+            id_usuario: 1, // ID temporal
+            id_bodega: 1,
+            id_orden_origen: orden.id_orden,
           };
 
-          const response = await api.put(`/orden/test/${id_orden}`, updateData);
-          return response.data.data;
+          const despachoResponse =       await api.post('/despachos', despachoData);
+
+          // Actualizar estado de la orden original
+          await api.put(`/orden/${id_orden}`, {
+            estado: 'Despachada'
+          });
+
+          return despachoResponse.data.data;
         } catch (error) {
           console.error(`Error procesando orden ${id_orden}:`, error);
           throw error;
