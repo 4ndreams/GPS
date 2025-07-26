@@ -1,25 +1,39 @@
 import api from './api'; // instancia de axios configurada con interceptores
 import { TokenService } from './tokenService';
 import { config } from './config';
+import { Alert } from 'react-native';
 
 // Función para iniciar sesión con email y contraseña
 export const loginUser = async (email: string, password: string) => {
   try {
+    Alert.alert('Login', `🔄 Iniciando login para: ${email}`);
     const response = await api.post('/login', { 
       email, 
       password 
+      //token 
     });
-    
-    console.log('🔍 Respuesta del backend:', response.data);
-    
+
+    Alert.alert('🔍 Respuesta del backend:', JSON.stringify(response.data));
+
     if (response.data.data.token) {
       // Usar el sistema de gestión de tokens
       await TokenService.setToken(response.data.data.token);
+      console.log('✅ Token guardado exitosamente');
+      
+      // Verificar que se guardó correctamente
+      const savedToken = await TokenService.getToken();
+      if (savedToken) {
+        console.log('✅ Token verificado en almacenamiento');
+      } else {
+        console.log('❌ Error: Token no se guardó correctamente');
+      }
+    } else {
+      console.log('❌ No se recibió token en la respuesta');
     }
     
     return response.data.data;
   } catch (error: any) {
-    console.error("Error en el inicio de sesión:", error.response?.data ?? error.message);
+    console.error("❌ Error en el inicio de sesión:", error);
     throw error;
   }
 };

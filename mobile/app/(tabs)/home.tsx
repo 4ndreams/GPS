@@ -27,7 +27,7 @@ export default function Home() {
       console.log('🌐 Iniciando fetch usando servicio API configurado...');
       
       // Usar el servicio API configurado con la URL correcta
-      const response = await api.get('/orden/test');
+      const response = await api.get('/orden');
       
       console.log('✅ Respuesta del API:', response.data);
       

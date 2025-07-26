@@ -29,6 +29,7 @@ interface BaseDashboardProps {
     loading: boolean
   ) => React.ReactNode;
   floatingButton?: React.ReactNode;
+  initialTab?: string;
 }
 
 export const BaseDashboard: React.FC<BaseDashboardProps> = ({
@@ -40,9 +41,10 @@ export const BaseDashboard: React.FC<BaseDashboardProps> = ({
   onRefresh: externalOnRefresh,
   renderContent,
   floatingButton,
+  initialTab,
 }) => {
   const { usuario } = useUsuario();
-  const [activeTab, setActiveTab] = useState(config.tabs[0]?.key || '');
+  const [activeTab, setActiveTab] = useState(initialTab || config.tabs[0]?.key || '');
   
   // Usar datos externos si están disponibles, sino usar internos
   const internalDashboard = useDashboardData(config);

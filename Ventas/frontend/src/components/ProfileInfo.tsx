@@ -72,7 +72,6 @@ type UserProfile = {
   email: string;
   rol: string;
   correoVerificado: boolean;
-  telefono?: string;
   rut: string;
 };
 

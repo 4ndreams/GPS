@@ -17,6 +17,10 @@ import Carrito from './pages/Carrito';
 import Checkout from './pages/Checkout';
 import Cotizar from './pages/Cotizar';
 import ProductDetail from './pages/ProductDetail.tsx';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailure from './pages/PaymentFailure';
+import PaymentPending from './pages/PaymentPending';
+
 import Navbar from './components/Navbar';
 
 import './App.css';
@@ -43,6 +47,7 @@ function App() {
     updateCartItemQuantity,
     getCartItemQuantity,
     cartItemCount,
+    clearCart,
   } = useCart();
 
   // Cargar perfil de usuario
@@ -110,8 +115,19 @@ function App() {
         <Route path="/verified-email" element={<VerifiedEmail />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/about-us" element={<AboutUs />} />
-        <Route path="/checkout" element={<Checkout />} />
+        <Route 
+          path="/checkout" 
+          element={
+            <Checkout 
+              cartItems={cartItems}
+              clearCart={clearCart}
+            />
+          } 
+        />
         <Route path="/cotizar" element={<Cotizar />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-failure" element={<PaymentFailure />} />
+        <Route path="/payment-pending" element={<PaymentPending />} />
         <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} getCartItemQuantity={getCartItemQuantity} />} />
         <Route 
           path="/productos" 

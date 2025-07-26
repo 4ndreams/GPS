@@ -25,13 +25,20 @@ export const useDashboardData = (config: DashboardConfig): UseDashboardDataRetur
       // Crear promesas para todos los endpoints
       const promises = config.counters.map(async (counter) => {
         try {
+          console.log(`🔄 Cargando datos para ${counter.key}: ${counter.apiEndpoint}`);
           const response = await api.get(counter.apiEndpoint);
+          console.log(`✅ Datos cargados para ${counter.key}:`, response.data.data?.length || 0, 'elementos');
           return {
             key: counter.key,
             data: response.data.data as BaseOrden[]
           };
-        } catch (error) {
-          console.error(`Error loading data for ${counter.key}:`, error);
+        } catch (error: any) {
+          console.error(`❌ Error loading data for ${counter.key}:`, {
+            endpoint: counter.apiEndpoint,
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            message: error.message
+          });
           return {
             key: counter.key,
             data: [] as BaseOrden[]
