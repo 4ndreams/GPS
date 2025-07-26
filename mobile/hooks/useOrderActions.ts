@@ -36,7 +36,7 @@ export const useOrderActions = (onSuccess?: () => Promise<void>): UseOrderAction
         ...additionalData
       };
 
-      await api.put(`/orden/test/${id_orden}`, updateData);
+      await api.put(`/orden/${id_orden}`, updateData);
       console.log('✅ Estado cambiado exitosamente');
 
       if (onSuccess) {
@@ -91,7 +91,7 @@ export const useOrderActions = (onSuccess?: () => Promise<void>): UseOrderAction
       const promises = ordenesIds.map(async (id_orden) => {
         try {
           // Obtener detalles de la orden
-          const ordenResponse = await api.get(`/orden/test/${id_orden}`);
+          const ordenResponse = await api.get(`/orden/${id_orden}`);
           const orden = ordenResponse.data.data;
 
           // Crear despacho
@@ -110,7 +110,7 @@ export const useOrderActions = (onSuccess?: () => Promise<void>): UseOrderAction
           const despachoResponse =       await api.post('/despachos/test', despachoData);
 
           // Actualizar estado de la orden original
-          await api.put(`/orden/test/${id_orden}`, {
+          await api.put(`/orden/${id_orden}`, {
             estado: 'Despachada'
           });
 
