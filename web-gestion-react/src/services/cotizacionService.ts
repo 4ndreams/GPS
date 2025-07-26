@@ -62,6 +62,11 @@ export const cotizacionService = {
     }
   },
 
+  // Actualiar cotización (solo admin y fabrica)
+  updateCotizacion: async (id: number, data: Partial<CotizacionResponse>): Promise<CotizacionResponse> => {
+    const response = await api.patch(`/productos-personalizados/${id}`, data);
+    return response.data.data;
+  },
   // Actualizar precio de una cotización
   updatePrecio: async (id: number, data: UpdatePrecioData): Promise<CotizacionResponse> => {
     const response = await api.patch(`/productos-personalizados/${id}/precio`, data);
