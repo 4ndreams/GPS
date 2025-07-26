@@ -44,7 +44,7 @@ const useGetComprasMes = (body: ComprasFiltroBody) => {
     };
 
     fetch();
-  }, [body]); // gracias al useMemo, body solo cambia si sus valores internos cambian
+  }, [body]); 
 
   return { compras, total, cantidad, loading, error };
 };

@@ -9,6 +9,7 @@ import OrdenesTable from "../components/OrdenesTable"
 import NotificacionesPanel from "../components/NotificacionesPanel"
 import UsersManagement from "../components/UsersManagement"
 import CotizacionesManagement from "../components/CotizacionesManagement"
+import ComprarBodega from "../components/ComprarBodega"
 
 interface OrdenDespacho {
   id: string;
@@ -188,7 +189,7 @@ export default function Dashboard() {
   const authContext = useContext(AuthContext)
   const navigate = useNavigate()
   const [selectedRows, setSelectedRows] = useState<string[]>([])
-  const [activeTab, setActiveTab] = useState<'ordenes' | 'usuarios' | 'cotizaciones'>('ordenes')
+  const [activeTab, setActiveTab] = useState<'ordenes' | 'usuarios' | 'cotizaciones' | 'compras'>('ordenes')
 
   useEffect(() => {
     if (!authContext?.usuario) {
@@ -266,6 +267,14 @@ export default function Dashboard() {
           `}
           onClick={() => setActiveTab('cotizaciones')}
         >Cotizaciones</button>
+        <button
+          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
+            ${activeTab === 'compras'
+              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
+              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
+          `}
+          onClick={() => setActiveTab('compras')}
+        >Compras</button>
       </div>
 
       {/* Estadísticas solo para Órdenes */}
@@ -299,6 +308,11 @@ export default function Dashboard() {
       {activeTab === 'cotizaciones' && (
         <div>
           <CotizacionesManagement />
+        </div>
+      )}
+      {activeTab === 'compras' && (
+        <div>
+          <ComprarBodega />
         </div>
       )}
     </div>
