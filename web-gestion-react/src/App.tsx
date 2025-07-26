@@ -9,6 +9,7 @@ import ReportesPage from './pages/ReportesPage';
 import ConfiguracionPage from './pages/ConfiguracionPage';
 import AlertasPage from './pages/AlertasPage';
 import GraficosPage from './pages/GraficosPage';
+import CotizacionesPage from './pages/CotizacionesPage';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="configuracion" element={<ConfiguracionPage />} />
           <Route path="alertas" element={<AlertasPage />} />
           <Route path="graficos" element={<GraficosPage />} />
+          <Route path="cotizaciones" element={<CotizacionesPage />} />
         </Route>
       </Routes>
     </AuthProvider>

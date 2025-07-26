@@ -44,12 +44,12 @@
             },
         },
         relations: {
-            venta: {
-                target: VentaSchema,
-                type: "many-to-one",
-                joinColumn: { name: "id_venta" },
-                cascade: true,
-            },
+            // venta: {
+            //     target: VentaSchema,
+            //     type: "many-to-one",
+            //     joinColumn: { name: "id_venta" },
+            //     cascade: true,
+            // },
             producto: {
                 target: ProductoSchema,
                 type: "many-to-one",

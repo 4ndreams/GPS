@@ -17,9 +17,86 @@
 
 .cart-item {
   display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
   border-bottom: 1px solid #ddd;
+}
+
+.cart-item .item-image {
+  flex-shrink: 0;
+}
+
+.cart-item .item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cart-item .item-name {
+  font-weight: 600;
+  color: #000000;
+}
+
+.cart-item .item-quantity,
+.cart-item .item-unit-price {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.cart-item .item-price {
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+/* Empty cart styles */
+.empty-cart {
+  text-align: center;
+  padding: 4rem 2rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-cart h2 {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.empty-cart p {
+  color: #888;
+  margin-bottom: 2rem;
+}
+
+/* Payment button styles */
+.checkout-button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 1rem;
+}
+
+.checkout-button:hover:not(:disabled) {
+  background: #219a52;
+}
+
+.checkout-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.payment-note {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  text-align: center;
 }
 
 .cart-total {

@@ -67,12 +67,23 @@ export async function loginService(user) {
       email: userFound.email,
       rut: userFound.rut,
       rol: userFound.rol,
+      flag_blacklist: userFound.flag_blacklist,
     };
 
     // Usar TokenService para generar el token con gestión de expiración
     const accessToken = TokenService.generateToken(payload);
 
-    return [accessToken, null];
+    // Devolver tanto el token como los datos del usuario
+    const userData = {
+      id_usuario: userFound.id_usuario,
+      nombre: userFound.nombre,
+      apellidos: userFound.apellidos,
+      email: userFound.email,
+      rut: userFound.rut,
+      rol: userFound.rol,
+    };
+
+    return [{ token: accessToken, user: userData }, null];
 
   } catch (error) {
     console.error("Error al iniciar sesión:", error);
@@ -129,6 +140,7 @@ export async function verifyEmailService(token) {
     try {
       payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
     } catch (err) {
+      console.error("Error al verificar el token de recuperación de contraseña:", err);
       return [null, "Token inválido o expirado"];
     }
 
@@ -160,7 +172,7 @@ export async function recoverPasswordService(token, newPassword) {
     try {
       payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
     } catch (err) {
-      return [null, "Token inválido o expirado"];
+      return ["Error: Token inválido o expirado, " + err];
     }
 
     const user = await userRepository.findOne({ where: {email: payload.email } });

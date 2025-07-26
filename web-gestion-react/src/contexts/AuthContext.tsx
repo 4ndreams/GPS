@@ -1,20 +1,52 @@
 import React, { createContext, useState } from 'react';
 import type { ReactNode } from 'react';
+import { authService } from '../services/authService';
 
 // Tipos
 export interface Usuario {
   id: string;
   nombre: string;
   email: string;
-  rol: 'admin' | 'operador' | 'vendedor';
+  rol: 'administrador' | 'fabrica' | 'tienda' | 'cliente';
+  flag_blacklist?: boolean; // <-- Añade esto
   avatar?: string;
+  rut?: string;
+  telefono?: string;
 }
+
+// Función para mapear roles del backend al frontend
+const mapRoleFromBackend = (backendRole: string): Usuario['rol'] => {
+  switch (backendRole) {
+    case 'tienda':
+      return 'tienda';
+    case 'administrador':
+    case 'fabrica':
+    case 'cliente':
+      return backendRole as Usuario['rol'];
+    default:
+      return 'cliente';
+  }
+};
+
+// Función para mapear roles del frontend al backend
+export const mapRoleToBackend = (frontendRole: Usuario['rol']): string => {
+  switch (frontendRole) {
+    case 'tienda':
+      return 'tienda';
+    case 'administrador':
+    case 'fabrica':
+    case 'cliente':
+      return frontendRole;
+    default:
+      return 'cliente';
+  }
+};
 
 export interface AuthContextType {
   usuario: Usuario | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
@@ -30,58 +62,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Simulación de usuarios para desarrollo
-  const usuariosDemo = [
-    {
-      id: '1',
-      nombre: 'Admin Sistema',
-      email: 'admin@gps.com',
-      password: 'admin123',
-      rol: 'admin' as const,
-      avatar: undefined
-    },
-    {
-      id: '2',
-      nombre: 'María López',
-      email: 'maria@gps.com',
-      password: 'maria123',
-      rol: 'operador' as const,
-      avatar: undefined
-    },
-    {
-      id: '3',
-      nombre: 'Carlos Ruiz',
-      email: 'carlos@gps.com',
-      password: 'carlos123',
-      rol: 'vendedor' as const,
-      avatar: undefined
-    }
-  ];
-
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
 
     try {
-      // Simulación de delay de red
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await authService.login({ email, password });
 
-      // Buscar usuario en datos demo
-      const usuarioEncontrado = usuariosDemo.find(
-        u => u.email === email && u.password === password
-      );
+      if (result.success && result.data) {
+        // Intentar obtener información completa del usuario
+        const tokenInfo = await authService.verifyToken();
+        
+        let usuario: Usuario;
+        
+        if (tokenInfo.valid && tokenInfo.user) {
+          // Si tenemos información del usuario desde el backend
+          const tokenUser = tokenInfo.user as any;
+          const backendUser = tokenUser.user || tokenUser;
+          
+          const userRole = backendUser.rol || 'cliente';
+          const mappedRole = mapRoleFromBackend(userRole);
+          
+          
+          usuario = {
+            id: backendUser.id || Date.now().toString(),
+            nombre: backendUser.nombreCompleto || backendUser.nombre || email.split('@')[0],
+            email: backendUser.email || email,
+            rol: mappedRole,
+            flag_blacklist: backendUser.flag_blacklist, 
+            avatar: backendUser.avatar,
+            rut: backendUser.rut,
+            telefono: backendUser.telefono,
+          };
+        } else {
+          // Fallback con datos básicos
+          usuario = {
+            id: Date.now().toString(),
+            nombre: email.split('@')[0],
+            email: email,
+            rol: 'cliente',
+          };
+        }
 
-      if (usuarioEncontrado) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password: _, ...usuarioSinPassword } = usuarioEncontrado;
-        setUsuario(usuarioSinPassword);
+        setUsuario(usuario);
         
         // Guardar en localStorage para persistencia
-        localStorage.setItem('usuario', JSON.stringify(usuarioSinPassword));
+        localStorage.setItem('usuario', JSON.stringify(usuario));
         
-        console.log('Login exitoso:', usuarioSinPassword);
         return true;
       } else {
-        console.log('Credenciales inválidas');
         return false;
       }
     } catch (error) {
@@ -92,20 +120,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setUsuario(null);
-    localStorage.removeItem('usuario');
-    console.log('Logout realizado');
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Error en logout:', error);
+    } finally {
+      setUsuario(null);
+      localStorage.removeItem('usuario'); // Limpiar localStorage
+      localStorage.removeItem('token'); // Limpiar token si existe
+    }
   };
 
   // Restaurar sesión al cargar la app
   React.useEffect(() => {
     const usuarioGuardado = localStorage.getItem('usuario');
+    
     if (usuarioGuardado) {
       try {
         const usuario = JSON.parse(usuarioGuardado);
-        setUsuario(usuario);
-        console.log('Sesión restaurada:', usuario);
+        
+        // NO establecer el usuario inmediatamente, esperar verificación del token
+        
+        // Verificar si el token sigue siendo válido
+        authService.verifyToken().then(tokenInfo => {
+          
+          if (tokenInfo.valid && tokenInfo.user) {
+            // Token válido, actualizar usuario con datos frescos del backend
+            const tokenUser = tokenInfo.user as any;
+            const backendUser = tokenUser.user || tokenUser;
+            
+            const userRole = backendUser.rol || 'cliente';
+            const mappedRole = mapRoleFromBackend(userRole);
+            
+            const usuarioActualizado = {
+              ...usuario,
+              rol: mappedRole,
+              estado: backendUser.flag_blacklist === true ? false : 'activo',
+            };
+            
+            setUsuario(usuarioActualizado);
+            localStorage.setItem('usuario', JSON.stringify(usuarioActualizado));
+          } else {
+            // Token inválido, limpiar sesión
+            setUsuario(null);
+            localStorage.removeItem('usuario');
+          }
+        }).catch(error => {
+          console.error('Error verificando token:', error);
+          // En caso de error de red, limpiar sesión por seguridad
+          setUsuario(null);
+          localStorage.removeItem('usuario');
+        });
+        
       } catch (error) {
         console.error('Error al restaurar sesión:', error);
         localStorage.removeItem('usuario');
@@ -113,13 +180,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const value: AuthContextType = {
+  const value = React.useMemo(() => ({
     usuario,
     isAuthenticated: !!usuario,
     login,
     logout,
     loading
-  };
+  }), [usuario, loading]);
 
   return (
     <AuthContext.Provider value={value}>

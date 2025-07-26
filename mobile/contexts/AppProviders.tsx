@@ -9,21 +9,30 @@ interface AuthWrapperProps {
 // Componente interno que sincroniza Auth con Usuario
 const AuthSyncWrapper: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
-  const { cambiarPerfil, limpiarPerfil } = useUsuario();
+  const { usuario, cambiarPerfil, limpiarPerfil } = useUsuario();
 
   useEffect(() => {
     if (isAuthenticated && user) {
       // Sincronizar el perfil cuando hay un usuario autenticado
-      const perfil = user.perfil === 'admin' ? 'fabrica' : (user.perfil as 'fabrica' | 'tienda' | null);
-      if (perfil) {
+      let perfil: 'fabrica' | 'tienda' | null = null;
+      
+      if (user.rol === 'admin') {
+        perfil = 'fabrica';
+      } else if (user.rol === 'tienda') {
+        perfil = 'tienda';
+      } else if (user.rol === 'fabrica') {
+        perfil = 'fabrica';
+      }
+
+      // Solo cambiar si es diferente al actual
+      if (perfil && perfil !== usuario.perfil) {
         cambiarPerfil(perfil, user.name);
       }
-    } else {
-      // Limpiar perfil cuando no hay usuario autenticado
+    } else if (!isAuthenticated && usuario.perfil !== null) {
+      // Solo limpiar si hay un perfil establecido
       limpiarPerfil();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated, user]); // cambiarPerfil y limpiarPerfil están memoizados con useCallback
+  }, [isAuthenticated, user, usuario.perfil, cambiarPerfil, limpiarPerfil]);
 
   return <>{children}</>;
 };

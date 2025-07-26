@@ -102,7 +102,7 @@ export const DASHBOARD_CONFIGS: Record<PerfilType, DashboardConfig> = {
     title: 'Perfil Ventas',
     counters: [
       {
-        key: 'en-transito',
+        key: 'despachos',
         label: 'En Tránsito',
         apiEndpoint: '/orden?estado=En tránsito',
       },

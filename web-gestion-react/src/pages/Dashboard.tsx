@@ -1,16 +1,10 @@
 "use client"
 
-<<<<<<< Updated upstream
-import React, { useState, useEffect, useContext } from "react"
-import { useNavigate } from "react-router-dom"
-import { AuthContext } from "../contexts/AuthContext"
-=======
 import { useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../contexts/AuthContext"
 import { useDashboardData } from "../hooks/useDashboardData"
 
->>>>>>> Stashed changes
 import DashboardStats from "../components/DashboardStats"
 import OrdenesTable from "../components/OrdenesTable"
 import NotificacionesPanel from "../components/NotificacionesPanel"
@@ -23,13 +17,10 @@ export default function Dashboard() {
   const authContext = useContext(AuthContext)
   const navigate = useNavigate()
   const [selectedRows, setSelectedRows] = useState<string[]>([])
-<<<<<<< Updated upstream
-=======
   const [activeTab, setActiveTab] = useState<'ordenes' | 'usuarios' | 'cotizaciones'>('ordenes')
   
   // Usar el hook personalizado para obtener datos del dashboard
   const { ordenes, notificaciones, loading, error, refresh } = useDashboardData()
->>>>>>> Stashed changes
 
   // Verificar autenticación
   if (!authContext?.usuario) {
@@ -49,7 +40,7 @@ export default function Dashboard() {
     setSelectedRows((prev: string[]) => 
       prev.length === ordenes.length 
         ? [] 
-        : ordenes.map(orden => orden.id)
+        : ordenes.map(orden => orden.id_orden.toString())
     )
   }
 
@@ -105,28 +96,11 @@ export default function Dashboard() {
             Dashboard TERPLAC
           </h1>
           <p className="text-gray-600 mt-1">
-            Sistema de Gestión de Despachos - Bienvenido, {authContext.usuario.nombre}
+            Sistema de Gestión de Despachos, Usuarios y Cotizaciones - Bienvenido, {authContext.usuario.nombre}
           </p>
         </div>
       </div>
 
-<<<<<<< Updated upstream
-      {/* Estadísticas */}
-      <DashboardStats ordenesDespacho={ordenesDespacho} />
-
-      {/* Contenido principal */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Tabla de órdenes */}
-        <div className="lg:col-span-2">
-          <OrdenesTable
-            ordenesDespacho={ordenesDespacho}
-            selectedRows={selectedRows}
-            onSelectRow={handleSelectRow}
-            onSelectAll={handleSelectAll}
-            onRefresh={handleRefresh}
-            onExport={handleExport}
-          />
-=======
       {/* Tabs */}
       <div className="flex gap-2 mb-2">
         <button
@@ -178,17 +152,10 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {activeTab === 'usuarios' && (
-        <div>
-          <UsersManagement />
->>>>>>> Stashed changes
-        </div>
-
         {/* Panel de notificaciones */}
         <div className="lg:col-span-1">
           <NotificacionesPanel notificaciones={notificaciones} />
         </div>
       </div>
-    </div>
   )
 }

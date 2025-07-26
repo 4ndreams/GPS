@@ -3,6 +3,11 @@ import User from "../entity/user.entity.js";
 import { AppDataSource } from "../config/configDb.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
 
+
+
+
+
+
 export async function getUserService(query) {
   try {
     const { rut, id, email } = query;
@@ -10,7 +15,7 @@ export async function getUserService(query) {
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id: id }, { rut: rut }, { email: email }],
+      where: [{ id_usuario: id }, { rut: rut }, { email: email }],
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
@@ -41,14 +46,63 @@ export async function getUsersService() {
   }
 }
 
+export async function createUserService(userData) {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+
+    // Verificar si ya existe un usuario con el mismo rut o email
+    const existingUser = await userRepository.findOne({
+      where: [
+        { rut: userData.rut },
+        { email: userData.email }
+      ],
+    });
+
+    if (existingUser) {
+      return [null, "Ya existe un usuario con el mismo rut o email"];
+    }
+
+    // Encriptar la contraseña si se proporciona
+    let encryptedPassword = null;
+    if (userData.password && userData.password.trim() !== "") {
+      encryptedPassword = await encryptPassword(userData.password);
+    }
+
+    // Preparar los datos del usuario
+    const newUserData = {
+      nombre: userData.nombre,
+      apellidos: userData.apellidos,
+      rut: userData.rut,
+      email: userData.email,
+      rol: userData.rol || 'cliente', // rol por defecto
+      flag_blacklist: userData.flag_blacklist || false,
+      password: encryptedPassword,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // Crear el usuario
+    const newUser = userRepository.create(newUserData);
+    const savedUser = await userRepository.save(newUser);
+
+    // Retornar sin la contraseña
+    const { password, ...userCreated } = savedUser;
+    return [userCreated, null];
+  } catch (error) {
+    console.error("Error al crear un usuario:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
 export async function updateUserService(query, body) {
   try {
     const { id, rut, email } = query;
 
     const userRepository = AppDataSource.getRepository(User);
 
+    // Buscar usuario usando id_usuario en lugar de id
     const userFound = await userRepository.findOne({
-      where: [{ id: id }, { rut: rut }, { email: email }],
+      where: [{ id_usuario: id }, { rut: rut }, { email: email }],
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
@@ -57,7 +111,7 @@ export async function updateUserService(query, body) {
       where: [{ rut: body.rut }, { email: body.email }],
     });
 
-    if (existingUser && existingUser.id !== userFound.id) {
+    if (existingUser && existingUser.id_usuario !== userFound.id_usuario) {
       return [null, "Ya existe un usuario con el mismo rut o email"];
     }
 
@@ -70,11 +124,14 @@ export async function updateUserService(query, body) {
       if (!matchPassword) return [null, "La contraseña no coincide"];
     }
 
+    // Actualizar campos con los nombres correctos según el frontend
     const dataUserUpdate = {
-      nombreCompleto: body.nombreCompleto,
+      nombre: body.nombre,
+      apellidos: body.apellidos,
       rut: body.rut,
       email: body.email,
       rol: body.rol,
+      flag_blacklist: body.flag_blacklist,
       updatedAt: new Date(),
     };
 
@@ -82,10 +139,11 @@ export async function updateUserService(query, body) {
       dataUserUpdate.password = await encryptPassword(body.newPassword);
     }
 
-    await userRepository.update({ id: userFound.id }, dataUserUpdate);
+    // Actualizar usando id_usuario
+    await userRepository.update({ id_usuario: userFound.id_usuario }, dataUserUpdate);
 
     const userData = await userRepository.findOne({
-      where: { id: userFound.id },
+      where: { id_usuario: userFound.id_usuario },
     });
 
     if (!userData) {
@@ -108,7 +166,7 @@ export async function deleteUserService(query) {
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id: id }, { rut: rut }, { email: email }],
+      where: [{ id_usuario: id }, { rut: rut }, { email: email }],
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];

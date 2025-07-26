@@ -17,39 +17,33 @@ import { useAuth } from '../contexts/AuthContext';
 import { router } from 'expo-router';
 
 export default function LoginScreen() {
-  const { login, loginWithGoogle, register, isLoading } = useAuth();
+  const { login, loginWithGoogle, isLoading } = useAuth();
   
-  const [isLoginMode, setIsLoginMode] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async () => {
-    if (!email || !password || (!isLoginMode && !name)) {
+    console.log('Botón presionado');
+    if (!email || !password) {
       Alert.alert('Error', 'Por favor completa todos los campos');
       return;
     }
 
-    let success = false;
-    
-    if (isLoginMode) {
-      success = await login(email, password);
-      if (!success) {
-        Alert.alert(
-          'Error de autenticación', 
-          'Credenciales incorrectas.\n\nCuentas de prueba:\n• admin@mundogestion.com / 123456\n• fabrica@mundogestion.com / 123456\n• tienda@mundogestion.com / 123456'
-        );
+    try {
+      const success = await login(email, password);
+      if (success) {
+        router.replace('/(tabs)');
       }
-    } else {
-      success = await register(email, password, name);
-      if (!success) {
-        Alert.alert('Error', 'No se pudo crear la cuenta');
+    } catch (error: any) {
+      // Manejo específico de errores
+      if (error.response?.status === 401) {
+        Alert.alert('Clave inválida', 'La contraseña ingresada es incorrecta. Por favor verifica e intenta nuevamente.');
+      } else if (error.response?.status === 404) {
+        Alert.alert('Usuario no encontrado', 'No existe una cuenta con este correo electrónico.');
+      } else {
+        Alert.alert('Error de conexión', 'No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.');
       }
-    }
-
-    if (success) {
-      router.replace('/(tabs)');
     }
   };
 
@@ -77,26 +71,12 @@ export default function LoginScreen() {
           />
           <Text style={styles.title}>Mundo Gestión</Text>
           <Text style={styles.subtitle}>
-            {isLoginMode ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta nueva'}
+            Inicia sesión en tu cuenta
           </Text>
         </View>
 
         {/* Formulario */}
         <View style={styles.formContainer}>
-          {!isLoginMode && (
-            <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={20} color="#A1A1AA" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Nombre completo"
-                placeholderTextColor="#A1A1AA"
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
-              />
-            </View>
-          )}
-
           <View style={styles.inputContainer}>
             <Ionicons name="mail-outline" size={20} color="#A1A1AA" style={styles.inputIcon} />
             <TextInput
@@ -132,11 +112,9 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {isLoginMode && (
-            <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={styles.forgotPassword}>
+            <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
+          </TouchableOpacity>
 
           {/* Botón principal */}
           <TouchableOpacity
@@ -148,7 +126,7 @@ export default function LoginScreen() {
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {isLoginMode ? 'Iniciar Sesión' : 'Crear Cuenta'}
+                Iniciar Sesión
               </Text>
             )}
           </TouchableOpacity>
@@ -170,28 +148,19 @@ export default function LoginScreen() {
             <Text style={styles.googleButtonText}>Google</Text>
           </TouchableOpacity>
 
-          {/* Toggle entre login/registro */}
+          {/* Información para nuevos usuarios */}
           <View style={styles.toggleContainer}>
             <Text style={styles.toggleText}>
-              {isLoginMode ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}
+              ¿No tienes cuenta? Contactate con administrador
             </Text>
-            <TouchableOpacity onPress={() => setIsLoginMode(!isLoginMode)}>
-              <Text style={styles.toggleButton}>
-                {isLoginMode ? 'Regístrate' : 'Inicia sesión'}
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
 
-        {/* Información de cuentas de prueba */}
-        {isLoginMode && (
-          <View style={styles.demoInfo}>
-            <Text style={styles.demoTitle}>Cuentas de prueba:</Text>
-            <Text style={styles.demoText}>• admin@mundogestion.com / 123456</Text>
-            <Text style={styles.demoText}>• fabrica@mundogestion.com / 123456</Text>
-            <Text style={styles.demoText}>• tienda@mundogestion.com / 123456</Text>
-          </View>
-        )}
+        {/* Información para nuevos usuarios */}
+        <View style={styles.demoInfo}>
+          <Text style={styles.demoTitle}>¿No tienes cuenta?</Text>
+          <Text style={styles.demoText}>Contacta con el administrador del sistema para obtener acceso.</Text>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

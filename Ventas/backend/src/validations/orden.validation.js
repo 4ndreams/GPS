@@ -99,7 +99,7 @@ export const OrdenBodyValidation = Joi.object({
     observaciones: Joi.string()
         .max(500)
         .optional()
-        .allow(null)
+        .allow(null, '')
         .messages({
             "string.base": "Las observaciones deben ser una cadena de texto.",
             "string.max": "Las observaciones no pueden exceder los 500 caracteres."

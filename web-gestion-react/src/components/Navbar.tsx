@@ -1,5 +1,5 @@
 // src/components/Navbar.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, AlertTriangle, BarChart3, LogOut, Search, Bell, User, Settings, Download, RefreshCw, Package } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -39,7 +39,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-brand">
         <div>
-          <h1 className="navbar-title">TERPLAC - Mundo Puertas</h1>
+          <h1 className="navbar-title">TERPLAC</h1>
           <div className="text-xs text-gray-300">Gestión Fábrica → Tienda</div>
         </div>
       </div>
@@ -72,10 +72,10 @@ export default function Navbar() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Buscar por orden, trabajador, producto..."
+            placeholder="Buscar..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-80 bg-white/10 border-white/20 text-white placeholder-white/70 focus:text-white"
+            className="pl-10 w-48 md:w-60 lg:w-72 bg-white/10 border-white/20 text-white placeholder-white/70 focus:text-white"
           />
         </div>
 
@@ -97,7 +97,7 @@ export default function Navbar() {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-80" side="bottom">
             <DropdownMenuLabel>Notificaciones de Fábrica</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <ScrollArea className="h-64">
@@ -131,7 +131,7 @@ export default function Navbar() {
               Exportar
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent side="bottom">
             <DropdownMenuItem>Excel (.xlsx)</DropdownMenuItem>
             <DropdownMenuItem>PDF</DropdownMenuItem>
             <DropdownMenuItem>CSV</DropdownMenuItem>
@@ -143,10 +143,10 @@ export default function Navbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="flex items-center space-x-2 bg-white/10 border-white/20 text-white hover:bg-white/20">
               <User className="h-4 w-4" />
-              <span className="hidden sm:inline">{usuario?.nombre || 'Usuario'}</span>
+              <span className="hidden sm:inline">{usuario?.nombre ? usuario.nombre.split(' ')[0] : 'Usuario'}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56" side="bottom">
             <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <div className="px-2 py-1.5 text-sm text-gray-500">

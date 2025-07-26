@@ -146,6 +146,33 @@
   font-weight: 600;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.precio-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.precio-badge i {
+  font-size: 0.9rem;
+}
+
+.precio-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+}
+
 .cotizacion-id {
   font-size: 0.9rem;
   opacity: 0.9;

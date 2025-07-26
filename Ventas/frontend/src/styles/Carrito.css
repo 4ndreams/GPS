@@ -69,15 +69,48 @@
   margin: 1rem 0;
 }
 
+
 .item-cantidad button {
-  width: 35px;
-  height: 35px;
-  border: 1px solid #ddd;
-  background: white;
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: linear-gradient(135deg, #f01010 60%, #ff5757 100%);
+  color: #fff;
   border-radius: 50%;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
+  font-weight: bold;
   cursor: pointer;
-  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(240,16,16,0.08);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+}
+
+.item-cantidad button:active {
+  transform: scale(0.95);
+}
+
+.item-cantidad button:focus {
+  box-shadow: 0 0 0 2px #f01010;
+}
+
+.item-cantidad button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #eee;
+  color: #aaa;
+  border: none;
+  box-shadow: none;
+}
+
+.item-cantidad button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d00e0e 60%, #f01010 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(240,16,16,0.13);
 }
 
 .item-cantidad button:disabled {
@@ -150,32 +183,40 @@
 }
 
 .btn-continuar, .btn-pagar {
-  padding: 0.8rem 1.5rem;
-  border-radius: 4px;
-  font-weight: 600;
+  padding: 0.9rem 2.2rem;
+  border-radius: 6px;
+  font-weight: 700;
   text-align: center;
-  transition: all 0.3s;
+  transition: all 0.2s;
   text-decoration: none;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+  letter-spacing: 0.5px;
 }
 
 .btn-continuar {
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9fa 60%, #e9ecef 100%);
   color: #2c3e50;
   border: 1px solid #ddd;
 }
 
 .btn-continuar:hover {
-  background-color: #e9ecef;
+  background: linear-gradient(135deg, #e9ecef 60%, #f8f9fa 100%);
+  color: #f01010;
+  border-color: #f01010;
 }
 
 .btn-pagar {
-  background-color: #f01010;
+  background: linear-gradient(135deg, #f01010 60%, #ff5757 100%);
   color: white;
   border: none;
+  box-shadow: 0 2px 8px rgba(240,16,16,0.10);
 }
 
 .btn-pagar:hover {
-  background-color: #d00e0e;
+  background: linear-gradient(135deg, #d00e0e 60%, #f01010 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(240,16,16,0.18);
 }
 
 @media (max-width: 768px) {

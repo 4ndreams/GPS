@@ -325,6 +325,7 @@ export default function NuevoPedidoStock() {
                   onValueChange={(value) => setSelectedProducto(value === '' ? null : Number(value))}
                   style={styles.picker}
                 >
+<<<<<<< HEAD
                   <Picker.Item label="Seleccionar producto" value="" />
                   {productos
                     .filter(producto => producto && producto.nombre_producto && producto.nombre_producto.trim() !== '') 
@@ -335,6 +336,18 @@ export default function NuevoPedidoStock() {
                         value={producto.id_producto}
                       />
                     ))}
+=======
+                  <Picker.Item label="Seleccionar producto" value={null} />
+                  {productos
+                  .filter(producto => producto && producto.nombre_producto && producto.nombre_producto.trim() !== '') 
+                  .map(producto => (
+                    <Picker.Item
+                      key={producto.id_producto}
+                      label={producto.nombre_producto}
+                      value={producto.id_producto}
+                    />
+                  ))}
+>>>>>>> dev
                 </Picker>
               </View>
             </View>
