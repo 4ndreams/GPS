@@ -24,13 +24,7 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
-        'http://localhost:5173', 
-        'http://localhost:3000',  // Para la app móvil en web
-        'http://192.168.1.105:3000', 
-        'http://192.168.1.105:19000',
-        'http://localhost:8081'
-      ], 
+      origin: true,  // Permite solicitudes desde cualquier origen
       credentials: true
     }));
 
