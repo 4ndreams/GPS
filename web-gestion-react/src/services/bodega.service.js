@@ -12,7 +12,7 @@ export async function getBodega(idBodega) {
 
 export async function getBodegas() {
     try {
-        const {data} = await api.get('/bodega');
+        const {data} = await api.get('/bodega/');
         return data.data;
     } catch (error) {
         return error.response.data;
