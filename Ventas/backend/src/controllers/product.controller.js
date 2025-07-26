@@ -12,7 +12,9 @@ export const getProducts = async (req, res) => {
     // Construir query builder
     const productRepo = AppDataSource.getRepository("Producto");
     let query = productRepo.createQueryBuilder("producto")
-      .leftJoinAndSelect("producto.tipo", "tipo");  // <-- Aquí incluyes la relación tipo
+      .leftJoinAndSelect("producto.tipo", "tipo")
+      .leftJoinAndSelect("producto.material", "material")
+      .leftJoinAndSelect("producto.relleno", "relleno"); // <-- Aquí incluyes la relación relleno
 
     // Filtros
     if (nombre) {
@@ -32,7 +34,7 @@ export const getProducts = async (req, res) => {
 
     const productos = await query.getMany();
 
-    
+ 
     return res.json({
       status: "success",
       data: productos,

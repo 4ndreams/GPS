@@ -285,7 +285,7 @@ const TablaCompras = () => {
                       : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
                   }`}
                 >
-                  {compra.modoCrear ? "Crear" : "Usar lista"}
+                  {compra.modoCrear ? "🔃Cambiar modo a lista " : "🔃Cambiar modo a crear"}
                 </button>
                 <button
                   onClick={() => eliminarFila(index)}
