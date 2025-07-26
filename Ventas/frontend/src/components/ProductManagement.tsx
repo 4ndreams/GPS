@@ -41,7 +41,7 @@ interface Props {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function ProductManagement({ userRole, token }: Props) {
+function ProductManagement({ userRole, token }: Readonly<Props>) {
   const [products, setProducts] = useState<Product[]>([]) ;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

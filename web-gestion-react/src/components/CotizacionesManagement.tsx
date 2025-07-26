@@ -247,13 +247,23 @@ export default function CotizacionesManagement() {
     setEstadoError(null);
     setSavingEstado(true);
     try {
-      await cotizacionService.updateEstado(selectedCotizacion.id_producto_personalizado, { estado: estadoInput });
+      // Esperar respuesta con posible detalle de venta
+      const response = await cotizacionService.updateEstado(selectedCotizacion.id_producto_personalizado, { estado: estadoInput });
       setShowEstadoDialog(false);
       setNotification({
         type: 'success',
         title: 'Estado actualizado',
         message: 'El estado se cambió correctamente.',
       });
+      // Si la respuesta incluye venta creada, mostrar notificación adicional
+      // Se asume que response.ventaResult viene en response (no en response.productoPersonalizado)
+      if (response && response.ventaResult && response.ventaResult.success && response.ventaResult.venta) {
+        setNotification({
+          type: 'success',
+          title: 'Venta generada',
+          message: `Se creó la venta #${response.ventaResult.venta.id_venta} para la cotización entregada.`
+        });
+      }
       loadCotizaciones();
     } catch (error: any) {
       setEstadoError(error?.message || 'Error al actualizar estado');
