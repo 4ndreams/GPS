@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "@styles/productManagement.css";
 import ModalProduct from "./ModalProduct";
+import ConfirmModal from "./ConfirmModal";
 
 interface Tipo {
   id_tipo: number;
@@ -48,6 +49,8 @@ function ProductManagement({ userRole, token }: Props) {
   const [editData, setEditData] = useState<ProductData | null>(null);
   const [tipos, setTipos] = useState<Tipo[]>([]);
   const [materiales, setMateriales] = useState<Material[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<{id: number, name: string} | null>(null);
 
   const axiosConfig = {
     headers: { Authorization: `Bearer ${token}` },
@@ -173,10 +176,18 @@ function ProductManagement({ userRole, token }: Props) {
     });
   };
 
-  const handleDeleteProduct = async (id: number) => {
+  const handleDeleteClick = (id: number, name: string) => {
+    setProductToDelete({ id, name });
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete) return;
+    
     try {
-      await axios.delete(`${API_BASE_URL}/products/${id}`, axiosConfig);
+      await axios.delete(`${API_BASE_URL}/products/${productToDelete.id}`, axiosConfig);
       fetchProducts();
+      setProductToDelete(null);
     } catch {
       setError("Error al eliminar producto");
     }
@@ -212,7 +223,7 @@ function ProductManagement({ userRole, token }: Props) {
                 </button>
                 <button
                   className="delete-btn"
-                  onClick={() => handleDeleteProduct(p.id_producto!)}
+                  onClick={() => handleDeleteClick(p.id_producto!, p.nombre_producto)}
                 >
                   Eliminar
                 </button>
@@ -239,6 +250,19 @@ function ProductManagement({ userRole, token }: Props) {
           loadingMateriales={materiales.length === 0}
         />
       )}
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setProductToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmar Eliminación"
+        message={`¿Realmente quiere borrar el producto "${productToDelete?.name}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
     </div>
   );
 }
