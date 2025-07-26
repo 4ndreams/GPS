@@ -35,7 +35,7 @@ export default function RevisarPedido() {
         setLoading(true);
         
         // Llamada a la API
-        const response = await api.get(`/orden/test/${id}`);
+        const response = await api.get(`/orden/${id}`);
         const ordenData = response.data.data;
         
         console.log('✅ Orden cargada:', ordenData);

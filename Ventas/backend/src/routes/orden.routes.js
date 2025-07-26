@@ -9,8 +9,8 @@ const router = Router();
 router
     .get('/', authenticateJwt, authorizeRoles(['administrador', 'fabrica', 'tienda']), getOrdenesController)
     .get('/:id_orden', authenticateJwt, authorizeRoles(['administrador', 'fabrica', 'tienda']), getOrdenController)
-    .post('/', authenticateJwt, authorizeRoles(['tienda', 'administrador']), createOrdenController)
-    .put('/:id_orden', authenticateJwt, authorizeRoles(['fabrica', 'administrador']), updateOrdenController)
+    .post('/', authenticateJwt, authorizeRoles(['tienda', 'administrador', 'fabrica']), createOrdenController)
+    .put('/:id_orden', authenticateJwt, authorizeRoles(['fabrica', 'administrador', 'tienda']), updateOrdenController)
     .delete('/:id_orden', authenticateJwt, authorizeRoles(['administrador']), deleteOrdenController);
 
 export default router;
