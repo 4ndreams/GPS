@@ -42,23 +42,6 @@ const OrdenSchema = new EntitySchema({
       default: "Pendiente",
       nullable: false,
     },
-    prioridad: {
-      type: "varchar",
-      length: 20,
-      default: "Media",
-      nullable: true,
-    },
-    transportista: {
-      type: "varchar",
-      length: 255,
-      nullable: true,
-    },
-    tipo: {
-      type: "varchar",
-      length: 50,
-      default: "normal",
-      nullable: true,
-    },
     observaciones: {
       type: "varchar",
       length: 500,
