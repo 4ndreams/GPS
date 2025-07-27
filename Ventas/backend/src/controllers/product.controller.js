@@ -48,6 +48,15 @@ export const getProducts = async (req, res) => {
 // GET /api/products/:id
 export const getProductById = async (req, res) => {
   const id = parseInt(req.params.id);
+  
+  // Validar que el ID sea un número válido
+  if (isNaN(id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "ID de producto inválido" 
+    });
+  }
+  
   try {
     const producto = await productoRepo.findOne({
       where: { id_producto: id },
@@ -122,6 +131,14 @@ export const createProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   const id = parseInt(req.params.id);
 
+  // Validar que el ID sea un número válido
+  if (isNaN(id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "ID de producto inválido" 
+    });
+  }
+
   try {
     const producto = await productoRepo.findOneBy({ id_producto: id });
     if (!producto) {
@@ -140,6 +157,14 @@ export const updateProduct = async (req, res) => {
 // DELETE /api/products/:id
 export const deleteProduct = async (req, res) => {
   const id = parseInt(req.params.id);
+
+  // Validar que el ID sea un número válido
+  if (isNaN(id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "ID de producto inválido" 
+    });
+  }
 
   try {
     const resultado = await productoRepo.delete({ id_producto: id });

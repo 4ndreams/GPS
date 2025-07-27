@@ -1,4 +1,4 @@
-// ...existing code...
+import UpdateCotizacion from './UpdateCotizacion';
 import { useState, useEffect } from 'react';
 import Notification from './Notification';
 import { useAuth } from '../hooks/useAuth';
@@ -120,6 +120,38 @@ export default function CotizacionesManagement() {
     }
   };
 
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  // ...existing code...
+
+  // --- Lógica de edición de cotización ---
+  function handleEditCotizacion(cotizacion: CotizacionResponse) {
+    setSelectedCotizacion(cotizacion);
+    setEditError(null);
+    setShowEditDialog(true);
+  }
+
+  async function saveEditCotizacion(data: Partial<CotizacionResponse>) {
+    if (!selectedCotizacion) return;
+    setSavingEdit(true);
+    setEditError(null);
+    try {
+      await cotizacionService.updateCotizacion(selectedCotizacion.id_producto_personalizado, data);
+      setShowEditDialog(false);
+      setNotification({
+        type: 'success',
+        title: 'Cotización actualizada',
+        message: 'Los datos se guardaron correctamente.'
+      });
+      loadCotizaciones();
+    } catch (error: any) {
+      setEditError(error?.message || 'Error al actualizar cotización');
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   // Función para filtrar y ordenar cotizaciones
   const filteredCotizaciones = cotizaciones
@@ -504,6 +536,20 @@ export default function CotizacionesManagement() {
                                 {canManage && (
                                   <>
                                     <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        handleEditCotizacion(cotizacion);
+                                        // Cerrar el menú manualmente
+                                        const target = e.target as HTMLElement;
+                                        const menu = target.closest('[role="menu"]');
+                                        if (menu) {
+                                          (menu as HTMLElement).blur();
+                                        }
+                                      }}
+                                    >
+                                      <Settings className="mr-2 h-4 w-4" />
+                                      Editar cotización
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleUpdateEstado(cotizacion)}>
                                       <Settings className="mr-2 h-4 w-4" />
                                       Cambiar estado
@@ -523,6 +569,14 @@ export default function CotizacionesManagement() {
                   </TableBody>
                 </Table>
               </div>
+              <UpdateCotizacion
+                open={showEditDialog}
+                onOpenChange={setShowEditDialog}
+                initialData={selectedCotizacion}
+                loading={savingEdit}
+                error={editError}
+                onSave={saveEditCotizacion}
+              />
 
               {/* Paginación */}
               {filteredCotizaciones.length > 0 && (

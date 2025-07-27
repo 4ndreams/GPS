@@ -83,7 +83,7 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
 
       <div className="right-side">
         <form className="form" onSubmit={handleSubmit}>
-          <div className="back-home-row">
+          <div className="back-home-row" style={{ marginTop: '2.5rem' }}>
             <Link to="/" className="back-home-btn">
               <i className="bi bi-arrow-left"></i> Volver al inicio
             </Link>
@@ -133,7 +133,6 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
               {showPassword ? <i className="bi bi-eye"></i> : <i className="bi bi-eye-slash"></i>}
             </button>
           </div>
-
           {notification && (
             <Notification
               message={notification.message}
@@ -145,6 +144,10 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
           <button type="submit" className="submit-btn" disabled={!email.trim() || !password.trim() || loading}>
             Ingresar
           </button>
+
+          <div style={{ textAlign: 'center', margin: '0.5rem 0 1rem 0' }}>
+            <Link to="/recover-password" className="forgot-password-link" style={{ fontSize: '0.95em', color: '#666' }}>¿Olvidaste tu contraseña?</Link>
+          </div>
 
           <div className="divider"><span>o</span></div>
 
