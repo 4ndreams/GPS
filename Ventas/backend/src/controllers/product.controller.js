@@ -13,6 +13,8 @@ export const getProducts = async (req, res) => {
     let query = productRepo.createQueryBuilder("producto")
       .leftJoinAndSelect("producto.tipo", "tipo")
       .leftJoinAndSelect("producto.imagenes", "imagenes");
+      .leftJoinAndSelect("producto.material", "material")
+      .leftJoinAndSelect("producto.relleno", "relleno"); // <-- Aquí incluyes la relación relleno
 
     if (nombre) {
       query = query.andWhere("producto.nombre_producto ILIKE :nombre", { nombre: `%${nombre}%` });

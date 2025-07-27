@@ -18,7 +18,7 @@ import { OrdenFabrica } from '../../types/dashboard';
 export default function DashboardFabrica() {
   const config = getConfigForProfile('fabrica');
   const { data, loading, refreshing, onRefresh } = useDashboardData(config);
-  const { procesando, cambiarEstado, crearDespacho } = useOrderActions(onRefresh);
+  const { procesando, cambiarEstado } = useOrderActions(onRefresh);
   
   const [ordenesSeleccionadas, setOrdenesSeleccionadas] = useState<number[]>([]);
   const [transportista, setTransportista] = useState('');
@@ -46,12 +46,13 @@ export default function DashboardFabrica() {
 
     try {
       // Crear el despacho con la información completa
-      await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho);
+      //await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho);
       
       // Cambiar estado de todas las órdenes seleccionadas a "En tránsito" y agregar transportista
       for (const ordenId of ordenesSeleccionadas) {
         await cambiarEstado(ordenId, 'En tránsito', { 
-          transportista: transportista.trim() 
+
+          observaciones: observacionesDespacho.trim(),
         });
       }
       

@@ -44,7 +44,7 @@ const Home = forwardRef<HTMLElement, HomeProps>((_, ref) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BASE}/api/contacto`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/contacto`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
