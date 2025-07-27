@@ -3,6 +3,7 @@
 import {
   createImagenService,
   deleteImagenService,
+  deleteImagenesByProductoService,
   getImagenByIdService,
   getImagenesService,
   getImagenesByProductoService,
@@ -85,6 +86,9 @@ export async function createImagenController(req, res) {
     if (error) {
       return handleErrorClient(res, 400, error.details[0].message);
     }
+
+    // Eliminar todas las imágenes anteriores del producto antes de crear la nueva
+    await deleteImagenesByProductoService(body.id_producto);
 
     const newImagen = await createImagenService(body);
     return handleSuccess(res, 201, "Imagen created successfully", newImagen);

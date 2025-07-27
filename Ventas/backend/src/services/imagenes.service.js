@@ -87,3 +87,22 @@ export async function deleteImagenService(id) {
     return null;
   }
 }
+
+export async function deleteImagenesByProductoService(id_producto) {
+  try {
+    const imagenesRepository = AppDataSource.getRepository(Imagenes);
+    const imagenes = await imagenesRepository.find({
+      where: { id_producto: id_producto },
+    });
+    
+    if (imagenes.length > 0) {
+      await imagenesRepository.remove(imagenes);
+      console.log(`Eliminadas ${imagenes.length} imágenes del producto ${id_producto}`);
+    }
+    
+    return imagenes;
+  } catch (error) {
+    console.error("Error al eliminar las imágenes del producto:", error);
+    return null;
+  }
+}
