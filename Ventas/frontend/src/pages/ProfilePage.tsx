@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import ProfileInfo from "@components/ProfileInfo";
-import UsersTable from "@components/UserTable";
 import UserInfo from "@components/UserInfo";
 import ProductManagement from "@components/ProductManagement";
 import MisCotizaciones from "@components/MisCotizaciones.tsx";
@@ -15,7 +14,6 @@ const dinamicTabs = (role: string) => {
       { key: "info", label: "Mi Perfil" },
       { key: "orders", label: "Mis Compras" },
       { key: "cotizaciones", label: "Mis Cotizaciones" },
-      { key: "usersInfo", label: "Información de usuarios" },
       { key: "products", label: "Gestión de Productos" },
     ];
   }
@@ -100,12 +98,6 @@ const ProfilePage: React.FC = () => {
 
         {activeTab === "cotizaciones" && <MisCotizaciones />}
 
-        {activeTab === "usersInfo" &&
-          (userRole.toLowerCase() === "administrador" ? (
-            <UsersTable />
-          ) : (
-            <UserInfo />
-          ))}
       </main>
     </div>
   );

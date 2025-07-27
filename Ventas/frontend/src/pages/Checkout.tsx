@@ -1,46 +1,51 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserProfile } from "@services/userService";
+import { createPaymentOrder } from "@services/paymentService";
+import { getImagePath } from "@utils/getImagePath";
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import "@styles/Checkout.css";
 
 interface CartItem {
   id: number;
   nombre: string;
   precio: number;
-  cantidad: number;
+  imagen: string;
+  categoria: string;
+  quantity: number;
 }
 
 interface ContactInfo {
   nombre: string;
   apellidos: string;
   email: string;
-  telefono: string;
 }
 
-const Checkout: React.FC = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+interface CheckoutProps {
+  cartItems: CartItem[];
+  clearCart: () => void;
+}
+
+const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     nombre: "",
     apellidos: "",
-    email: "",
-    telefono: "",
+    email: ""
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  // Cargar carrito simulado (o desde localStorage)
+  // Inicializar Mercado Pago
   useEffect(() => {
-    const stored = localStorage.getItem("cart");
-    if (stored) {
-      setCart(JSON.parse(stored));
-    } else {
-      // aqui van los productos
-      setCart([
-        { id: 1, nombre: "Puerta Geno Enchape Wenge", precio: 105000, cantidad: 1 },
-        { id: 3, nombre: "Moldura Roble 2m", precio: 45000, cantidad: 2 },
-      ]);
+    const publicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
+    if (publicKey) {
+      initMercadoPago(publicKey);
     }
-    
-    // Cargar información del usuario si está logueado
+  }, []);
+
+  // Cargar información del usuario si está logueado
+  useEffect(() => {
     loadUserProfile();
   }, []);
 
@@ -54,8 +59,7 @@ const Checkout: React.FC = () => {
       setContactInfo({
         nombre: userData.nombre || "",
         apellidos: userData.apellidos || "",
-        email: userData.email || "",
-        telefono: userData.telefono || "",
+        email: userData.email || ""
       });
       setIsLoggedIn(true);
     } catch (error) {
@@ -72,7 +76,58 @@ const Checkout: React.FC = () => {
     });
   };
 
-  const total = cart.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+  // Manejar el proceso de pago
+  const handlePayment = async () => {
+    // Validar campos requeridos
+    if (!contactInfo.nombre || !contactInfo.apellidos || !contactInfo.email) {
+      alert('Por favor completa todos los campos de contacto antes de proceder al pago.');
+      return;
+    }
+
+    setIsProcessingPayment(true);
+
+    try {
+      // Crear la orden en el backend y obtener el preference_id de Mercado Pago
+      const orderData = {
+        contactInfo,
+        items: cartItems,
+        total
+      };
+
+      const response = await createPaymentOrder(orderData);
+      
+      if (response.success && response.preferenceId) {
+        setPreferenceId(response.preferenceId);
+        // El componente Wallet se renderizará automáticamente cuando preferenceId tenga valor
+      } else {
+        throw new Error('Error al crear la preferencia de pago');
+      }
+    } catch (error) {
+      console.error('Error procesando pago:', error);
+      alert('Error al procesar el pago. Por favor intenta nuevamente.');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.precio * item.quantity, 0);
+
+  // Si el carrito está vacío, mostrar mensaje
+  if (cartItems.length === 0) {
+    return (
+      <div className="checkout-wrapper">
+        <div className="checkout-page">
+          <div className="empty-cart">
+            <h2>Tu carrito está vacío</h2>
+            <p>Agrega algunos productos antes de proceder al checkout.</p>
+            <Link to="/productos" className="btn btn-primary">
+              Ver productos
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="checkout-wrapper">
@@ -122,18 +177,6 @@ const Checkout: React.FC = () => {
                     value={contactInfo.email}
                     onChange={handleContactChange}
                     placeholder="Tu correo electrónico"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="telefono">Teléfono</label>
-                  <input
-                    type="tel"
-                    id="telefono"
-                    name="telefono"
-                    value={contactInfo.telefono}
-                    onChange={handleContactChange}
-                    placeholder="Tu número de teléfono"
                     required
                   />
                 </div>
@@ -193,14 +236,38 @@ const Checkout: React.FC = () => {
               <h2 className="section-title">Pago</h2>
             </div>
             <div className="payment-link">
-              <Link
-                to={`https://checkout.example.com?amount=${total}`}
-                className="checkout-button"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Pagar con WebPay
-              </Link>
+              {!preferenceId ? (
+                <button
+                  onClick={handlePayment}
+                  className="checkout-button"
+                  disabled={cartItems.length === 0 || isProcessingPayment}
+                >
+                  {isProcessingPayment ? 'Preparando pago...' : `Pagar con Mercado Pago - $${total.toLocaleString("es-CL")}`}
+                </button>
+              ) : (
+                <div className="mercadopago-wallet">
+                  <Wallet 
+                    initialization={{ 
+                      preferenceId: preferenceId,
+                      redirectMode: 'self'
+                    }}
+                    onReady={() => {
+                      console.log('Wallet listo');
+                    }}
+                    onError={(error) => {
+                      console.error('Error en Mercado Pago:', error);
+                      alert('Error en el proceso de pago. Por favor intenta nuevamente.');
+                      setPreferenceId(null);
+                    }}
+                  />
+                </div>
+              )}
+              <p className="payment-note">
+                {!preferenceId 
+                  ? 'Al procesar el pedido serás redirigido a Mercado Pago para completar el pago.'
+                  : 'Completa tu pago con Mercado Pago de forma segura.'
+                }
+              </p>
             </div>
           </div>
         </section>
@@ -215,10 +282,23 @@ const Checkout: React.FC = () => {
                 <h2 className="section-title-alt">Resumen de tu compra</h2>
               </div>
               <div className="cart-list">
-                {cart.map(item => (
+                {cartItems.map((item: CartItem) => (
                   <div key={item.id} className="cart-item">
-                    <span className="item-name">{item.nombre} (x{item.cantidad})</span>
-                    <span className="item-price">${(item.precio * item.cantidad).toLocaleString("es-CL")}</span>
+                    <div className="item-image">
+                      <img 
+                        src={getImagePath(`${item.categoria}/${item.imagen}`)} 
+                        alt={item.nombre}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
+                        }}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                      />
+                    </div>
+                    <div className="item-details">
+                      <span className="item-name">{item.nombre}</span>
+                      <span className="item-quantity">Cantidad: {item.quantity}</span>
+                    </div>
+                    <span className="item-price">${(item.precio * item.quantity).toLocaleString("es-CL")}</span>
                   </div>
                 ))}
               </div>

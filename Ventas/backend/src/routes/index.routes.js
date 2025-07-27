@@ -20,6 +20,7 @@ import productoPersonalizadoRoutes from "./producto_personalizado.routes.js"; //
 import tiendaRoutes from "./tienda.routes.js";
 import imagenesRoutes from "./imagenes.routes.js"; 
 import notificacionRoutes from "./notificacion.routes.js"; // Import notificacion routes 
+import orderRoutes from "./order.routes.js"; // Import order routes for Mercado Pago 
 
 const router = Router();
 
@@ -55,5 +56,6 @@ router.use('/productos-personalizados', productoPersonalizadoRoutes); // Rutas p
 router.use('/tienda', tiendaRoutes);
 router.use('/imagenes', imagenesRoutes);
 router.use('/notificaciones', notificacionRoutes); // Rutas para notificaciones y alertas
+router.use('/orders', orderRoutes); // Rutas para órdenes y pagos con Mercado Pago
 
 export default router;

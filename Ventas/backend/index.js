@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
+import path from "path";
 
 import indexRoutes from "./src/routes/index.routes.js";
 import { connectDB } from "./src/config/configDb.js";
@@ -17,6 +18,8 @@ import {
   passportOAuthSetup,
 } from "./src/auth/passport.auth.js";
 
+const __dirname = path.resolve();
+
 async function setupServer() {
   try {
     const app = express();
@@ -24,15 +27,7 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
-        'http://localhost:5173',
-        'http://localhost:5174',   
-        'http://localhost:3000',  // Para la app móvil en web
-        'http://192.168.1.105:3000', 
-        'http://192.168.1.105:19000',
-        'http://localhost:8081'
-      ], 
-      origin: true,
+      origin: true,  // Permite solicitudes desde cualquier origen
       credentials: true
     }));
 
