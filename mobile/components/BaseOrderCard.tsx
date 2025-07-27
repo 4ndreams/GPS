@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BaseOrden } from '../types/dashboard';
 import { getPrioridadColor, getEstadoColor } from '../config/dashboardConfig';
+import { OrderPhotoPreview } from './OrderPhotoPreview';
 
 interface BaseOrderCardProps {
   orden: BaseOrden;
@@ -78,15 +79,19 @@ export const BaseOrderCard: React.FC<BaseOrderCardProps> = ({
           <Text style={styles.tipoText}>Pedido de stock interno</Text>
         )}
         
-        {/* Producto */}
-        <Text style={styles.productoText}>
-          • {orden.producto.nombre_producto}
-        </Text>
-        
-        {/* Cantidad */}
-        <Text style={styles.cantidadText}>
-          Cantidad: {orden.cantidad} unidades
-        </Text>
+        {/* Producto con vista previa de foto */}
+        <View style={styles.productoContainer}>
+          <View style={styles.productoInfo}>
+            <Text style={styles.productoText}>
+              • {orden.producto.nombre_producto}
+            </Text>
+            {/* Cantidad */}
+            <Text style={styles.cantidadText}>
+              Cantidad: {orden.cantidad} unidades
+            </Text>
+          </View>
+          <OrderPhotoPreview id_orden={orden.id_orden} size="small" />
+        </View>
         
         {/* Fechas */}
         {orden.fecha_solicitud && (
@@ -258,5 +263,15 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontStyle: 'italic',
     marginTop: 4,
+  },
+  productoContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  productoInfo: {
+    flex: 1,
+    marginRight: 12,
   },
 });
