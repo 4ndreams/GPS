@@ -120,7 +120,7 @@ function ProductManagement({ userRole, token }: Props) {
   };
 
   const openEditModal = (product: Product) => {
-    setEditData({
+    const editDataToSet = {
       id_producto: product.id_producto,
       nombre_producto: product.nombre_producto,
       precio: product.precio.toString(),
@@ -128,10 +128,12 @@ function ProductManagement({ userRole, token }: Props) {
       descripcion: product.descripcion || "",
       medida_ancho: product.medida_ancho,
       medida_alto: product.medida_alto,
-      id_material: product.material?.id_material ?? product.id_material,
-      id_tipo: product.tipo?.id_tipo ?? product.id_tipo,
+      id_material: product.material?.id_material ?? product.id_material ?? "",
+      id_tipo: product.tipo?.id_tipo ?? product.id_tipo ?? "",
       id_relleno: product.relleno?.id_relleno ?? product.id_relleno ?? "",
-    });
+    };
+    
+    setEditData(editDataToSet);
     setSelectedImage(null);
     setImagePreview(null);
     setIsModalOpen(true);
@@ -197,6 +199,7 @@ function ProductManagement({ userRole, token }: Props) {
       medida_alto: formData.get("medida_alto") as string,
       descripcion: (formData.get("descripcion") as string) || "",
     };
+    
     if (editData?.id_producto) {
       productData.id_producto = editData.id_producto;
     }

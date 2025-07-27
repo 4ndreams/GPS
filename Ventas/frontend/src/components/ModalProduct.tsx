@@ -72,7 +72,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
 
   useEffect(() => {
     if (editData) {
-      setFormData({
+      const formDataToSet = {
         id_producto: editData.id_producto,
         nombre_producto: editData.nombre_producto,
         precio: editData.precio,
@@ -83,7 +83,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         medida_ancho: editData.medida_ancho || "",
         medida_alto: editData.medida_alto || "",
         descripcion: editData.descripcion || "",
-      });
+      };
+      setFormData(formDataToSet);
     } else {
       setFormData({
         nombre_producto: "",
@@ -97,7 +98,6 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         descripcion: "",
       });
     }
-
   }, [editData]);
 
   const handleChange = (
@@ -196,7 +196,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
               Tipo
               <select
                 name="id_tipo"
-                value={formData.id_tipo}
+                value={String(formData.id_tipo)}
                 onChange={handleChange}
                 required
               >
@@ -216,7 +216,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
               Material
               <select
                 name="id_material"
-                value={formData.id_material}
+                value={String(formData.id_material)}
                 onChange={handleChange}
                 required
               >
@@ -236,7 +236,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
               Relleno
               <select
                 name="id_relleno"
-                value={formData.id_relleno}
+                value={String(formData.id_relleno)}
                 onChange={handleChange}
                 required
               >
