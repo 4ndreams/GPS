@@ -18,6 +18,7 @@ import { useOrderActions } from '../../hooks/useOrderActions';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { OrdenFabrica } from '../../types/dashboard';
 import * as ImagePicker from 'expo-image-picker';
+import { TokenService } from '../../services/tokenService';
 
 export default function DashboardFabrica() {
   const config = getConfigForProfile('fabrica');
@@ -29,6 +30,8 @@ export default function DashboardFabrica() {
   const [observacionesDespacho, setObservacionesDespacho] = useState('');
   const [fotosDespacho, setFotosDespacho] = useState<string[]>([]);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
+  
 
   const toggleOrdenSeleccionada = (id_orden: number) => {
     if (ordenesSeleccionadas.includes(id_orden)) {
@@ -38,59 +41,66 @@ export default function DashboardFabrica() {
     }
   };
 
-  const subirFotoAMinIO = async (uri: string): Promise<string> => {
+  // Función para subir una imagen individual después de procesar una orden
+  const subirImagenIndividual = async (uri: string, id_orden: number): Promise<string> => {
     try {
-      // Crear nombre único para la foto
-      const timestamp = Date.now();
-      const fileName = `despacho-${timestamp}.jpg`;
+      console.log('=== SUBIENDO IMAGEN INDIVIDUAL ===');
+      console.log('URI:', uri);
+      console.log('ID Orden:', id_orden);
       
-      // Obtener presigned URL del backend
-      const uploadUrlResponse = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/api/minio/upload-url?filename=${fileName}`,
+      // Obtener token de autenticación
+      const token = await TokenService.getToken();
+      if (!token) {
+        throw new Error('No hay token de autenticación');
+      }
+
+      const formData = new FormData();
+      const nombreArchivo = uri.split('/').pop() || `despacho-${Date.now()}.jpg`;
+
+      // Agregar la imagen al FormData con el nombre que espera tu backend ("file")
+      formData.append('file', {
+        uri,
+        name: nombreArchivo,
+        type: 'image/jpeg'
+      } as any);
+
+      // Agregar el id_orden que tu backend necesita
+      formData.append('id_orden', id_orden.toString());
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_BASE_URL}/photo`,
         {
-          method: 'GET',
+          method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`,
           },
+          body: formData,
         }
       );
 
-      if (!uploadUrlResponse.ok) {
-        throw new Error('Error al obtener URL de subida');
+      console.log('Respuesta:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error del servidor:', errorText);
+        throw new Error(`Error al subir imagen: ${response.status} - ${errorText}`);
       }
 
-      const { url: presignedUrl } = await uploadUrlResponse.json();
-
-      // Convertir la imagen a blob
-      const imageResponse = await fetch(uri);
-      const imageBlob = await imageResponse.blob();
-
-      // Subir la imagen usando el presigned URL
-      const uploadResponse = await fetch(presignedUrl, {
-        method: 'PUT',
-        body: imageBlob,
-        headers: {
-          'Content-Type': 'image/jpeg',
-        },
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('Error al subir la imagen');
-      }
-
-      // Construir la URL pública de la imagen
-      const publicUrl = `http://146.83.198.35:1411/mundopuertas/${fileName}`;
+      const data = await response.json();
+      console.log('Imagen subida exitosamente:', data);
       
-      return publicUrl;
+      // Tu backend devuelve la imagen con la URL de MinIO
+      return data.data?.ruta_imagen || data.ruta_imagen || '';
     } catch (error) {
-      console.error('Error al subir foto a MinIO:', error);
+      console.error('Error al subir imagen individual:', error);
       throw error;
     }
   };
 
+  // Función para tomar foto con cámara
   const tomarFoto = async () => {
     try {
-      // Solicitar permisos para la cámara
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Error', 'Se necesitan permisos de cámara para tomar fotos');
@@ -98,10 +108,8 @@ export default function DashboardFabrica() {
       }
 
       setSubiendoFoto(true);
-
-      // Abrir la cámara
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ Usar la versión que funciona
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -109,79 +117,127 @@ export default function DashboardFabrica() {
       });
 
       if (!result.canceled && result.assets[0]) {
-        const uri = result.assets[0].uri;
-        
-        // Subir foto a MinIO
-        const minioUrl = await subirFotoAMinIO(uri);
-        
-        // Agregar la URL de MinIO a la lista de fotos
-        setFotosDespacho(prev => [...prev, minioUrl]);
-        
+        const asset = result.assets[0];
+        // Solo guardar localmente, NO subir aún - se subirá al crear el despacho
+        setSelectedFiles(prev => [...prev, asset]);
+        setFotosDespacho(prev => [...prev, asset.uri]);
         Alert.alert('Éxito', 'Foto agregada correctamente');
       }
     } catch (error) {
       console.error('Error al tomar foto:', error);
-      Alert.alert('Error', 'No se pudo subir la foto. Intenta nuevamente.');
+      Alert.alert('Error', 'No se pudo agregar la foto. Intenta nuevamente.');
     } finally {
       setSubiendoFoto(false);
     }
   };
 
+  // Elimina imagen de ambos arreglos
   const eliminarFoto = (index: number) => {
-    Alert.alert(
-      'Eliminar foto',
-      '¿Estás seguro de que quieres eliminar esta foto?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: () => {
-            setFotosDespacho(prev => prev.filter((_, i) => i !== index));
-          }
-        }
-      ]
-    );
+    setFotosDespacho(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Sube todas las imágenes después de cambiar estado de órdenes
+  const subirTodasLasImagenes = async (ordenesActualizadas: number[]): Promise<string[]> => {
+    const urls: string[] = [];
+    
+    try {
+      console.log('📸 Iniciando subida de todas las imágenes...');
+      console.log(`🔢 Total de imágenes a subir: ${selectedFiles.length}`);
+      console.log(`📦 Órdenes actualizadas: ${ordenesActualizadas}`);
+      
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const asset = selectedFiles[i];
+        
+        // Para cada imagen, usar una orden procesada (rotación para distribuir las imágenes)
+        const ordenIndex = i % ordenesActualizadas.length;
+        const ordenId = ordenesActualizadas[ordenIndex];
+
+        console.log(`📤 Subiendo imagen ${i + 1}/${selectedFiles.length} para orden ID: ${ordenId}`);
+        
+        try {
+          // Subir imagen asociándola directamente con el id_orden
+          const urlImagen = await subirImagenIndividual(asset.uri, ordenId);
+          urls.push(urlImagen);
+          console.log(`✅ Imagen ${i + 1} subida exitosamente: ${urlImagen}`);
+        } catch (imageError) {
+          console.error(`❌ Error al subir imagen ${i + 1}:`, imageError);
+          // Continuar con las demás imágenes en lugar de fallar completamente
+          console.warn(`⚠️ Saltando imagen ${i + 1} debido a error de subida`);
+        }
+      }
+      
+      console.log('🎉 Proceso de subida completado');
+      console.log(`📋 URLs generadas exitosamente: ${urls.length}/${selectedFiles.length}`);
+      
+      if (urls.length === 0) {
+        throw new Error('No se pudo subir ninguna imagen');
+      }
+      
+      return urls;
+    } catch (error) {
+      console.error('❌ Error en el proceso de subida de imágenes:', error);
+      throw error;
+    }
+  };
+
+  // Crear despacho: 
+  // 1. Primero procesar órdenes (cambiar estado)
+  // 2. Luego subir imágenes asociándolas directamente con los ids de orden
   const handleCrearDespacho = async () => {
-    // Validar que se haya ingresado la información requerida
+    // Validaciones
     if (!transportista.trim()) {
-      Alert.alert('Error', 'Por favor, ingresa el nombre del transportista');
+      Alert.alert('Error', 'Por favor ingresa el nombre del transportista');
       return;
     }
 
     if (ordenesSeleccionadas.length === 0) {
-      Alert.alert('Error', 'Por favor, selecciona al menos una orden para el despacho');
+      Alert.alert('Error', 'Selecciona al menos una orden para el despacho');
       return;
     }
 
-    // Validar que se haya tomado al menos una foto
-    if (fotosDespacho.length === 0) {
-      Alert.alert('Error', 'Debes tomar al menos una foto del despacho');
+    if (selectedFiles.length === 0) {
+      Alert.alert('Error', 'Debes agregar al menos una foto del despacho');
       return;
     }
 
     try {
-      // Cambiar estado de todas las órdenes seleccionadas a "En tránsito"
+      setSubiendoFoto(true);
+      console.log('🚚 Iniciando creación de despacho...');
+      console.log('📦 Órdenes seleccionadas:', ordenesSeleccionadas);
+      console.log('📸 Fotos a subir:', selectedFiles.length);
+
+      // PASO 1: Cambiar estado de las órdenes
+      const ordenesActualizadas: number[] = [];
       for (const ordenId of ordenesSeleccionadas) {
         await cambiarEstado(ordenId, 'En tránsito', { 
-          transportista: transportista.trim(),
-          observaciones: observacionesDespacho.trim(),
-          fotos: fotosDespacho,
+          //transportista: transportista.trim(),
+          observaciones: observacionesDespacho.trim() || null,
         });
+        ordenesActualizadas.push(ordenId);
       }
-      
-      // Limpiar formulario después del éxito
+      console.log('✅ Órdenes actualizadas exitosamente');
+
+      // PASO 2: Subir imágenes asociándolas directamente con las órdenes procesadas
+      const uploadedUrls = await subirTodasLasImagenes(ordenesActualizadas);
+      console.log('✅ URLs de imágenes subidas:', uploadedUrls);
+
+      // Limpiar formulario
       setOrdenesSeleccionadas([]);
       setTransportista('');
       setObservacionesDespacho('');
       setFotosDespacho([]);
+      setSelectedFiles([]);
       
-      Alert.alert('Éxito', 'Despacho creado correctamente');
-    } catch (error) {
-      console.error('Error al crear despacho y cambiar estados:', error);
-      Alert.alert('Error', 'No se pudo crear el despacho. Intenta nuevamente.');
+      Alert.alert(
+        'Éxito', 
+        `Despacho creado correctamente:\n• ${ordenesActualizadas.length} orden(es) actualizadas\n• ${uploadedUrls.length} foto(s) subida(s) a MinIO`
+      );
+    } catch (error: any) {
+      console.error('❌ Error al crear despacho:', error);
+      Alert.alert('Error', `No se pudo crear el despacho: ${error.message || 'Error desconocido'}`);
+    } finally {
+      setSubiendoFoto(false);
     }
   };
 
