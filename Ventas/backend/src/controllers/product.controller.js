@@ -2,7 +2,7 @@
 import { AppDataSource } from "../config/configDb.js";
 import ProductoSchema from "../entity/producto.entity.js";
 import { uploadImage } from "../services/uploadImage.service.js";
-import { createImagenService } from "../services/imagenes.service.js";
+import { createImagenService, deleteImagenesByProductoService } from "../services/imagenes.service.js";
 
 const productoRepo = AppDataSource.getRepository("Producto");
 
@@ -325,6 +325,9 @@ export const updateProductoConImagenesController = async (req, res) => {
     // Procesar nuevas imágenes si existen
     const nuevasImagenes = [];
     if (req.files && req.files.length > 0) {
+      // Eliminar todas las imágenes anteriores del producto
+      await deleteImagenesByProductoService(id_producto);
+      
       for (const file of req.files) {
         try {
           // Subir imagen a MinIO
