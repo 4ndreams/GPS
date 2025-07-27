@@ -22,6 +22,7 @@ export interface CotizacionResponse {
   nombre_apellido_contacto: string;
   email_contacto: string;
   rut_contacto: string;
+  telefono_contacto: string;
   mensaje: string;
   medida_ancho: number;
   medida_alto: number;
