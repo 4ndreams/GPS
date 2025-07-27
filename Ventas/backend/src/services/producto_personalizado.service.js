@@ -61,9 +61,9 @@ export async function createProductoPersonalizadoService(body) {
                 if (!usuarioExists) {
                     return [null, `El usuario con ID ${body.id_usuario} no existe en la base de datos`];
                 }
-                console.log(`✅ Usuario ${body.id_usuario} verificado correctamente`);
+                console.log(`Usuario ${body.id_usuario} verificado correctamente`);
             } catch (error) {
-                console.error(`❌ Error al verificar usuario ${body.id_usuario}:`, error);
+                console.error(`Error al verificar usuario ${body.id_usuario}:`, error);
                 return [null, `Error al verificar la existencia del usuario: ${error.message}`];
             }
         }
@@ -81,7 +81,7 @@ export async function createProductoPersonalizadoService(body) {
         try {
             await sendCotizacionConfirmationEmail(completo);
         } catch (emailError) {
-            console.error(`❌ Error al enviar email de confirmación para cotización #${completo.id_producto_personalizado}:`, emailError.message);
+            console.error(`Error al enviar email de confirmación para cotización #${completo.id_producto_personalizado}:`, emailError.message);
             // No fallar la creación si el email falla, solo registrar el error
         }
         
@@ -247,11 +247,11 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
                         try {
                             await sendVentaProductoPersonalizadoEmail({ venta, productoPersonalizado: exists });
                         } catch (mailError) {
-                            console.error(`❌ Error al enviar correo de venta para producto personalizado #${id_producto_personalizado}:`, mailError.message);
+                            console.error(`Error al enviar correo de venta para producto personalizado #${id_producto_personalizado}:`, mailError.message);
                         }
                     }
                 } catch (ventaError) {
-                    console.error(`❌ Error al crear venta para producto personalizado #${id_producto_personalizado}:`, ventaError.message);
+                    console.error(`Error al crear venta para producto personalizado #${id_producto_personalizado}:`, ventaError.message);
                     ventaResult = { success: false, error: ventaError.message, venta: null };
                 }
             } else {

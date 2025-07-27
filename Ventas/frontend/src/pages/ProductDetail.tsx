@@ -6,6 +6,7 @@ import { isCurrentUserAdmin } from "@services/authService";
 import { updateProduct } from "@services/productService";
 import { TokenService } from "@services/tokenService";
 import "@styles/ProductDetail.css";
+import Notification from "../components/Notification";
 
 interface Producto {
   id_producto: number;
@@ -159,26 +160,23 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
 
   const handleEditSubmit = async () => {
     if (!producto) return;
-    
     try {
       setUpdating(true);
       await updateProduct(producto.id_producto, {
         precio: editForm.precio,
         stock: editForm.stock
       });
-      
       // Actualizar el estado local del producto
       setProducto(prev => prev ? {
         ...prev,
         precio: editForm.precio,
         stock: editForm.stock
       } : null);
-      
       setIsEditing(false);
-      alert("Producto actualizado exitosamente");
+      setNotification({ message: "Producto actualizado exitosamente", type: "success" });
     } catch (error) {
       console.error("Error actualizando producto:", error);
-      alert("Error al actualizar el producto. Verifica que tengas permisos de administrador.");
+      setNotification({ message: "Error al actualizar el producto. Verifica que tengas permisos de administrador.", type: "error" });
     } finally {
       setUpdating(false);
     }
@@ -326,6 +324,15 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
 
   return (
     <div className="producto-detalle-container">
+      {notification && (
+        <div style={{ maxWidth: 600, margin: '0 auto 18px auto' }}>
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        </div>
+      )}
       <button className="btn-volver" onClick={() => navigate(-1)}>← Volver</button>
       <div className="detalle-producto">
         <div className="detalle-imagen">
@@ -344,161 +351,129 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
         </div>
         <div className="detalle-info">
           <h1>{producto.nombre_producto}</h1>
-          <p><strong>Precio:</strong> ${Number(producto.precio).toLocaleString("es-CL")}</p>
+          <div className="producto-precio">${Number(producto.precio).toLocaleString("es-CL")}</div>
           <p><strong>Stock disponible:</strong> {stockDisponible}</p>
           <p><strong>Descripción:</strong> {producto.descripcion || "Sin descripción"}</p>
           <p><strong>Dimensiones:</strong> {producto.medida_ancho} x {producto.medida_largo} x {producto.medida_alto} cm</p>
-          <p><strong>Tipo:</strong> {producto.tipo?.nombre_tipo}</p>
-          <p><strong>Material:</strong> {producto.material?.nombre_material}</p>
-          
+
           {/* Panel de edición para administradores */}
           {isAdmin && (
-            <div style={{ 
-              background: "#f8f9fa", 
-              padding: "20px", 
-              borderRadius: "8px", 
+            <div className="admin-panel-producto" style={{
+              background: "#f8f9fa",
+              padding: "24px 20px 20px 20px",
+              borderRadius: "14px",
               border: "2px solid #e53935",
-              marginBottom: "20px" 
+              marginBottom: "20px",
+              boxShadow: "0 2px 8px rgba(44,62,80,0.07)"
             }}>
-              <h3 style={{ color: "#e53935", marginBottom: "15px" }}>
-                🔧 Panel de Administrador
-              </h3>
-              
-              {/* Botón para agregar/eliminar destacado */}
-              <div style={{ marginBottom: "15px" }}>
-                {isDestacado ? (
-                  <button
-                    onClick={handleEliminarDestacado}
-                    disabled={destacadoLoading}
-                    style={{
-                      background: "#6c757d",
-                      color: "white",
-                      border: "none",
-                      padding: "10px 20px",
-                      borderRadius: "5px",
-                      cursor: destacadoLoading ? "not-allowed" : "pointer",
-                      fontSize: "14px",
-                      marginBottom: "8px"
-                    }}
-                  >
-                    {destacadoLoading ? "⏳ Quitando..." : "Quitar de destacados"}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleAgregarDestacado}
-                    disabled={destacadoLoading}
-                    style={{
-                      background: "#e53935",
-                      color: "white",
-                      border: "none",
-                      padding: "10px 20px",
-                      borderRadius: "5px",
-                      cursor: destacadoLoading ? "not-allowed" : "pointer",
-                      fontSize: "14px",
-                      marginBottom: "8px"
-                    }}
-                  >
-                    {destacadoLoading ? "⏳ Agregando..." : "Agregar a destacados"}
-                  </button>
-                )}
-              </div>
-              
+              <h3 style={{ color: "#e53935", marginBottom: "18px", fontWeight: 700, fontSize: "1.2rem", letterSpacing: 1 }}>🔧 Panel de Administrador</h3>
               {!isEditing ? (
                 <button
+                  className="btn-comprar"
+                  style={{ maxWidth: 220, fontSize: 15, padding: "10px 0", margin: 0 }}
                   onClick={handleEditToggle}
-                  style={{
-                    background: "#e53935",
-                    color: "white",
-                    border: "none",
-                    padding: "10px 20px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    fontSize: "14px"
-                  }}
                 >
                   ✏️ Editar Precio y Stock
                 </button>
               ) : (
-                <div>
-                  <div style={{ marginBottom: "15px" }}>
-                    <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
+                <form style={{ width: "100%", marginTop: 10 }} onSubmit={e => { e.preventDefault(); handleEditSubmit(); }}>
+                  <div style={{ marginBottom: "12px" }}>
+                    <label htmlFor="admin-precio" style={{ display: "block", marginBottom: "4px", fontWeight: 600, color: "#e53935", fontSize: 14 }}>
                       Precio:
                     </label>
                     <input
+                      id="admin-precio"
                       type="number"
                       value={editForm.precio}
                       onChange={(e) => setEditForm(prev => ({ ...prev, precio: Number(e.target.value) }))}
+                      className="input-admin-producto"
                       style={{
                         width: "100%",
-                        padding: "8px",
-                        border: "1px solid #ddd",
-                        borderRadius: "4px",
-                        fontSize: "16px"
+                        padding: "7px 10px",
+                        border: "1.2px solid #e0e0e0",
+                        borderRadius: "6px",
+                        fontSize: "1rem",
+                        background: "#fff",
+                        color: "#263238",
+                        maxWidth: 180
                       }}
                       min="0"
                       step="0.01"
                     />
                   </div>
-                  
-                  <div style={{ marginBottom: "15px" }}>
-                    <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
+                  <div style={{ marginBottom: "12px" }}>
+                    <label htmlFor="admin-stock" style={{ display: "block", marginBottom: "4px", fontWeight: 600, color: "#e53935", fontSize: 14 }}>
                       Stock:
                     </label>
                     <input
+                      id="admin-stock"
                       type="number"
                       value={editForm.stock}
                       onChange={(e) => setEditForm(prev => ({ ...prev, stock: Number(e.target.value) }))}
+                      className="input-admin-producto"
                       style={{
                         width: "100%",
-                        padding: "8px",
-                        border: "1px solid #ddd",
-                        borderRadius: "4px",
-                        fontSize: "16px"
+                        padding: "7px 10px",
+                        border: "1.2px solid #e0e0e0",
+                        borderRadius: "6px",
+                        fontSize: "1rem",
+                        background: "#fff",
+                        color: "#263238",
+                        maxWidth: 180
                       }}
                       min="0"
                     />
                   </div>
-                  
-                  <div style={{ display: "flex", gap: "10px" }}>
+                  <div style={{ display: "flex", gap: "10px", marginTop: 8 }}>
                     <button
-                      onClick={handleEditSubmit}
+                      className="btn-comprar"
+                      type="submit"
                       disabled={updating}
                       style={{
-                        background: "#28a745",
-                        color: "white",
+                        background: updating ? "#218838" : "#28a745",
                         border: "none",
-                        padding: "10px 20px",
-                        borderRadius: "5px",
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: 14,
+                        padding: "8px 18px",
+                        borderRadius: 7,
+                        opacity: updating ? 0.7 : 1,
                         cursor: updating ? "not-allowed" : "pointer",
-                        fontSize: "14px",
-                        opacity: updating ? 0.7 : 1
+                        transition: "background 0.18s"
                       }}
+                      onMouseOver={e => { if (!updating) e.currentTarget.style.background = '#218838'; }}
+                      onMouseOut={e => { if (!updating) e.currentTarget.style.background = '#28a745'; }}
                     >
                       {updating ? "⏳ Guardando..." : "💾 Guardar"}
                     </button>
-                    
                     <button
+                      className="btn-comprar"
+                      type="button"
                       onClick={handleEditCancel}
                       disabled={updating}
                       style={{
-                        background: "#6c757d",
-                        color: "white",
-                        border: "none",
-                        padding: "10px 20px",
-                        borderRadius: "5px",
+                        background: updating ? "#bdbdbd" : "#f1f1f1",
+                        border: "1.2px solid #bdbdbd",
+                        color: "#444",
+                        fontWeight: 700,
+                        fontSize: 14,
+                        padding: "8px 18px",
+                        borderRadius: 7,
+                        opacity: updating ? 0.7 : 1,
                         cursor: updating ? "not-allowed" : "pointer",
-                        fontSize: "14px",
-                        opacity: updating ? 0.7 : 1
+                        transition: "background 0.18s"
                       }}
+                      onMouseOver={e => { if (!updating) e.currentTarget.style.background = '#e0e0e0'; }}
+                      onMouseOut={e => { if (!updating) e.currentTarget.style.background = '#f1f1f1'; }}
                     >
                       ❌ Cancelar
                     </button>
                   </div>
-                </div>
+                </form>
               )}
             </div>
           )}
-          
+
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
             <button
               className="btn-comprar"
@@ -511,7 +486,7 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
             <button
               className="btn-comprar"
               style={{ backgroundColor: "#fff", color: "#e53935", border: "2px solid #e53935", opacity: agotado ? 0.7 : 1, cursor: agotado ? 'not-allowed' : 'pointer' }}
-              onClick={() => { if (!agotado) { handleAddToCart(); alert("Producto agregado al carrito."); } }}
+              onClick={() => { if (!agotado) { handleAddToCart(); setNotification({ message: "Producto agregado al carrito.", type: "success" }); } }}
               disabled={agotado}
             >
               {agotado ? 'Sin stock' : 'Agregar al carrito'}
