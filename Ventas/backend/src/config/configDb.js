@@ -16,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: `${DATABASE}`,
   entities: [path.join(__dirname, "../entity/**/*.js")],
   synchronize: true,
-  logging: false, // Habilitado temporalmente para debuggear
+  logging: false, // Deshabilitado para limpiar la consola
 });
 
 export async function connectDB() {
