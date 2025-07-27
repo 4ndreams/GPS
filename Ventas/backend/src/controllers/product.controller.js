@@ -1,6 +1,8 @@
 "use strict";
 import { AppDataSource } from "../config/configDb.js";
 import ProductoSchema from "../entity/producto.entity.js";
+import { uploadImage } from "../services/uploadImage.service.js";
+import { createImagenService } from "../services/imagenes.service.js";
 
 const productoRepo = AppDataSource.getRepository("Producto");
 
@@ -12,9 +14,9 @@ export const getProducts = async (req, res) => {
     const productRepo = AppDataSource.getRepository("Producto");
     let query = productRepo.createQueryBuilder("producto")
       .leftJoinAndSelect("producto.tipo", "tipo")
-      .leftJoinAndSelect("producto.imagenes", "imagenes");
+      .leftJoinAndSelect("producto.imagenes", "imagenes")
       .leftJoinAndSelect("producto.material", "material")
-      .leftJoinAndSelect("producto.relleno", "relleno"); // <-- Aquí incluyes la relación relleno
+      .leftJoinAndSelect("producto.relleno", "relleno");
 
     if (nombre) {
       query = query.andWhere("producto.nombre_producto ILIKE :nombre", { nombre: `%${nombre}%` });
@@ -59,7 +61,7 @@ export const getProductById = async (req, res) => {
   try {
     const producto = await productoRepo.findOne({
       where: { id_producto: id },
-      relations: ["material", "tipo"],
+      relations: ["material", "tipo", "imagenes"],
     });
 
     if (!producto) {
@@ -193,5 +195,155 @@ export const getMateriales = async (req, res) => {
     res.json({ success: true, data: materiales });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error al obtener materiales" });
+  }
+};
+
+// Nuevos métodos para productos con imágenes
+export const createProductoConImagenesController = async (req, res) => {
+  try {
+    // Extraer datos del producto del body
+    const productoData = {
+      nombre_producto: req.body.nombre_producto,
+      precio: parseFloat(req.body.precio),
+      stock: parseInt(req.body.stock),
+      descripcion: req.body.descripcion,
+      medida_ancho: req.body.medida_ancho ? parseFloat(req.body.medida_ancho) : null,
+      medida_largo: req.body.medida_largo ? parseFloat(req.body.medida_largo) : null,
+      medida_alto: req.body.medida_alto ? parseFloat(req.body.medida_alto) : null,
+      id_material: req.body.id_material ? parseInt(req.body.id_material) : null,
+      id_tipo: req.body.id_tipo ? parseInt(req.body.id_tipo) : null,
+      id_relleno: req.body.id_relleno ? parseInt(req.body.id_relleno) : null,
+    };
+
+    // Crear el producto primero
+    const nuevoProducto = productoRepo.create({
+      ...productoData,
+      material: productoData.id_material ? { id_material: productoData.id_material } : null,
+      tipo: productoData.id_tipo ? { id_tipo: productoData.id_tipo } : null,
+    });
+
+    await productoRepo.save(nuevoProducto);
+
+    // Procesar imágenes si existen
+    const imagenes = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try {
+          // Subir imagen a MinIO
+          const ruta_imagen = await uploadImage(file);
+          
+          // Crear registro de imagen en BD
+          const imagenData = {
+            ruta_imagen: ruta_imagen,
+            id_producto: nuevoProducto.id_producto
+          };
+          
+          const nuevaImagen = await createImagenService(imagenData);
+          if (nuevaImagen) {
+            imagenes.push(nuevaImagen);
+          }
+        } catch (error) {
+          console.error('Error al procesar imagen:', error);
+          // Continuar con las demás imágenes
+        }
+      }
+    }
+
+    // Obtener producto completo con imágenes
+    const productoCompleto = await productoRepo.findOne({
+      where: { id_producto: nuevoProducto.id_producto },
+      relations: ["material", "tipo", "imagenes"]
+    });
+
+    res.status(201).json({ 
+      success: true, 
+      message: "Producto creado exitosamente con imágenes", 
+      data: productoCompleto 
+    });
+  } catch (error) {
+    console.error('Error en createProductoConImagenesController:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error interno del servidor", 
+      error: error.message 
+    });
+  }
+};
+
+export const updateProductoConImagenesController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const id_producto = parseInt(id);
+    
+    // Extraer datos del producto del body
+    const productoData = {
+      nombre_producto: req.body.nombre_producto,
+      precio: req.body.precio ? parseFloat(req.body.precio) : undefined,
+      stock: req.body.stock ? parseInt(req.body.stock) : undefined,
+      descripcion: req.body.descripcion,
+      medida_ancho: req.body.medida_ancho ? parseFloat(req.body.medida_ancho) : undefined,
+      medida_largo: req.body.medida_largo ? parseFloat(req.body.medida_largo) : undefined,
+      medida_alto: req.body.medida_alto ? parseFloat(req.body.medida_alto) : undefined,
+      id_material: req.body.id_material ? parseInt(req.body.id_material) : undefined,
+      id_tipo: req.body.id_tipo ? parseInt(req.body.id_tipo) : undefined,
+      id_relleno: req.body.id_relleno ? parseInt(req.body.id_relleno) : undefined,
+    };
+
+    // Filtrar campos undefined
+    const productoDataFiltrado = Object.fromEntries(
+      Object.entries(productoData).filter(([_, value]) => value !== undefined)
+    );
+
+    // Actualizar el producto
+    const producto = await productoRepo.findOneBy({ id_producto });
+    if (!producto) {
+      return res.status(404).json({ success: false, message: "Producto no encontrado" });
+    }
+
+    productoRepo.merge(producto, productoDataFiltrado);
+    const productoActualizado = await productoRepo.save(producto);
+
+    // Procesar nuevas imágenes si existen
+    const nuevasImagenes = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try {
+          // Subir imagen a MinIO
+          const ruta_imagen = await uploadImage(file);
+          
+          // Crear registro de imagen en BD
+          const imagenData = {
+            ruta_imagen: ruta_imagen,
+            id_producto: id_producto
+          };
+          
+          const nuevaImagen = await createImagenService(imagenData);
+          if (nuevaImagen) {
+            nuevasImagenes.push(nuevaImagen);
+          }
+        } catch (error) {
+          console.error('Error al procesar imagen:', error);
+        }
+      }
+    }
+
+    // Obtener producto completo con imágenes
+    const productoCompleto = await productoRepo.findOne({
+      where: { id_producto },
+      relations: ["material", "tipo", "imagenes"]
+    });
+
+    res.json({ 
+      success: true, 
+      message: "Producto actualizado exitosamente", 
+      data: productoCompleto 
+    });
+  } catch (error) {
+    console.error('Error en updateProductoConImagenesController:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error interno del servidor", 
+      error: error.message 
+    });
   }
 };
