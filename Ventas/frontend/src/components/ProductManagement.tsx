@@ -44,25 +44,24 @@ interface Props {
   token: string;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function ProductManagement({ userRole, token }: Readonly<Props>) {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+function ProductManagement({ userRole, token }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState<ProductData | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tipos, setTipos] = useState<Tipo[]>([]);
   const [materiales, setMateriales] = useState<Material[]>([]);
   const [rellenos, setRellenos] = useState<Relleno[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<{  id: number, name: string  } | null>(null);
+  const [productToDelete, setProductToDelete] = useState<{ id: number, name: string } | null>(null);
+  // Add state for filters
   const [filter, setFilter] = useState("");
   const [sortStock, setSortStock] = useState<"asc" | "desc" | "none">("none");
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  // Eliminado imagePreview, no se usa ni se muestra preview
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -75,9 +74,9 @@ function ProductManagement({ userRole, token }: Readonly<Props>) {
     try {
       const res = await axios.get(`${API_BASE_URL}/products`, axiosConfig);
       setProducts(res.data.data);
-    } catch (e: any) {
-      const details = e?.response?.data?.details || "Error al cargar productos";
-      setNotification({ message: details, type: "error" });
+      setError("");
+    } catch {
+      setError("Error al cargar productos");
     }
     setLoading(false);
   };
@@ -184,34 +183,9 @@ function ProductManagement({ userRole, token }: Readonly<Props>) {
 
       fetchProducts();
       closeModal();
-    } catch (e: any) {
-      setNotification({ message: e?.response?.data?.details || "Error al guardar producto", type: "error" });
+    } catch {
+      setError("Error al guardar producto");
     }
-  };
-
-  // Recibe el FormData del modal y lo transforma a ProductData
-  const handleModalSubmit = (formData: FormData) => {
-    const productData: ProductData = {
-      nombre_producto: formData.get("nombre_producto") as string,
-      precio: formData.get("precio") as string,
-      stock: formData.get("stock") as string,
-      id_tipo: Number(formData.get("id_tipo")),
-      id_material: Number(formData.get("id_material")),
-      medida_ancho: formData.get("medida_ancho") as string,
-      medida_largo: formData.get("medida_largo") as string,
-      medida_alto: formData.get("medida_alto") as string,
-      descripcion: (formData.get("descripcion") as string) || "",
-    };
-    if (editData?.id_producto) {
-      productData.id_producto = editData.id_producto;
-    }
-    void handleSaveProduct(productData);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    setSelectedImage(file || null);
-    // No preview
   };
 
   // ✅ Este es el cambio importante:
@@ -241,12 +215,11 @@ function ProductManagement({ userRole, token }: Readonly<Props>) {
   const handleDeleteConfirm = async () => {
     if (!productToDelete) return;
     try {
-      const res = await axios.delete(`${API_BASE_URL}/products/${productToDelete.id}`, axiosConfig);
-      setNotification({ message: res?.data?.details || "Producto eliminado correctamente", type: "success" });
+      await axios.delete(`${API_BASE_URL}/products/${productToDelete.id}`, axiosConfig);
       fetchProducts();
       setProductToDelete(null);
-    } catch (e: any) {
-      setNotification({ message: e?.response?.data?.details || "Error al eliminar producto", type: "error" });
+    } catch {
+      setError("Error al eliminar producto");
     }
   };
 
@@ -263,28 +236,18 @@ function ProductManagement({ userRole, token }: Readonly<Props>) {
   };
 
   if (loading) return <p>Cargando productos...</p>;
-
-  // Filtrar productos por nombre
-  let filteredProducts = filter.trim().length === 0
-    ? products
-    : products.filter((p) =>
-        p.nombre_producto.toLowerCase().includes(filter.trim().toLowerCase())
-      );
-
-  // Ordenar por stock
-  if (sortStock !== "none") {
-    filteredProducts = [...filteredProducts].sort((a, b) => {
-      const stockA = Number(a.stock);
-      const stockB = Number(b.stock);
-      return sortStock === "asc" ? stockA - stockB : stockB - stockA;
-    });
-  }
+  if (error) return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 0' }}>
+      <Notification message={error} type="error" onClose={() => {}} />
+    </div>
+  );
 
   return (
     <div className="product-management" style={{ maxWidth: 900, margin: '0 auto', padding: '32px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
         <h2 style={{ fontWeight: 700, fontSize: 28, color: '#EC221F', margin: 0 }}>Panel de Gestión de Productos</h2>
         <button
+          className="pm-btn-create"
           type="button"
           onClick={openCreateModal}
           disabled={tipos.length === 0 || materiales.length === 0}
@@ -296,16 +259,112 @@ function ProductManagement({ userRole, token }: Readonly<Props>) {
         </button>
       </div>
 
-      <ul className="pm-list pm-list-scroll">
-        {products.length > 0 ? (
-          products.map((p) => (
-            <li className="pm-item" key={p.id_producto}>
-              <h4>{p.nombre_producto}</h4>
-              <p>${Number(p.precio).toLocaleString("es-CL")}</p>
-              <p>{p.stock} unidades</p>
-              <div>
-                <button className="edit-btn" onClick={() => openEditModal(p)}>Editar</button>
-                <button className="delete-btn" onClick={() => handleDeleteClick(p.id_producto!, p.nombre_producto)}>Eliminar</button>
+      {/* Filtros visuales */}
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+        <input
+          type="text"
+          placeholder="Filtrar por nombre..."
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          style={{ minWidth: 220, padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', background: '#fafbfc', fontSize: 15, outline: 'none', boxShadow: '0 1px 4px #0001' }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f5f5f7', borderRadius: 8, padding: '6px 12px' }}>
+          <span style={{ fontSize: 15, color: '#444', fontWeight: 500 }}>Ordenar por stock</span>
+          <button
+            type="button"
+            onClick={() => setSortStock(sortStock === "asc" ? "none" : "asc")}
+            style={{
+              background: sortStock === "asc" ? '#EC221F' : '#fff',
+              color: sortStock === "asc" ? '#fff' : '#222',
+              border: '1.5px solid #e0e0e0',
+              borderRadius: 6,
+              padding: '4px 12px',
+              cursor: 'pointer',
+              fontWeight: 700,
+              fontSize: 18,
+              boxShadow: sortStock === "asc" ? '0 2px 8px #EC221F22' : 'none',
+              transition: 'all 0.2s'
+            }}
+            aria-label="Ordenar stock ascendente"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={() => setSortStock(sortStock === "desc" ? "none" : "desc")}
+            style={{
+              background: sortStock === "desc" ? '#EC221F' : '#fff',
+              color: sortStock === "desc" ? '#fff' : '#222',
+              border: '1.5px solid #e0e0e0',
+              borderRadius: 6,
+              padding: '4px 12px',
+              cursor: 'pointer',
+              fontWeight: 700,
+              fontSize: 18,
+              boxShadow: sortStock === "desc" ? '0 2px 8px #EC221F22' : 'none',
+              transition: 'all 0.2s'
+            }}
+            aria-label="Ordenar stock descendente"
+          >
+            ↓
+          </button>
+        </div>
+      </div>
+
+      {/* Notification panel (shows only if error or success/info is set) */}
+      {error && (
+        <div style={{ marginBottom: 20 }}>
+          <Notification message={error} type="error" onClose={() => {}} />
+        </div>
+      )}
+
+      {/* Product cards grid with filters applied visually */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
+        {(products
+          .filter((p) =>
+            filter.trim().length === 0
+              ? true
+              : p.nombre_producto.toLowerCase().includes(filter.trim().toLowerCase())
+          )
+          .sort((a, b) => {
+            if (sortStock === "none") return 0;
+            const stockA = Number(a.stock);
+            const stockB = Number(b.stock);
+            return sortStock === "asc" ? stockA - stockB : sortStock === "desc" ? stockB - stockA : 0;
+          })
+        ).length > 0 ? (
+          (products
+            .filter((p) =>
+              filter.trim().length === 0
+                ? true
+                : p.nombre_producto.toLowerCase().includes(filter.trim().toLowerCase())
+            )
+            .sort((a, b) => {
+              if (sortStock === "none") return 0;
+              const stockA = Number(a.stock);
+              const stockB = Number(b.stock);
+              return sortStock === "asc" ? stockA - stockB : sortStock === "desc" ? stockB - stockA : 0;
+            })
+          ).map((p) => (
+            <div key={p.id_producto} style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 16px #0002', padding: 24, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 180, position: 'relative', border: '1.5px solid #f2f2f2' }}>
+              <div style={{ fontWeight: 700, fontSize: 20, color: '#222', marginBottom: 4 }}>{p.nombre_producto}</div>
+              <div style={{ color: '#EC221F', fontWeight: 600, fontSize: 18 }}>${Number(p.precio).toLocaleString("es-CL")}</div>
+              <div style={{ color: '#555', fontSize: 15 }}>{p.stock} unidades</div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                <button
+                  className="edit-btn"
+                  onClick={() => openEditModal(p)}
+                  style={{ background: '#fff', color: '#EC221F', border: '1.5px solid #EC221F', borderRadius: 6, padding: '6px 16px', fontWeight: 600, fontSize: 15, cursor: 'pointer', transition: 'all 0.2s' }}
+                >
+                  Editar
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDeleteClick(p.id_producto!, p.nombre_producto)}
+                  style={{ background: '#EC221F', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 600, fontSize: 15, cursor: 'pointer', transition: 'all 0.2s' }}
+                >
+                  Eliminar
+                </button>
               </div>
             </div>
           ))
@@ -316,7 +375,8 @@ function ProductManagement({ userRole, token }: Readonly<Props>) {
         )}
       </div>
 
-      {isModalOpen && (
+      {/* ...existing code for modals and confirm modal... */}
+      {isModalOpen && editData && (
         <ModalProduct
           isOpen={isModalOpen}
           editData={editData}
@@ -330,11 +390,17 @@ function ProductManagement({ userRole, token }: Readonly<Props>) {
           loadingRellenos={rellenos.length === 0}
           extraFields={
             <>
-              <label>
+              <label style={{ marginTop: 10 }}>
                 Imagen del producto:
                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
               </label>
-              {imagePreview && <img src={imagePreview} alt="Preview" style={{ maxHeight: "150px", marginTop: "8px" }} />}
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  style={{ maxHeight: "150px", marginTop: "8px", borderRadius: 8, boxShadow: '0 2px 8px #0002' }}
+                />
+              )}
             </>
           }
         />
