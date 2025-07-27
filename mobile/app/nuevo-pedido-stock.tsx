@@ -31,7 +31,7 @@ export default function NuevoPedidoStock() {
   const [saving, setSaving] = useState(false);
 
   // Constantes para el pedido de stock
-  const BODEGA_DEFECTO = 3;
+  const BODEGA_DEFECTO = 5;
 
   useEffect(() => {
     cargarProductos();

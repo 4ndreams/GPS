@@ -21,6 +21,8 @@ import productoPersonalizadoRoutes from "./producto_personalizado.routes.js"; //
 import tiendaRoutes from "./tienda.routes.js";
 import imagenesRoutes from "./imagenes.routes.js"; 
 import notificacionRoutes from "./notificacion.routes.js"; // Import notificacion routes 
+import minioRoutes from "./minio.routes.js";
+
 
 const router = Router();
 
@@ -31,6 +33,7 @@ router.get("/", (req, res) => {
 
 router.use(authRoutes);       
 router.use(contactRoutes);
+router.use(minioRoutes);
 router.use('/bodega',bodegaRoutes);  
 router.use('/imagen', imagenRoutes);
 router.use('/tipo', tipoRoutes);

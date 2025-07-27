@@ -6,6 +6,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   TextInput,
+  Alert,
+  Image,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BaseDashboard } from '../../components/BaseDashboard';
@@ -14,6 +17,7 @@ import { getConfigForProfile } from '../../config/dashboardConfig';
 import { useOrderActions } from '../../hooks/useOrderActions';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { OrdenFabrica } from '../../types/dashboard';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function DashboardFabrica() {
   const config = getConfigForProfile('fabrica');
@@ -23,6 +27,8 @@ export default function DashboardFabrica() {
   const [ordenesSeleccionadas, setOrdenesSeleccionadas] = useState<number[]>([]);
   const [transportista, setTransportista] = useState('');
   const [observacionesDespacho, setObservacionesDespacho] = useState('');
+  const [fotosDespacho, setFotosDespacho] = useState<string[]>([]);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
 
   const toggleOrdenSeleccionada = (id_orden: number) => {
     if (ordenesSeleccionadas.includes(id_orden)) {
@@ -32,27 +38,137 @@ export default function DashboardFabrica() {
     }
   };
 
+  const subirFotoAMinIO = async (uri: string): Promise<string> => {
+    try {
+      // Crear nombre único para la foto
+      const timestamp = Date.now();
+      const fileName = `despacho-${timestamp}.jpg`;
+      
+      // Obtener presigned URL del backend
+      const uploadUrlResponse = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/api/minio/upload-url?filename=${fileName}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!uploadUrlResponse.ok) {
+        throw new Error('Error al obtener URL de subida');
+      }
+
+      const { url: presignedUrl } = await uploadUrlResponse.json();
+
+      // Convertir la imagen a blob
+      const imageResponse = await fetch(uri);
+      const imageBlob = await imageResponse.blob();
+
+      // Subir la imagen usando el presigned URL
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: imageBlob,
+        headers: {
+          'Content-Type': 'image/jpeg',
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Error al subir la imagen');
+      }
+
+      // Construir la URL pública de la imagen
+      const publicUrl = `http://146.83.198.35:1411/mundopuertas/${fileName}`;
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('Error al subir foto a MinIO:', error);
+      throw error;
+    }
+  };
+
+  const tomarFoto = async () => {
+    try {
+      // Solicitar permisos para la cámara
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Error', 'Se necesitan permisos de cámara para tomar fotos');
+        return;
+      }
+
+      setSubiendoFoto(true);
+
+      // Abrir la cámara
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const uri = result.assets[0].uri;
+        
+        // Subir foto a MinIO
+        const minioUrl = await subirFotoAMinIO(uri);
+        
+        // Agregar la URL de MinIO a la lista de fotos
+        setFotosDespacho(prev => [...prev, minioUrl]);
+        
+        Alert.alert('Éxito', 'Foto agregada correctamente');
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      Alert.alert('Error', 'No se pudo subir la foto. Intenta nuevamente.');
+    } finally {
+      setSubiendoFoto(false);
+    }
+  };
+
+  const eliminarFoto = (index: number) => {
+    Alert.alert(
+      'Eliminar foto',
+      '¿Estás seguro de que quieres eliminar esta foto?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => {
+            setFotosDespacho(prev => prev.filter((_, i) => i !== index));
+          }
+        }
+      ]
+    );
+  };
+
   const handleCrearDespacho = async () => {
     // Validar que se haya ingresado la información requerida
     if (!transportista.trim()) {
-      alert('Por favor, ingresa el nombre del transportista');
+      Alert.alert('Error', 'Por favor, ingresa el nombre del transportista');
       return;
     }
 
     if (ordenesSeleccionadas.length === 0) {
-      alert('Por favor, selecciona al menos una orden para el despacho');
+      Alert.alert('Error', 'Por favor, selecciona al menos una orden para el despacho');
+      return;
+    }
+
+    // Validar que se haya tomado al menos una foto
+    if (fotosDespacho.length === 0) {
+      Alert.alert('Error', 'Debes tomar al menos una foto del despacho');
       return;
     }
 
     try {
-      // Crear el despacho con la información completa
-      //await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho);
-      
-      // Cambiar estado de todas las órdenes seleccionadas a "En tránsito" y agregar transportista
+      // Cambiar estado de todas las órdenes seleccionadas a "En tránsito"
       for (const ordenId of ordenesSeleccionadas) {
         await cambiarEstado(ordenId, 'En tránsito', { 
-
+          transportista: transportista.trim(),
           observaciones: observacionesDespacho.trim(),
+          fotos: fotosDespacho,
         });
       }
       
@@ -60,8 +176,12 @@ export default function DashboardFabrica() {
       setOrdenesSeleccionadas([]);
       setTransportista('');
       setObservacionesDespacho('');
+      setFotosDespacho([]);
+      
+      Alert.alert('Éxito', 'Despacho creado correctamente');
     } catch (error) {
       console.error('Error al crear despacho y cambiar estados:', error);
+      Alert.alert('Error', 'No se pudo crear el despacho. Intenta nuevamente.');
     }
   };
 
@@ -102,6 +222,57 @@ export default function DashboardFabrica() {
                 multiline
                 numberOfLines={3}
               />
+            </View>
+
+            {/* Sección de fotos */}
+            <View style={styles.formGroup}>
+              <Text style={[styles.formLabel, styles.requiredField]}>
+                Fotos del Despacho *
+              </Text>
+              
+              {/* Botón para tomar foto */}
+              <TouchableOpacity
+                style={styles.fotoButton}
+                onPress={tomarFoto}
+                disabled={subiendoFoto}
+              >
+                {subiendoFoto ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Ionicons name="camera" size={20} color="#FFFFFF" />
+                )}
+                <Text style={styles.fotoButtonText}>
+                  {subiendoFoto ? 'Subiendo...' : 'Tomar Foto'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Mostrar fotos tomadas */}
+              {fotosDespacho.length > 0 && (
+                <ScrollView horizontal style={styles.fotosContainer} showsHorizontalScrollIndicator={false}>
+                  {fotosDespacho.map((foto, index) => (
+                    <View key={index} style={styles.fotoItem}>
+                      <Image source={{ uri: foto }} style={styles.fotoPreview} />
+                      <TouchableOpacity
+                        style={styles.eliminarFotoButton}
+                        onPress={() => eliminarFoto(index)}
+                      >
+                        <Ionicons name="close-circle" size={20} color="#DC2626" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+              
+              {/* Mostrar contador de fotos y mensaje de requerimiento */}
+              {fotosDespacho.length > 0 ? (
+                <Text style={styles.fotoCounter}>
+                  {fotosDespacho.length} foto{fotosDespacho.length !== 1 ? 's' : ''} agregada{fotosDespacho.length !== 1 ? 's' : ''}
+                </Text>
+              ) : (
+                <Text style={styles.fotoRequiredMessage}>
+                  Debes tomar al menos una foto para crear el despacho
+                </Text>
+              )}
             </View>
 
             <Text style={styles.sectionTitle}>Pedidos Fabricados Disponibles</Text>
@@ -228,6 +399,9 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginBottom: 8,
   },
+  requiredField: {
+    color: '#DC2626',
+  },
   formInput: {
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
@@ -240,6 +414,57 @@ const styles = StyleSheet.create({
   formInputMultiline: {
     height: 80,
     textAlignVertical: 'top',
+  },
+  fotoButton: {
+    backgroundColor: '#0066CC',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  fotoButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  fotosContainer: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  fotoItem: {
+    position: 'relative',
+    marginRight: 12,
+  },
+  fotoPreview: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  eliminarFotoButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+  },
+  fotoCounter: {
+    fontSize: 12,
+    color: '#059669',
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  fotoRequiredMessage: {
+    fontSize: 12,
+    color: '#DC2626',
+    textAlign: 'center',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   sectionTitle: {
     fontSize: 16,
