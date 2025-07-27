@@ -44,11 +44,16 @@ export function authorizeRoles(allowedRoles) {
   return async (req, res, next) => {
     try {
       const userRepository = AppDataSource.getRepository(User);
-      
-      const userFound = await userRepository.findOneBy({ 
-        id_usuario: req.user.id_usuario 
-      });
-
+      // Permitir que el token tenga id_usuario o id
+      const userId = req.user.id_usuario || req.user.id;
+      if (!userId) {
+        return handleErrorClient(
+          res,
+          401,
+          "Token JWT sin id_usuario ni id"
+        );
+      }
+      const userFound = await userRepository.findOneBy({ id_usuario: userId });
       if (!userFound) {
         return handleErrorClient(
           res,
@@ -56,7 +61,6 @@ export function authorizeRoles(allowedRoles) {
           "Usuario no encontrado en la base de datos"
         );
       }
-
       if (!allowedRoles.includes(userFound.rol)) {
         return handleErrorClient(
           res,
@@ -65,7 +69,6 @@ export function authorizeRoles(allowedRoles) {
           `Se requiere uno de los siguientes roles: ${allowedRoles.join(", ")}`
         );
       }
-
       req.user.rol = userFound.rol;
       next();
     } catch (error) {
