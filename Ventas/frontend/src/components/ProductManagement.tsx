@@ -14,6 +14,11 @@ interface Material {
   nombre_material: string;
 }
 
+interface Relleno {
+  id_relleno: number;
+  nombre_relleno: string;
+}
+
 interface ProductData {
   id_producto?: number;
   nombre_producto: string;
@@ -21,15 +26,16 @@ interface ProductData {
   stock: string | number;
   descripcion?: string;
   medida_ancho: string;
-  medida_largo: string;
   medida_alto: string;
   id_material: number | string;
   id_tipo: number | string;
+  id_relleno: number | string;
 }
 
 interface Product extends ProductData {
   tipo?: Tipo;
   material?: Material;
+  relleno?: Relleno;
 }
 
 interface Props {
@@ -49,6 +55,7 @@ function ProductManagement({ userRole, token }: Props) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tipos, setTipos] = useState<Tipo[]>([]);
   const [materiales, setMateriales] = useState<Material[]>([]);
+  const [rellenos, setRellenos] = useState<Relleno[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{ id: number, name: string } | null>(null);
 
@@ -72,16 +79,19 @@ function ProductManagement({ userRole, token }: Props) {
 
   const fetchTiposYMateriales = async () => {
     try {
-      const [resTipos, resMateriales] = await Promise.all([
+      const [resTipos, resMateriales, resRellenos] = await Promise.all([
         axios.get(`${API_BASE_URL}/tipos`),
         axios.get(`${API_BASE_URL}/materiales`),
+        axios.get(`${API_BASE_URL}/rellenos`),
       ]);
       const tiposData = Array.isArray(resTipos.data) ? resTipos.data : resTipos.data.data;
       const materialesData = Array.isArray(resMateriales.data) ? resMateriales.data : resMateriales.data.data;
+      const rellenosData = Array.isArray(resRellenos.data) ? resRellenos.data : resRellenos.data.data;
       setTipos(tiposData.flat().filter(Boolean));
       setMateriales(materialesData.flat().filter(Boolean));
+      setRellenos(rellenosData.flat().filter(Boolean));
     } catch (e) {
-      console.error("Error al cargar tipos o materiales", e);
+      console.error("Error al cargar tipos, materiales o rellenos", e);
     }
   };
 
@@ -99,10 +109,10 @@ function ProductManagement({ userRole, token }: Props) {
       stock: "",
       descripcion: "",
       medida_ancho: "",
-      medida_largo: "",
       medida_alto: "",
       id_material: materiales[0]?.id_material || 1,
       id_tipo: tipos[0]?.id_tipo || 1,
+      id_relleno: "",
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -117,10 +127,10 @@ function ProductManagement({ userRole, token }: Props) {
       stock: product.stock.toString(),
       descripcion: product.descripcion || "",
       medida_ancho: product.medida_ancho,
-      medida_largo: product.medida_largo,
       medida_alto: product.medida_alto,
       id_material: product.material?.id_material ?? product.id_material,
       id_tipo: product.tipo?.id_tipo ?? product.id_tipo,
+      id_relleno: product.relleno?.id_relleno ?? product.id_relleno ?? "",
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -142,6 +152,7 @@ function ProductManagement({ userRole, token }: Props) {
         stock: Number(productData.stock),
         id_material: Number(productData.id_material),
         id_tipo: Number(productData.id_tipo),
+        id_relleno: Number(productData.id_relleno),
       };
 
       let savedProduct;
@@ -181,8 +192,8 @@ function ProductManagement({ userRole, token }: Props) {
       stock: formData.get("stock") as string,
       id_tipo: Number(formData.get("id_tipo")),
       id_material: Number(formData.get("id_material")),
+      id_relleno: Number(formData.get("id_relleno")),
       medida_ancho: formData.get("medida_ancho") as string,
-      medida_largo: formData.get("medida_largo") as string,
       medida_alto: formData.get("medida_alto") as string,
       descripcion: (formData.get("descripcion") as string) || "",
     };
@@ -263,10 +274,12 @@ function ProductManagement({ userRole, token }: Props) {
           editData={editData}
           tipos={tipos}
           materiales={materiales}
+          rellenos={rellenos}
           onClose={closeModal}
           onSubmit={handleModalSubmit}
           loadingTipos={tipos.length === 0}
           loadingMateriales={materiales.length === 0}
+          loadingRellenos={rellenos.length === 0}
           extraFields={
             <>
               <label>

@@ -59,7 +59,7 @@ export const getProductById = async (req, res) => {
   try {
     const producto = await productoRepo.findOne({
       where: { id_producto: id },
-      relations: ["material", "tipo", "imagenes"],
+      relations: ["material", "tipo", "imagenes", "relleno"],
     });
 
     if (!producto) {
