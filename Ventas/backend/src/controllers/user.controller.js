@@ -188,28 +188,42 @@ export async function updateProfile(req, res) {
     const userId = req.user?.id_usuario;
     const { body } = req;
 
+    console.log('=== UPDATE PROFILE DEBUG ===');
+    console.log('User ID:', userId);
+    console.log('Request body:', body);
+    console.log('Body keys:', Object.keys(body));
+
     // Valida el body si tienes validación
     const { error: bodyError } = userBodyValidation.validate(body);
-    if (bodyError)
+    if (bodyError) {
+      console.log('Validation error:', bodyError.message);
+      console.log('Validation details:', bodyError.details);
       return handleErrorClient(
         res,
         400,
         "Error de validación en los datos enviados",
         bodyError.message
       );
+    }
+
+    console.log('Validation passed, calling service...');
 
     const [user, userError] = await updateProfileService(userId, body);
 
-    if (userError)
+    if (userError) {
+      console.log('Service error:', userError);
       return handleErrorClient(
         res,
         400,
         "Error modificando el perfil",
         userError
       );
+    }
 
+    console.log('Profile updated successfully');
     handleSuccess(res, 200, "Perfil modificado correctamente", user);
   } catch (error) {
+    console.error('Unexpected error in updateProfile:', error);
     handleErrorServer(res, 500, error.message);
   }
 }

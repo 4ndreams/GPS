@@ -14,9 +14,10 @@ interface NavbarProps {
   readonly user: User;
   readonly onLogout?: () => void;
   readonly cartItemCount: number;
+  readonly onContactoClick?: () => void; // <-- Agrego prop opcional
 }
 
-function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
+function Navbar({ user, onLogout, cartItemCount, onContactoClick }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false); 
   const [userMenuOpen, setUserMenuOpen] = useState(false); 
   const userMenuRef = useRef<HTMLDivElement>(null); 
@@ -65,7 +66,21 @@ function Navbar({ user, onLogout, cartItemCount }: NavbarProps) {
           <li><Link to="/" className="navbar-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
           <li><Link to="/productos" className="navbar-link" onClick={() => setIsOpen(false)}>Productos</Link></li>
           <li><Link to="/about-us" className="navbar-link" onClick={() => setIsOpen(false)}>Sobre Nosotros</Link></li>
-          <li><Link to="/contacto" className="navbar-link" onClick={() => setIsOpen(false)}>Contacto</Link></li>
+          <li>
+            <a
+              href="#contacto"
+              className="navbar-link"
+              onClick={e => {
+                e.preventDefault();
+                setIsOpen(false);
+                if (onContactoClick) {
+                  onContactoClick();
+                }
+              }}
+            >
+              Contacto
+            </a>
+          </li>
           <li><Link to="/cotizar" className="navbar-link" onClick={() => setIsOpen(false)}>Cotizar</Link></li>
         </ul>
         {/* Iconos (carrito y perfil) */}

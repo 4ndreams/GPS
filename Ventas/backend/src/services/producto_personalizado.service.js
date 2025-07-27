@@ -1,6 +1,6 @@
 "use strict";
 import { AppDataSource } from "../config/configDb.js";
-import { sendCotizacionConfirmationEmail, sendCotizacionStatusChangeEmail } from "../helpers/email.helper.js";
+import { sendCotizacionConfirmationEmail, sendCotizacionStatusChangeEmail, sendCotizacionEditedEmail } from "../helpers/email.helper.js";
 
 export async function getProductosPersonalizadosService() {
     try {
@@ -131,7 +131,15 @@ export async function updateProductoPersonalizadoService(id_producto_personaliza
             where: { id_producto_personalizado },
             relations: ["relleno", "material", "usuario"]
         });
-        
+
+        // Enviar email de notificación de edición de cotización
+        try {
+            await sendCotizacionEditedEmail(updated);
+        } catch (emailError) {
+            console.error(`Error al enviar email de edición para cotización #${updated.id_producto_personalizado}:`, emailError.message);
+            // No fallar la edición si el email falla, solo registrar el error
+        }
+
         return [updated, null];
     } catch (error) {
         return [error, "Error al actualizar producto personalizado"];

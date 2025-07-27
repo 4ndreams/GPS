@@ -209,6 +209,11 @@ export async function getProfileService(userId) {
 
 export async function updateProfileService(userId, body) {
   try {
+    console.log('=== UPDATE PROFILE SERVICE DEBUG ===');
+    console.log('User ID:', userId);
+    console.log('Body received:', body);
+    console.log('Body keys:', Object.keys(body));
+    
     const userRepository = AppDataSource.getRepository(User);
 
     // Busca el usuario por su ID
@@ -218,16 +223,37 @@ export async function updateProfileService(userId, body) {
 
     if (!userFound) return [null, "Usuario no encontrado"];
 
-    // Verifica si ya existe otro usuario con el mismo rut o email
-    const existingUser = await userRepository.findOne({
-      where: [
-        { rut: body.rut },
-        { email: body.email }
-      ],
-    });
+    // Verifica si ya existe otro usuario con el mismo rut o email (solo si se están enviando estos campos)
+    if (body.rut || body.email) {
+      console.log('Checking for duplicates...');
+      console.log('Body rut:', body.rut);
+      console.log('Body email:', body.email);
+      
+      const whereConditions = [];
+      
+      if (body.rut) {
+        whereConditions.push({ rut: body.rut });
+      }
+      
+      if (body.email) {
+        whereConditions.push({ email: body.email });
+      }
+      
+      console.log('Where conditions:', whereConditions);
+      
+      if (whereConditions.length > 0) {
+        const existingUser = await userRepository.findOne({
+          where: whereConditions,
+        });
 
-    if (existingUser && existingUser.id_usuario !== userFound.id_usuario) {
-      return [null, "Ya existe un usuario con el mismo rut o email"];
+        console.log('Existing user found:', existingUser ? existingUser.id_usuario : 'None');
+        console.log('Current user ID:', userFound.id_usuario);
+
+        if (existingUser && existingUser.id_usuario !== userFound.id_usuario) {
+          console.log('Duplicate found!');
+          return [null, "Ya existe un usuario con el mismo rut o email"];
+        }
+      }
     }
 
     if (body.password) {
@@ -239,12 +265,14 @@ export async function updateProfileService(userId, body) {
     }
 
     const dataUserUpdate = {
-      nombre: body.nombre,
-      apellidos: body.apellidos,
-      email: body.email,
-      rut: body.rut,
       updatedAt: new Date(),
     };
+
+    // Solo actualizar los campos que se están enviando
+    if (body.nombre !== undefined) dataUserUpdate.nombre = body.nombre;
+    if (body.apellidos !== undefined) dataUserUpdate.apellidos = body.apellidos;
+    if (body.email !== undefined) dataUserUpdate.email = body.email;
+    if (body.rut !== undefined) dataUserUpdate.rut = body.rut;
 
     if (body.newPassword && body.newPassword.trim() !== "") {
       dataUserUpdate.password = await encryptPassword(body.newPassword);

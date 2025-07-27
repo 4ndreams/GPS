@@ -158,6 +158,7 @@ export const ProductoPersonalizadoBodyValidation = Joi.object({
         .integer()
         .positive()
         .optional()
+        .allow(null)
         .messages({
             "number.base": "El ID del usuario debe ser un número entero positivo.",
             "number.integer": "El ID del usuario debe ser un número entero.",
@@ -310,6 +311,7 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
         .integer()
         .positive()
         .optional()
+        .allow(null)
         .messages({
             "number.base": "El ID del usuario debe ser un número entero positivo.",
             "number.integer": "El ID del usuario debe ser un número entero.",

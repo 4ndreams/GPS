@@ -12,7 +12,7 @@ import { isAdmin, authorizeRoles } from "../middlewares/autorization.middleware.
 
 const router = Router();
 
-router.get("/all", getProducts);
+router.get("/", getProducts);
 router.get("/:id", getProductById);
 
 // Permisos específicos por endpoint
