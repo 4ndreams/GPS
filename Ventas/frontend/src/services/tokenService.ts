@@ -366,3 +366,4 @@ export const getAuthToken = (): string | null => TokenService.getToken();
 export const setAuthToken = (token: string): void => TokenService.setToken(token);
 export const removeAuthToken = (): void => TokenService.removeToken();
 export const isAuthenticated = (): boolean => TokenService.isTokenValid();
+export default TokenService;
