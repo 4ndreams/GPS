@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 import "../styles/modal.css";
 
 interface Tipo {
@@ -27,12 +28,13 @@ interface ProductData {
 interface ModalProductProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: ProductData) => void;
+  onSubmit: (data: FormData) => void;
   editData: ProductData | null;
   tipos: Tipo[];
   materiales: Material[];
   loadingTipos?: boolean;
   loadingMateriales?: boolean;
+  extraFields?: React.ReactNode;
 }
 
 const ModalProduct: React.FC<ModalProductProps> = ({
@@ -44,6 +46,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
   materiales,
   loadingTipos = false,
   loadingMateriales = false,
+  extraFields,
 }) => {
   const [formData, setFormData] = useState<ProductData>({
     nombre_producto: "",
@@ -56,6 +59,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     medida_alto: "",
     descripcion: "",
   });
+
+
 
   useEffect(() => {
     if (editData) {
@@ -84,6 +89,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         descripcion: "",
       });
     }
+
   }, [editData]);
 
   const handleChange = (
@@ -95,20 +101,26 @@ const ModalProduct: React.FC<ModalProductProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, String(value));
+    });
+
+    onSubmit(data);
     onClose();
   };
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
           <h2>{editData && editData.id_producto ? "Editar Producto" : "Crear Producto"}</h2>
           <button className="close-btn" type="button" onClick={onClose}>&times;</button>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="modal-body">
             <label>
               Nombre
@@ -194,7 +206,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 {loadingTipos ? (
                   <option disabled>Cargando tipos...</option>
                 ) : (
-                  (Array.isArray(tipos) ? tipos.filter(Boolean) : []).map((tipo) => (
+                  tipos.map((tipo) => (
                     <option key={tipo.id_tipo} value={tipo.id_tipo}>
                       {tipo.nombre_tipo}
                     </option>
@@ -214,7 +226,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 {loadingMateriales ? (
                   <option disabled>Cargando materiales...</option>
                 ) : (
-                  (Array.isArray(materiales) ? materiales.filter(Boolean) : []).map((material) => (
+                  materiales.map((material) => (
                     <option key={material.id_material} value={material.id_material}>
                       {material.nombre_material}
                     </option>
@@ -222,9 +234,15 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 )}
               </select>
             </label>
+
+            {/* Campos extra */}
+            {extraFields}
           </div>
+
           <div className="modal-actions">
-            <button className="save-btn" type="submit">{editData && editData.id_producto ? "Guardar cambios" : "Crear"}</button>
+            <button className="save-btn" type="submit">
+              {editData && editData.id_producto ? "Guardar cambios" : "Crear"}
+            </button>
             <button className="cancel-btn" type="button" onClick={onClose}>
               Cancelar
             </button>
@@ -233,6 +251,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default ModalProduct;

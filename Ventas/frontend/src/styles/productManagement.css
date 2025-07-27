@@ -1,19 +1,99 @@
+
 .product-management {
-  max-width: 960px;
-  margin: 40px auto;
-  padding: 24px;
-  background-color: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  font-family: 'Segoe UI', sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.pm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 36px;
 }
 
 .pm-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 24px;
-  color: #333;
-  text-align: center;
+  font-weight: 700;
+  font-size: 28px;
+  color: #EC221F;
+  margin: 0;
+}
+
+.pm-btn-create {
+  background: #EC221F;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 2px 8px #0001;
+  transition: background 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 1;
+}
+.pm-btn-create:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pm-filtros {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+.pm-input-filter {
+  min-width: 220px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0e0;
+  background: #fafbfc;
+  font-size: 15px;
+  outline: none;
+  box-shadow: 0 1px 4px #0001;
+}
+
+.pm-sort-stock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f5f7;
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+.pm-sort-stock span {
+  font-size: 15px;
+  color: #444;
+  font-weight: 500;
+}
+.pm-btn-sort {
+  background: #fff;
+  color: #222;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: none;
+  transition: all 0.2s;
+}
+.pm-btn-sort.active {
+  background: #EC221F;
+  color: #fff;
+  box-shadow: 0 2px 8px #EC221F22;
+}
+
+.pm-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
 }
 
 .pm-form {
@@ -60,12 +140,6 @@
   background-color: #0056b3;
 }
 
-.pm-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 32px;
-  border-top: 1px solid #e0e0e0;
-}
 
 .pm-item {
   display: flex;
