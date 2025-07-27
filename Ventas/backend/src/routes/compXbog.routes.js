@@ -6,7 +6,8 @@ import { isFabricaOrAdmin } from "../middlewares/autorization.middleware.js";
 
 const router = Router();
 
-
+router.use(authenticateJwt);
+router.use(isFabricaOrAdmin);
 
 router.post("/", async (req, res) => {
     const body = req.body;

@@ -6,7 +6,6 @@ import {
     updateCompraController,
     deleteCompraController
 } from '../controllers/compras.controller.js';
-import { crearCompXBod } from '../function/Com_bod.function.js';
 import { authenticateJwt } from '../middlewares/authentication.middleware.js';
 import { isFabricaOrAdmin, authorizeRoles } from '../middlewares/autorization.middleware.js';
 
