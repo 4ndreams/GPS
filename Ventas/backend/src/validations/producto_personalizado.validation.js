@@ -158,6 +158,7 @@ export const ProductoPersonalizadoBodyValidation = Joi.object({
         .integer()
         .positive()
         .optional()
+        .allow(null)
         .messages({
             "number.base": "El ID del usuario debe ser un número entero positivo.",
             "number.integer": "El ID del usuario debe ser un número entero.",
@@ -260,6 +261,15 @@ export const ProductoPersonalizadoBodyValidation = Joi.object({
         .messages({
             "string.base": "El estado debe ser una cadena de texto.",
             "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar', 'Cancelada', 'Producto Entregado'."
+        }),
+    precio: Joi.number()
+        .integer()
+        .min(1)
+        .optional()
+        .messages({
+            "number.base": "El precio debe ser un número.",
+            "number.integer": "El precio debe ser un número entero.",
+            "number.min": "El precio debe ser mayor a 0.",
         })
 });
 
@@ -301,6 +311,7 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
         .integer()
         .positive()
         .optional()
+        .allow(null)
         .messages({
             "number.base": "El ID del usuario debe ser un número entero positivo.",
             "number.integer": "El ID del usuario debe ser un número entero.",
@@ -407,5 +418,14 @@ export const ProductoPersonalizadoBodyValidationLoggedUser = Joi.object({
         .messages({
             "string.base": "El estado debe ser una cadena de texto.",
             "any.only": "El estado debe ser uno de: 'Solicitud Recibida', 'En Proceso', 'Lista para retirar', 'Cancelada', 'Producto Entregado'."
+        }),
+    precio: Joi.number()
+        .integer()
+        .min(1)
+        .optional()
+        .messages({
+            "number.base": "El precio debe ser un número.",
+            "number.integer": "El precio debe ser un número entero.",
+            "number.min": "El precio debe ser mayor a 0.",
         })
 });

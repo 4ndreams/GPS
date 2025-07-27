@@ -5,14 +5,17 @@ import { authenticateJwt } from "../middlewares/authentication.middleware.js";
 import { isFabricaOrAdmin } from "../middlewares/autorization.middleware.js";
 
 const router = Router();
-
+router.use(authenticateJwt);
+router.use(isFabricaOrAdmin);
 router.put("/", async (req, res) => {
+    console.log("Añadiendo puertas con body:", req.body);
     const body = req.body;
     const [message, error] = await añadir_puertas(body);
     if (error) {
         if (error.includes("No hay suficiente stock de material") || error.includes("No hay suficiente stock de relleno")) {
             return handleErrorClient(res, 400, error);
         } else if (error.includes("Producto no existente")) {
+            console.error("Error al añadir puertas:", error);
             return handleErrorClient(res, 404, error);
         }else{
             return handleErrorServer(res, 500, error);

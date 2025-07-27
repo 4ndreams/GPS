@@ -17,12 +17,9 @@ export class TokenService {
    */
   static generateToken(payload) {
     return jwt.sign(
-      {
-        ...payload,
-        iat: Math.floor(Date.now() / 1000), // Tiempo de emisión
-        exp: Math.floor(Date.now() / 1000) + TOKEN_EXPIRATION // Tiempo de expiración
-      },
-      ACCESS_TOKEN_SECRET
+      payload,
+      ACCESS_TOKEN_SECRET,
+      { expiresIn: TOKEN_EXPIRATION } // por ejemplo, '24h' o 86400
     );
   }
 
@@ -118,6 +115,7 @@ export class TokenService {
         email: user.email,
         rut: user.rut,
         rol: user.rol,
+        flag_blacklist: user.flag_blacklist 
       };
 
       const newToken = this.generateToken(newTokenPayload);
@@ -152,7 +150,8 @@ export class TokenService {
         user: {
           email: decoded.email,
           rol: decoded.rol,
-          nombreCompleto: decoded.nombreCompleto
+          nombreCompleto: decoded.nombreCompleto,
+          flag_blacklist: decoded.flag_blacklist,
         }
       };
     } catch (error) {

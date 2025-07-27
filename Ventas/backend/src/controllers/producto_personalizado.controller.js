@@ -29,15 +29,15 @@ function autoCompleteUserData(req) {
         if (RutValidator.isValidRut(req.user.rut)) {
             req.body.rut_contacto = req.user.rut;
         } else {
-            console.warn(`⚠️ RUT del usuario ${req.user.email} no es válido: ${req.user.rut}. No se auto-completará.`);
+            console.warn(`RUT del usuario ${req.user.email} no es válido: ${req.user.rut}. No se auto-completará.`);
         }
     }
     
     if (!req.body.email_contacto && req.user.email) {
         req.body.email_contacto = req.user.email;
     }
-    
-    console.log(`✅ Datos de usuario logueado asignados automáticamente: ${req.user.email}`);
+
+    console.log(`Datos de usuario logueado asignados automáticamente: ${req.user.email}`);
 }
 
 export async function getProductoPersonalizadoController(req, res) {
@@ -86,12 +86,10 @@ export async function createProductoPersonalizadoController(req, res) {
         const validation = isLoggedUser 
             ? ProductoPersonalizadoBodyValidationLoggedUser 
             : ProductoPersonalizadoBodyValidation;
-        
-        console.log('🔍 Usando validación para:', isLoggedUser ? 'usuario logueado' : 'usuario anónimo');
-        
+                
         const { error } = validation.validate(req.body);
         if (error) {
-            console.error('❌ Error de validación:', error.details[0].message);
+            console.error('Error de validación:', error.details[0].message);
             return handleErrorClient(res, 400, error.details[0].message);
         }
         
@@ -100,14 +98,14 @@ export async function createProductoPersonalizadoController(req, res) {
         const [newProductoPersonalizado, errorMessage] = await createProductoPersonalizadoService(req.body);
         
         if (errorMessage) {
-            console.error('❌ Error del servicio:', errorMessage);
+            console.error(' Error del servicio:', errorMessage);
             return handleErrorServer(res, 500, errorMessage);
         }
 
-        console.log('🎉 Producto personalizado creado exitosamente:', newProductoPersonalizado.id_producto_personalizado);
+        console.log('Producto personalizado creado exitosamente:', newProductoPersonalizado.id_producto_personalizado);
         return handleSuccess(res, 201, "Producto personalizado creado exitosamente", newProductoPersonalizado);
     } catch (error) {
-        console.error('💥 Error inesperado en createProductoPersonalizadoController:', error);
+        console.error('Error inesperado en createProductoPersonalizadoController:', error);
         return handleErrorServer(res, 500, "Error interno del servidor", error.message);
     }
 }
@@ -115,9 +113,8 @@ export async function createProductoPersonalizadoController(req, res) {
 export async function updateProductoPersonalizadoController(req, res) { 
     try {
         const { id_producto_personalizado } = req.params;
-        
-        // Auto-completar datos del usuario si está logueado
-        autoCompleteUserData(req);
+
+        // Ya NO auto-completar datos del usuario si está logueado al actualizar
 
         // Usar validación diferenciada según si el usuario está logueado
         const isLoggedUser = req.user && req.user.id_usuario;
@@ -125,7 +122,12 @@ export async function updateProductoPersonalizadoController(req, res) {
             ? ProductoPersonalizadoBodyValidationLoggedUser 
             : ProductoPersonalizadoBodyValidation;
 
-        const { error } = validation.validate(req.body);
+        // Eliminar campos no permitidos del body
+        const forbiddenFields = ["createdAt", "updatedAt", "fecha_creacion", "fecha_actualizacion"];
+        forbiddenFields.forEach(field => { if (field in req.body) delete req.body[field]; });
+
+        // Permitir validación parcial (solo los campos enviados)
+        const { error } = validation.validate(req.body, { presence: 'optional' });
         if (error) {
             return handleErrorClient(res, 400, error.details[0].message);
         }
@@ -206,8 +208,12 @@ export async function updateEstadoProductoPersonalizadoController(req, res) {
         }
 
         const [updatedProductoPersonalizado, errorMessage] = await updateEstadoProductoPersonalizadoService(Number(id_producto_personalizado), estado);
-        
+
         if (errorMessage) {
+            // Si el error es por precio nulo o vacío, devolver 400
+            if (errorMessage.includes("precio es nulo o vacío")) {
+                return handleErrorClient(res, 400, errorMessage);
+            }
             return handleErrorClient(res, 404, errorMessage);
         }
 
@@ -234,6 +240,40 @@ export async function getMyProductosPersonalizadosController(req, res) {
         }
 
         return handleSuccess(res, 200, "Mis cotizaciones obtenidas exitosamente", productosPersonalizados);
+    } catch (error) {
+        console.error(error);
+        return handleErrorServer(res, 500, "Error interno del servidor");
+    }
+}
+
+export async function updatePrecioProductoPersonalizadoController(req, res) {
+    try {
+        const { id_producto_personalizado } = req.params;
+        const { precio } = req.body;
+
+        // Validar el ID del producto personalizado
+        const idValidation = ProductoPersonalizadoQueryValidation.validate({ id_producto_personalizado });
+        if (idValidation.error) {
+            return handleErrorClient(res, 400, idValidation.error.details[0].message);
+        }
+
+        // Validar que se proporcione el precio
+        if (!precio) {
+            return handleErrorClient(res, 400, "El precio es obligatorio");
+        }
+
+        // Validar que el precio sea un número entero mayor a 0
+        if (!Number.isInteger(precio) || precio <= 0) {
+            return handleErrorClient(res, 400, "El precio debe ser un número entero mayor a 0");
+        }
+
+        const [updatedProductoPersonalizado, errorMessage] = await updateProductoPersonalizadoService(Number(id_producto_personalizado), { precio });
+        
+        if (errorMessage) {
+            return handleErrorClient(res, 404, errorMessage);
+        }
+
+        return handleSuccess(res, 200, "Precio del producto personalizado actualizado exitosamente", updatedProductoPersonalizado);
     } catch (error) {
         console.error(error);
         return handleErrorServer(res, 500, "Error interno del servidor");

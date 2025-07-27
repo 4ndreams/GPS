@@ -10,7 +10,6 @@ export interface CotizacionData {
   medida_alto: number;
   medida_largo: number;
   tipo_puerta: string; // 'puertaPaso' o 'puertaCloset'
-  telefono_contacto: string;
   mensaje: string;
   // Campos opcionales para usuarios no logueados
   nombre_apellido_contacto?: string;
@@ -22,7 +21,6 @@ export interface CotizacionResponse {
   id_producto_personalizado: number;
   nombre_apellido_contacto: string;
   email_contacto: string;
-  telefono_contacto: string;
   rut_contacto: string;
   mensaje: string;
   medida_ancho: number;
@@ -30,6 +28,7 @@ export interface CotizacionResponse {
   medida_largo: number;
   tipo_puerta: string;
   estado: string;
+  precio?: number; // Precio opcional, se asigna desde gestión
   createdAt: string;
   updatedAt: string;
   material: {

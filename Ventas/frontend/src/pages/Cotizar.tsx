@@ -10,7 +10,12 @@ import {
   type Relleno as RellenoType 
 } from '@services/materialesService';
 import Notification from '@components/Notification';
+import { formatRut } from '@utils/validations';
+
 import '@styles/Cotizar.css';
+
+// Establecer el título de la página
+import { useRef } from 'react';
 
 // Constantes de validación
 const VALIDATION_RULES = {
@@ -48,6 +53,8 @@ interface ValidationErrors {
 }
 
 function Cotizar() {
+  // Guardar el título original para restaurar si es necesario
+  const originalTitle = useRef(document.title);
   const [user, setUser] = useState<any>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -90,8 +97,10 @@ function Cotizar() {
   });
 
   useEffect(() => {
+    // Cambiar el título de la página al montar
+    document.title = 'Solicitar Cotización | TERPLAC';
     setIsLoggedIn(estaLogueado());
-    
+
     // Cargar materiales y rellenos
     const cargarDatos = async () => {
       setCargandoMateriales(true);
@@ -109,7 +118,7 @@ function Cotizar() {
         setCargandoMateriales(false);
       }
     };
-    
+
     if (estaLogueado()) {
       getUserProfile()
         .then(data => {
@@ -124,8 +133,13 @@ function Cotizar() {
           console.log('No se pudo obtener el perfil del usuario');
         });
     }
-    
+
     cargarDatos();
+
+    return () => {
+      // Restaurar el título original al desmontar
+      document.title = originalTitle.current;
+    };
   }, []);
 
   // Validar el paso actual cuando cambien los datos relevantes
@@ -154,30 +168,39 @@ function Cotizar() {
     if (!value || isNaN(numValue)) {
       return `${fieldName} es requerido`;
     }
-    
+
     if (dimension === 'ancho') {
-      // Para el ancho, necesitamos verificar el tipo de puerta
-      if (!formData.tipo_puerta) {
-        return 'Primero debe seleccionar el tipo de puerta';
-      }
-      
-      const limits = VALIDATION_RULES.medidas.ancho[formData.tipo_puerta as 'puertaPaso' | 'puertaCloset'];
-      if (numValue < limits.min) {
-        return `${fieldName} debe ser mayor a ${limits.min} cm para ${formData.tipo_puerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'}`;
-      }
-      if (numValue > limits.max) {
-        return `${fieldName} debe ser menor a ${limits.max} cm para ${formData.tipo_puerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'}`;
-      }
+      return validateAncho(numValue, fieldName);
     } else if (dimension === 'alto') {
-      const limits = VALIDATION_RULES.medidas.alto;
-      if (numValue < limits.min) {
-        return `${fieldName} debe ser mayor a ${limits.min} cm`;
-      }
-      if (numValue > limits.max) {
-        return `${fieldName} debe ser menor a ${limits.max} cm`;
-      }
+      return validateAlto(numValue, fieldName);
     }
-    
+
+    return null;
+  };
+
+  const validateAncho = (numValue: number, fieldName: string): string | null => {
+    if (!formData.tipo_puerta) {
+      return 'Primero debe seleccionar el tipo de puerta';
+    }
+    const tipoPuerta = formData.tipo_puerta as 'puertaPaso' | 'puertaCloset';
+    const limits = VALIDATION_RULES.medidas.ancho[tipoPuerta];
+    if (numValue < limits.min) {
+      return `${fieldName} debe ser mayor a ${limits.min} cm para ${tipoPuerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'}`;
+    }
+    if (numValue > limits.max) {
+      return `${fieldName} debe ser menor a ${limits.max} cm para ${tipoPuerta === 'puertaPaso' ? 'puertas de paso' : 'puertas de closet'}`;
+    }
+    return null;
+  };
+
+  const validateAlto = (numValue: number, fieldName: string): string | null => {
+    const limits = VALIDATION_RULES.medidas.alto;
+    if (numValue < limits.min) {
+      return `${fieldName} debe ser mayor a ${limits.min} cm`;
+    }
+    if (numValue > limits.max) {
+      return `${fieldName} debe ser menor a ${limits.max} cm`;
+    }
     return null;
   };
 
@@ -218,12 +241,34 @@ function Cotizar() {
     return null;
   };
 
+  
+  // Valida el RUT incluyendo el dígito verificador
   const validateRut = (value: string): string | null => {
     if (!value.trim()) {
       return 'El RUT es requerido';
     }
     if (!VALIDATION_RULES.rut.pattern.test(value)) {
       return 'El formato del RUT no es válido (ej: 12345678-9)';
+    }
+    const [rutBody, dv] = value.split('-');
+    if (!rutBody || !dv) {
+      return 'El formato del RUT no es válido (ej: 12345678-9)';
+    }
+    // Calcular dígito verificador
+    let sum = 0;
+    let multiplier = 2;
+    for (let i = rutBody.length - 1; i >= 0; i--) {
+      sum += parseInt(rutBody[i]) * multiplier;
+      multiplier = multiplier === 7 ? 2 : multiplier + 1;
+    }
+    const remainder = sum % 11;
+    const calculatedDv = 11 - remainder;
+    let dvExpected = '';
+    if (calculatedDv === 11) dvExpected = '0';
+    else if (calculatedDv === 10) dvExpected = 'K';
+    else dvExpected = calculatedDv.toString();
+    if (dvExpected.toUpperCase() !== dv.toUpperCase()) {
+      return 'El RUT ingresado no es válido';
     }
     return null;
   };
@@ -267,6 +312,7 @@ function Cotizar() {
       case 'telefono_contacto':
         return validateTelefono(value);
       case 'rut_contacto':
+        // Usar validación local
         return validateRut(value);
       case 'email_contacto':
         return validateEmail(value);
@@ -282,26 +328,37 @@ function Cotizar() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
+    const { name, value, type } = e.target;
+    let newValue = value;
+
+    // Formateo especial para el RUT de contacto
+    if (name === 'rut_contacto' && typeof newValue === 'string') {
+      newValue = formatRut(newValue);
+      if (newValue.length > 10) {
+        newValue = newValue.substring(0, 10);
+      }
+    }
+
     // Manejar cambio de tipo de puerta - resetear espesor
     if (name === 'tipo_puerta') {
-      handleTipoPuertaChange(value);
+      handleTipoPuertaChange(newValue);
       return;
     }
-    
-    // Actualizar el campo normalmente
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Validar el campo en tiempo real
-    const error = validateField(name, value);
-    setValidationErrors(prev => ({
-      ...prev,
-      [name]: error
-    }));
-    
+
+    // Actualizar el estado del formulario
+    setFormData(prev => ({ ...prev, [name]: newValue }));
+
+    // Validar en tiempo real solo para campos de texto
+    if (type !== 'checkbox') {
+      const error = validateField(name, newValue);
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: error
+      }));
+    }
+
     // Manejar selecciones especiales
-    handleMaterialRelleno(name, value);
+    handleMaterialRelleno(name, newValue);
   };
 
   const handleTipoPuertaChange = (value: string) => {
@@ -404,6 +461,7 @@ function Cotizar() {
   const validateStepInfoContacto = (errors: ValidationErrors) => {
     if (!isLoggedIn) {
       const nombreError = validateNombre(formData.nombre_apellido_contacto);
+      // Validar rut_contacto con validations.ts
       const rutError = validateRut(formData.rut_contacto);
       const emailError = validateEmail(formData.email_contacto);
       
@@ -422,10 +480,11 @@ function Cotizar() {
     if (validation.isValid) {
       if (currentStep < totalSteps) {
         setCurrentStep(currentStep + 1);
-        showNotification('Paso completado correctamente', 'success');
+        // No mostrar notificación al completar pasos intermedios
       }
     } else {
       setValidationErrors(prev => ({ ...prev, ...validation.errors }));
+      // Mantener notificación solo en caso de error
       showNotification('Por favor, corrija los errores antes de continuar', 'error');
     }
   };
@@ -555,9 +614,38 @@ function Cotizar() {
   };
 
   return (
-    <div className="cotizar-page">
-      <h1>Solicitar Cotización</h1>
-      
+    <div className="cotizar-page cotizar-bg-decor" style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh' }}>
+      <h1 className="cotizar-title" style={{ position: 'relative', zIndex: 2, textAlign: 'center', margin: '32px 0 24px 0', fontWeight: 700, fontSize: '2.2rem', color: '#EC221F', letterSpacing: '0.01em' }}>Solicitar Cotización</h1>
+      {/* Círculos decorativos seguros */}
+      <div className="cotizar-extra-shape1" aria-hidden="true"></div>
+      <div className="cotizar-extra-shape2" aria-hidden="true"></div>
+      <div className="cotizar-extra-shape3" aria-hidden="true"></div>
+      <div className="cotizar-extra-shape4" aria-hidden="true"></div>
+      {/* Más formas decorativas a la izquierda */}
+      <div className="cotizar-extra-shape5" aria-hidden="true"></div>
+      <div className="cotizar-extra-shape6" aria-hidden="true"></div>
+      <div className="cotizar-extra-shape7" aria-hidden="true"></div>
+      {/* Marca de agua SVG decorativa en el fondo */}
+      <svg
+        width="340"
+        height="340"
+        viewBox="0 0 340 340"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{
+          position: 'absolute',
+          right: '-60px',
+          bottom: '-60px',
+          zIndex: 0,
+          opacity: 0.10,
+          pointerEvents: 'none',
+        }}
+        aria-hidden="true"
+      >
+        <ellipse cx="170" cy="170" rx="170" ry="170" fill="#EC221F" />
+        <rect x="90" y="90" width="160" height="160" rx="30" fill="#fff" fillOpacity="0.7" />
+        <rect x="120" y="120" width="100" height="100" rx="20" fill="#EC221F" fillOpacity="0.15" />
+      </svg>
       {/* Componente de notificación */}
       {notification && (
         <Notification
@@ -566,7 +654,6 @@ function Cotizar() {
           onClose={() => setNotification(null)}
         />
       )}
-      
       {/* Mensajes de éxito/error */}
       {successMessage && (
         <div className="success-message">
@@ -574,25 +661,22 @@ function Cotizar() {
           {successMessage}
         </div>
       )}
-      
       {errorMessage && (
         <div className="error-message">
           <i className="bi bi-exclamation-triangle"></i>
           {errorMessage}
         </div>
       )}
-
-      <form onSubmit={handleSubmit} className="cotizar-form">
+      <form onSubmit={handleSubmit} className="cotizar-form cotizar-form-fadein">
         {/* Indicador de pasos */}
         <div className="steps-indicator">
           {Array.from({ length: totalSteps }, (_, index) => {
             const stepNumber = index + 1;
             const isActive = stepNumber === currentStep;
             const isCompleted = stepNumber < currentStep;
-            
             return (
-              <div 
-                key={stepNumber} 
+              <div
+                key={stepNumber}
                 className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
               >
                 <div className="step-circle">
@@ -607,13 +691,11 @@ function Cotizar() {
             );
           })}
         </div>
-
         {/* Título del paso actual */}
         <div className="current-step-header">
           <i className={`bi ${getStepIcon(currentStep)}`}></i>
           <h2>{getStepTitle(currentStep)}</h2>
         </div>
-
         {/* Contenido del paso */}
         <div className="step-content">
           {/* Paso 1: Tipo de puerta y espesor */}
@@ -622,17 +704,16 @@ function Cotizar() {
               <p className="step-description">
                 Selecciona el tipo de puerta y espesor que necesitas.
               </p>
-              
               <div className="form-row">
                 <div className="field-group">
                   <label htmlFor="tipo_puerta">Tipo de puerta *</label>
-                  <select 
+                  <select
                     id="tipo_puerta"
-                    name="tipo_puerta" 
-                    value={formData.tipo_puerta} 
-                    onChange={handleChange} 
+                    name="tipo_puerta"
+                    value={formData.tipo_puerta}
+                    onChange={handleChange}
                     className={validationErrors.tipo_puerta ? 'error' : ''}
-                    required 
+                    required
                   >
                     <option value="">Selecciona un tipo</option>
                     <option value="puertaPaso">Puerta de paso</option>
@@ -645,26 +726,19 @@ function Cotizar() {
                     Selecciona si es una puerta de paso o de closet
                   </small>
                 </div>
-
                 <div className="field-group">
-                  <label htmlFor="medida_espesor">Espesor *</label>
-                  <select 
-                    id="medida_espesor"
-                    name="medida_espesor" 
-                    value={formData.medida_espesor} 
-                    onChange={handleChange} 
-                    className={validationErrors.medida_espesor ? 'error' : ''}
-                    required 
-                    disabled={!formData.tipo_puerta}
-                  >
-                    <option value="">Selecciona un espesor</option>
-                    {formData.tipo_puerta === 'puertaPaso' && (
-                      <option value="45">45mm - Puertas de paso</option>
-                    )}
-                    {formData.tipo_puerta === 'puertaCloset' && (
-                      <option value="18">18mm - Puertas de closet</option>
-                    )}
-                  </select>
+                <label htmlFor="medida_espesor">Espesor *</label>
+                <div id="medida_espesor" style={{ minHeight: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%' }} aria-live="polite">
+                  {formData.tipo_puerta === 'puertaPaso' && (
+                    <span style={{ fontWeight: 500, width: '100%' }}>45mm - Puertas de paso</span>
+                  )}
+                  {formData.tipo_puerta === 'puertaCloset' && (
+                    <span style={{ fontWeight: 500, width: '100%' }}>18mm - Puertas de closet</span>
+                  )}
+                  {!formData.tipo_puerta && (
+                    <span style={{ color: '#888', width: '100%' }}>Selecciona un tipo de puerta</span>
+                  )}
+                </div>
                   {validationErrors.medida_espesor && (
                     <span className="error-text">{validationErrors.medida_espesor}</span>
                   )}
@@ -675,26 +749,24 @@ function Cotizar() {
               </div>
             </div>
           )}
-
           {/* Paso 2: Medidas */}
           {currentStep === 2 && (
             <div className="step-section">
               <p className="step-description">
                 Especifica las dimensiones exactas del producto que deseas cotizar.
               </p>
-              
               <div className="form-row">
                 <div className="field-group">
                   <label htmlFor="medida_ancho">Ancho (cm) *</label>
-                  <input 
+                  <input
                     id="medida_ancho"
-                    type="number" 
-                    name="medida_ancho" 
-                    value={formData.medida_ancho} 
-                    onChange={handleChange} 
+                    type="number"
+                    name="medida_ancho"
+                    value={formData.medida_ancho}
+                    onChange={handleChange}
                     step="0.1"
                     className={validationErrors.medida_ancho ? 'error' : ''}
-                    required 
+                    required
                   />
                   {validationErrors.medida_ancho && (
                     <span className="error-text">{validationErrors.medida_ancho}</span>
@@ -711,20 +783,19 @@ function Cotizar() {
                     })()}
                   </small>
                 </div>
-
                 <div className="field-group">
                   <label htmlFor="medida_alto">Alto (cm) *</label>
-                  <input 
+                  <input
                     id="medida_alto"
-                    type="number" 
-                    name="medida_alto" 
-                    value={formData.medida_alto} 
-                    onChange={handleChange} 
+                    type="number"
+                    name="medida_alto"
+                    value={formData.medida_alto}
+                    onChange={handleChange}
                     step="0.1"
                     min={VALIDATION_RULES.medidas.alto.min}
                     max={VALIDATION_RULES.medidas.alto.max}
                     className={validationErrors.medida_alto ? 'error' : ''}
-                    required 
+                    required
                   />
                   {validationErrors.medida_alto && (
                     <span className="error-text">{validationErrors.medida_alto}</span>
@@ -736,36 +807,32 @@ function Cotizar() {
               </div>
             </div>
           )}
-
           {/* Paso 3: Material y Relleno */}
           {currentStep === 3 && (
             <div className="step-section">
               <p className="step-description">
                 Selecciona el material y tipo de relleno para tu producto personalizado.
               </p>
-              
               {cargandoMateriales && (
                 <div className="loading-message">
                   <span className="spinner-small"></span>
                   Cargando materiales y rellenos...
                 </div>
               )}
-              
               {!cargandoMateriales && materiales.length === 0 && rellenos.length === 0 && (
                 <div className="error-message">
                   <i className="bi bi-exclamation-triangle"></i>
                   No se pudieron cargar los materiales y rellenos. Por favor, verifica que el servidor esté funcionando.
                 </div>
               )}
-              
               <div className="form-row">
                 <div className="field-group">
                   <label htmlFor="id_material">Material *</label>
-                  <select 
-                    id="id_material" 
-                    name="id_material" 
-                    value={formData.id_material} 
-                    onChange={handleChange} 
+                  <select
+                    id="id_material"
+                    name="id_material"
+                    value={formData.id_material}
+                    onChange={handleChange}
                     required
                     disabled={cargandoMateriales}
                   >
@@ -778,10 +845,8 @@ function Cotizar() {
                         <option key={material.id_material} value={material.id_material}>
                           {material.nombre_material}
                         </option>
-                      ))
-                    }
+                      ))}
                   </select>
-                  
                   {/* Mostrar características del material seleccionado */}
                   {materialSeleccionado?.caracteristicas && (
                     <div className="caracteristicas-info">
@@ -790,14 +855,13 @@ function Cotizar() {
                     </div>
                   )}
                 </div>
-
                 <div className="field-group">
                   <label htmlFor="id_relleno">Relleno *</label>
-                  <select 
-                    id="id_relleno" 
-                    name="id_relleno" 
-                    value={formData.id_relleno} 
-                    onChange={handleChange} 
+                  <select
+                    id="id_relleno"
+                    name="id_relleno"
+                    value={formData.id_relleno}
+                    onChange={handleChange}
                     required
                     disabled={cargandoMateriales}
                   >
@@ -810,10 +874,8 @@ function Cotizar() {
                         <option key={relleno.id_relleno} value={relleno.id_relleno}>
                           {relleno.nombre_relleno}
                         </option>
-                      ))
-                    }
+                      ))}
                   </select>
-                  
                   {/* Mostrar características del relleno seleccionado */}
                   {rellenoSeleccionado?.caracteristicas && (
                     <div className="caracteristicas-info">
@@ -825,30 +887,31 @@ function Cotizar() {
               </div>
             </div>
           )}
-
           {/* Paso 3: Contacto básico y mensaje */}
           {currentStep === 4 && (
             <div className="step-section">
               <p className="step-description">
-                {isLoggedIn 
+                {isLoggedIn
                   ? 'Proporciona tu teléfono de contacto y cualquier mensaje adicional.'
-                  : 'Proporciona tu número de teléfono y cualquier mensaje adicional.'
-                }
+                  : 'Proporciona tu número de teléfono y cualquier mensaje adicional.'}
               </p>
-              
               <div className="field-group">
                 <label htmlFor="telefono_contacto">Teléfono de contacto *</label>
-                <input 
-                  id="telefono_contacto"
-                  type="tel" 
-                  name="telefono_contacto" 
-                  value={formData.telefono_contacto} 
-                  onChange={handleChange} 
-                  placeholder="Ej: 91234567"
-                  maxLength={8}
-                  className={validationErrors.telefono_contacto ? 'error' : ''}
-                  required 
-                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ whiteSpace: 'nowrap', fontWeight: 500, color: '#555' }}>+569</span>
+                  <input
+                    id="telefono_contacto"
+                    type="tel"
+                    name="telefono_contacto"
+                    value={formData.telefono_contacto}
+                    onChange={handleChange}
+                    placeholder="Ej: 91234567"
+                    maxLength={8}
+                    className={validationErrors.telefono_contacto ? 'error' : ''}
+                    required
+                    aria-label="Teléfono de contacto"
+                  />
+                </div>
                 {validationErrors.telefono_contacto && (
                   <span className="error-text">{validationErrors.telefono_contacto}</span>
                 )}
@@ -856,19 +919,18 @@ function Cotizar() {
                   Exactamente {VALIDATION_RULES.telefono.length} dígitos
                 </small>
               </div>
-
               <div className="field-group">
                 <label htmlFor="mensaje">Mensaje adicional</label>
-                <textarea 
+                <textarea
                   id="mensaje"
-                  name="mensaje" 
-                  value={formData.mensaje} 
+                  name="mensaje"
+                  value={formData.mensaje}
                   onChange={handleChange}
                   placeholder="Describa cualquier especificación adicional..."
                   rows={4}
+                  aria-label="Mensaje adicional"
                 />
               </div>
-
               {/* Información para usuarios logueados */}
               {isLoggedIn && (
                 <div className="logged-user-info">
@@ -878,61 +940,57 @@ function Cotizar() {
               )}
             </div>
           )}
-
           {/* Paso 5: Información de contacto (solo para usuarios no logueados) */}
           {currentStep === 5 && !isLoggedIn && (
             <div className="step-section">
               <p className="step-description">
                 Como no has iniciado sesión, necesitamos tus datos de contacto para procesar la cotización.
               </p>
-              
               <div className="field-group">
                 <label htmlFor="nombre_apellido_contacto">Nombre completo *</label>
-                <input 
+                <input
                   id="nombre_apellido_contacto"
-                  type="text" 
-                  name="nombre_apellido_contacto" 
-                  value={formData.nombre_apellido_contacto} 
-                  onChange={handleChange} 
+                  type="text"
+                  name="nombre_apellido_contacto"
+                  value={formData.nombre_apellido_contacto}
+                  onChange={handleChange}
                   placeholder="Ej: Juan Pérez González"
                   className={validationErrors.nombre_apellido_contacto ? 'error' : ''}
-                  required 
+                  required
                 />
                 {validationErrors.nombre_apellido_contacto && (
                   <span className="error-text">{validationErrors.nombre_apellido_contacto}</span>
                 )}
                 <small className="help-text">Solo letras y espacios, mínimo 2 caracteres</small>
               </div>
-
               <div className="field-group">
                 <label htmlFor="rut_contacto">RUT *</label>
-                <input 
+                <input
                   id="rut_contacto"
-                  type="text" 
-                  name="rut_contacto" 
-                  value={formData.rut_contacto} 
-                  onChange={handleChange} 
+                  type="text"
+                  name="rut_contacto"
+                  value={formData.rut_contacto}
+                  onChange={handleChange}
                   placeholder="Ej: 12345678-9"
                   className={validationErrors.rut_contacto ? 'error' : ''}
-                  required 
+                  required
                 />
                 {validationErrors.rut_contacto && (
                   <span className="error-text">{validationErrors.rut_contacto}</span>
                 )}
                 <small className="help-text">Formato: 12345678-9</small>
               </div>
-
               <div className="field-group">
                 <label htmlFor="email_contacto">Email *</label>
-                <input 
+                <input
                   id="email_contacto"
-                  type="email" 
-                  name="email_contacto" 
-                  value={formData.email_contacto} 
-                  onChange={handleChange} 
+                  type="email"
+                  name="email_contacto"
+                  value={formData.email_contacto}
+                  onChange={handleChange}
                   placeholder="tu.email@ejemplo.com"
                   className={validationErrors.email_contacto ? 'error' : ''}
-                  required 
+                  required
                 />
                 {validationErrors.email_contacto && (
                   <span className="error-text">{validationErrors.email_contacto}</span>
@@ -942,46 +1000,44 @@ function Cotizar() {
             </div>
           )}
         </div>
-
         {/* Navegación entre pasos */}
         <div className="step-navigation">
           {currentStep > 1 && (
-            <button 
-              type="button" 
-              className="btn-prev" 
+            <button
+              type="button"
+              className="btn-prev"
               onClick={prevStep}
             >
               <i className="bi bi-arrow-left"></i>
-              Anterior
+              <span style={{ marginLeft: 6 }}>Anterior</span>
             </button>
           )}
-
           {currentStep < totalSteps ? (
-            <button 
-              type="button" 
-              className="btn-next" 
+            <button
+              type="button"
+              className="btn-next"
               onClick={nextStep}
               disabled={!isCurrentStepValid}
             >
-              Siguiente
-              <i className="bi bi-arrow-right"></i>
+              <span>Siguiente</span>
+              <i className="bi bi-arrow-right" style={{ marginLeft: 6 }}></i>
             </button>
           ) : (
-            <button 
-              type="submit" 
-              className="submit-button" 
+            <button
+              type="submit"
+              className="submit-button"
               disabled={loading || !isCurrentStepValid}
             >
               {loading ? (
-                <>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                   <span className="spinner-small"></span>
-                  Enviando cotización...
-                </>
+                  <span>Enviando cotización...</span>
+                </span>
               ) : (
-                <>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                   <i className="bi bi-send"></i>
-                  Enviar Cotización
-                </>
+                  <span>Enviar Cotización</span>
+                </span>
               )}
             </button>
           )}

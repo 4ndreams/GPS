@@ -26,7 +26,16 @@
     /* Path mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@Funciones_Leandro/*": ["./src/hooks/Funciones_Leandro/*"],
+      "@services/*": ["./src/services/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@components/*": ["./src/components/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@types/*": ["./src/types/*"],
+      "@interfaces/*": ["./src/interfaces/*"],
+      "@config/*": ["./src/config/*"]
     }
   },
   "include": ["src"]

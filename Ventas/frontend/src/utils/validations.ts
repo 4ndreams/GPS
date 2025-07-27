@@ -27,16 +27,46 @@ export function formatRut(rut: string): string {
   return body + "-" + dv;
 }
 
+// Función para calcular el dígito verificador del RUT
+function calculateRutDv(rutBody: string): string {
+  let sum = 0;
+  let multiplier = 2;
+  
+  // Recorrer el RUT de derecha a izquierda
+  for (let i = rutBody.length - 1; i >= 0; i--) {
+    sum += parseInt(rutBody[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  
+  const remainder = sum % 11;
+  const dv = 11 - remainder;
+  
+  if (dv === 11) return '0';
+  if (dv === 10) return 'K';
+  return dv.toString();
+}
+
 // Validación de RUT
 export function validateRut(rut: string): string | null {
   if (!rut.trim()) {
     return 'El RUT es requerido';
   }
   
-  // Patrón para RUT sin puntos con guión: exactamente 8 dígitos + guión + dígito verificador
-  const rutPattern = /^\d{8}-[\dkK]$/;
+  // Patrón para RUT sin puntos con guión: 7 u 8 dígitos + guión + dígito verificador
+  const rutPattern = /^\d{7,8}-[\dkK]$/;
   if (!rutPattern.test(rut)) {
     return 'El formato del RUT no es válido (ej: 12345678-9)';
+  }
+  
+  // Separar cuerpo y dígito verificador
+  const [rutBody, dv] = rut.split('-');
+  
+  // Calcular el dígito verificador correcto
+  const calculatedDv = calculateRutDv(rutBody);
+  
+  // Comparar con el dígito verificador proporcionado
+  if (calculatedDv.toUpperCase() !== dv.toUpperCase()) {
+    return 'El RUT ingresado no es válido';
   }
   
   return null;
@@ -79,20 +109,6 @@ export function validateNombre(nombre: string): string | null {
   return null;
 }
 
-// Validación de teléfono
-export function validateTelefono(telefono: string): string | null {
-  if (!telefono.trim()) {
-    return 'El teléfono es requerido';
-  }
-  
-  // Permitir formato chileno: +56 9 1234 5678 o 9 1234 5678 o 912345678
-  const telefonoPattern = /^(\+56\s?)?([2-9]\d{8}|9\d{8})$/;
-  if (!telefonoPattern.test(telefono.replace(/\s/g, ''))) {
-    return 'El formato del teléfono no es válido';
-  }
-  
-  return null;
-}
 
 // Validación de contraseña
 export function validatePassword(password: string): string | null {
@@ -117,8 +133,6 @@ export function validateField(name: string, value: string): string | null {
       return validateRut(value);
     case 'email':
       return validateEmail(value);
-    case 'telefono':
-      return validateTelefono(value);
     case 'password':
       return validatePassword(value);
     default:

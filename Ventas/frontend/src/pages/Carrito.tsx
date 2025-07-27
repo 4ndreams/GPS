@@ -9,10 +9,12 @@ interface Product {
   imagen: string;
   categoria: string;
   quantity: number;
+  stock?: number; // Agregar stock opcional
 }
 
 interface CartItem extends Product {
   quantity: number;
+  stock: number; // Stock disponible del producto
 }
 
 interface CarritoProps {
@@ -22,17 +24,11 @@ interface CarritoProps {
 }
 
 function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
-  // Calcular subtotal
-  const subtotal = cartItems.reduce(
+  // Calcular total
+  const total = cartItems.reduce(
     (total, item) => total + ((item.precio || 0) * (item.quantity || 0)),
     0
   );
-
-  // Calcular IVA (19% en Chile)
-  const iva = subtotal * 0.19;
-
-  // Calcular total
-  const total = subtotal + iva;
 
   return (
     <div className="carrito-page">
@@ -75,11 +71,20 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
                     </button>
                     <span>{item.quantity || 0}</span>
                     <button 
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.id, Math.min(item.stock, item.quantity + 1))}
+                      disabled={item.quantity >= item.stock}
                     >
                       +
                     </button>
                   </div>
+                  
+                  {/* Mostrar información de stock */}
+                  <p className="stock-info">
+                    Stock disponible: {item.stock}
+                    {item.quantity >= item.stock && (
+                      <span className="stock-warning"> (Máximo alcanzado)</span>
+                    )}
+                  </p>
                   
                   <p className="item-total">
                     Total: ${(item.precio * item.quantity).toLocaleString('es-CL')}
@@ -98,16 +103,6 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
           
           <div className="carrito-resumen">
             <h2>Resumen de Compra</h2>
-            
-            <div className="resumen-linea">
-              <span>Subtotal:</span>
-              <span>${subtotal.toLocaleString('es-CL')}</span>
-            </div>
-            
-            <div className="resumen-linea">
-              <span>IVA (19%):</span>
-              <span>${iva.toLocaleString('es-CL')}</span>
-            </div>
             
             <div className="resumen-linea total">
               <span>Total:</span>
