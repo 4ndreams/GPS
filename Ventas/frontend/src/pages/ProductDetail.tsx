@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { getImagePath } from "@utils/getImagePath";
+
 import { isCurrentUserAdmin } from "@services/authService";
 import { updateProduct } from "@services/productService";
 import "@styles/ProductDetail.css";
@@ -18,6 +18,13 @@ interface Producto {
   tipo?: { nombre_tipo: string };
   material?: { nombre_material: string };
   imagen?: string;
+  imagenes?: Array<{
+    id_img: number;
+    ruta_imagen: string;
+    id_producto: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 }
 
 
@@ -94,7 +101,9 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
       id: producto.id_producto,
       nombre: producto.nombre_producto,
       precio: producto.precio,
-      imagen: producto.imagen || "default.jpeg",
+      imagen: producto.imagenes && producto.imagenes.length > 0 
+        ? producto.imagenes[0].ruta_imagen 
+        : "/img/puertas/default.jpeg",
       categoria: producto.tipo?.nombre_tipo || "otros",
       stock: producto.stock ?? 0,
       quantity: 1,
@@ -227,8 +236,8 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
         <div className="detalle-imagen">
           <img
             src={
-              producto.tipo?.nombre_tipo && producto.imagen
-                ? getImagePath(`${producto.tipo.nombre_tipo}/${producto.imagen}`)
+              producto.imagenes && producto.imagenes.length > 0
+                ? producto.imagenes[0].ruta_imagen
                 : "/img/puertas/default.jpeg"
             }
             alt={producto.nombre_producto}

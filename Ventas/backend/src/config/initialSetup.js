@@ -4,6 +4,8 @@ import { AppDataSource } from "./configDb.js";
 import Producto from "../entity/producto.entity.js";
 import MaterialSchema from "../entity/material.entity.js";
 import TipoSchema from "../entity/tipo.entity.js";
+import UsuarioSchema from "../entity/user.entity.js";
+import { encryptPassword } from "../helpers/bcrypt.helper.js";
 
 async function testConnection() {
   try {
@@ -146,6 +148,77 @@ async function testConnection() {
     } else {
       console.log("=> Ya existen productos en la base de datos.");
     }
+
+    // === USUARIOS DE EJEMPLO ===
+    const usuarioRepo = AppDataSource.getRepository(UsuarioSchema);
+    const usuariosEjemplo = [
+      {
+        nombre: "Admin",
+        apellidos: "Ejemplo",
+        email: "admin@gmail.com",
+        password: "admin123",
+        rol: "administrador",
+        rut: null
+      },
+      {
+        nombre: "Tienda",
+        apellidos: "Ejemplo",
+        email: "tienda@gmail.com",
+        password: "tienda123",
+        rol: "tienda",
+        rut: null
+      },
+      {
+        nombre: "Fabrica",
+        apellidos: "Ejemplo",
+        email: "fabrica@gmail.com",
+        password: "fabrica123",
+        rol: "fabrica",
+        rut: null
+      },
+      {
+        nombre: "Cliente",
+        apellidos: "Ejemplo",
+        email: "cliente@ejemplo.com",
+        password: "cliente123",
+        rol: "cliente",
+        rut: null
+      }
+    ];
+    for (const userData of usuariosEjemplo) {
+      const existingUser = await usuarioRepo.findOne({ where: { email: userData.email } });
+      if (!existingUser) {
+        const hashedPassword = await encryptPassword(userData.password);
+        const newUser = usuarioRepo.create({
+          nombre: userData.nombre,
+          apellidos: userData.apellidos,
+          rut: userData.rut,
+          email: userData.email,
+          password: hashedPassword,
+          rol: userData.rol,
+          correoVerificado: true,
+          flag_blacklist: false,
+          intentosFallidos: 0,
+          fechaBloqueo: null,
+          tokenVerificacion: null,
+          verificacionTokenExpiracion: null
+        });
+        await usuarioRepo.save(newUser);
+        console.log(`=> Usuario de ejemplo creado: ${userData.email} (${userData.rol})`);
+        console.log(`   Contraseña: ${userData.password}`);
+      } else {
+        console.log(`=> Ya existe el usuario de ejemplo: ${userData.email} (${userData.rol})`);
+        console.log(`   Contraseña: ${userData.password}`);
+      }
+    }
+    
+    // Mostrar resumen de usuarios de ejemplo
+    console.log("\n=== RESUMEN DE USUARIOS DE EJEMPLO ===");
+    console.log("Credenciales para acceder al sistema:");
+    usuariosEjemplo.forEach(user => {
+      console.log(`• ${user.email} (${user.rol}) - Contraseña: ${user.password}`);
+    });
+    console.log("=====================================\n");
   } catch (error) {
     console.error("Error al inicializar datos de ejemplo:", error);
   }

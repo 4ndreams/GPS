@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
+import path from "path";
 
 import indexRoutes from "./src/routes/index.routes.js";
 import { connectDB } from "./src/config/configDb.js";
@@ -17,6 +18,8 @@ import {
   passportOAuthSetup,
 } from "./src/auth/passport.auth.js";
 
+const __dirname = path.resolve();
+
 async function setupServer() {
   try {
     const app = express();
@@ -24,7 +27,7 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: true,  // Permite solicitudes desde cualquier origen
+      origin: true,
       credentials: true
     }));
 
@@ -38,7 +41,7 @@ async function setupServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: true,       // true si usas HTTPS
+        secure: false,       // true si usas HTTPS
         httpOnly: true,
         sameSite: "strict",  // evita CSRF
       },

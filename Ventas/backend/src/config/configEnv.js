@@ -31,3 +31,14 @@ export const SMTP_PORT = process.env.SMTP_PORT;
 export const SMTP_SECURE = process.env.SMTP_SECURE;
 export const VITE_API_BASE_URL = process.env.VITE_API_BASE_URL;
 export const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS;
+export const FRONTEND_URL = process.env.FRONTEND_URL;
+
+// MinIO Configuration
+export const UPLOAD_DRIVER = process.env.UPLOAD_DRIVER || "local";
+export const MINIO_ENDPOINT = process.env.MINIO_ENDPOINT;
+export const MINIO_PORT = process.env.MINIO_PORT;
+export const MINIO_USE_SSL = process.env.MINIO_USE_SSL;
+export const MINIO_ACCESS_KEY = process.env.MINIO_ACCESS_KEY;
+export const MINIO_SECRET_KEY = process.env.MINIO_SECRET_KEY;
+export const MINIO_BUCKET = process.env.MINIO_BUCKET;
+export const MINIO_PUBLIC_URL = process.env.MINIO_PUBLIC_URL;

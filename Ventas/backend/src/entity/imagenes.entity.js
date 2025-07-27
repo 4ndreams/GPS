@@ -1,6 +1,5 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-import ProductoSchema from "./producto.entity.js";
 
 const ImagenesSchema = new EntitySchema({
   name: "Imagenes",
@@ -14,7 +13,7 @@ const ImagenesSchema = new EntitySchema({
     ruta_imagen: {
       type: "varchar",
       length: 500,
-      nullable: false,
+      nullable: true,
     },
     id_producto: {
       type: "int",
@@ -35,7 +34,7 @@ const ImagenesSchema = new EntitySchema({
   relations: {
     producto: {
       type: "many-to-one",
-      target: ProductoSchema,
+      target: "Producto",
       joinColumn: {
         name: "id_producto",
       },
