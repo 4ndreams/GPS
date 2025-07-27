@@ -257,7 +257,7 @@ export default function CotizacionesManagement() {
       });
       // Si la respuesta incluye venta creada, mostrar notificación adicional
       // Se asume que response.ventaResult viene en response (no en response.productoPersonalizado)
-      if (response && response.ventaResult && response.ventaResult.success && response.ventaResult.venta) {
+      if (response?.ventaResult?.success && response?.ventaResult?.venta) {
         setNotification({
           type: 'success',
           title: 'Venta generada',
