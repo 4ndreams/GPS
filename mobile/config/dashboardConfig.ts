@@ -48,19 +48,19 @@ export const DASHBOARD_CONFIGS: Record<PerfilType, DashboardConfig> = {
       {
         key: 'pendientes',
         label: 'Pendientes',
-        apiEndpoint: '/orden/test?estado=Pendiente',
+        apiEndpoint: '/orden?estado=Pendiente',
         countField: 'length'
       },
       {
         key: 'fabricando',
         label: 'Fabricando',
-        apiEndpoint: '/orden/test?estado=En producción',
+        apiEndpoint: '/orden?estado=En producción',
         countField: 'length'
       },
       {
         key: 'fabricados',
         label: 'Fabricados',
-        apiEndpoint: '/orden/test?estado=Fabricada',
+        apiEndpoint: '/orden?estado=Fabricada',
         countField: 'length'
       }
     ],
@@ -90,11 +90,11 @@ export const DASHBOARD_CONFIGS: Record<PerfilType, DashboardConfig> = {
     },
     apiConfig: {
       baseEndpoints: {
-        pendientes: '/orden/test?estado=Pendiente',
-        fabricando: '/orden/test?estado=En producción',
-        fabricados: '/orden/test?estado=Fabricada',
+        pendientes: '/orden?estado=Pendiente',
+        fabricando: '/orden?estado=En producción',
+        fabricados: '/orden?estado=Fabricada',
         'crear-despacho': '/despachos/test',
-        'cambiar-estado': '/orden/test'
+        'cambiar-estado': '/orden'
       },
     },
   },
@@ -104,17 +104,17 @@ export const DASHBOARD_CONFIGS: Record<PerfilType, DashboardConfig> = {
       {
         key: 'despachos',
         label: 'En Tránsito',
-        apiEndpoint: '/orden/test?estado=En tránsito',
+        apiEndpoint: '/orden?estado=En tránsito',
       },
       {
         key: 'pedidos-stock',
-        label: 'Pedidos Stock',
-        apiEndpoint: '/orden/test?tipo=stock&estado=Pendiente,En producción',
+        label: 'Pedidos Stock', 
+        apiEndpoint: '/orden?estado=Pendiente',
       },
       {
         key: 'recibidos',
         label: 'Recibidos',
-        apiEndpoint: '/orden/test?estado=Recibido,Recibido con problemas',
+        apiEndpoint: '/orden?estado=Recibido,Recibido con problemas',
       },
     ],
     tabs: [
@@ -143,10 +143,10 @@ export const DASHBOARD_CONFIGS: Record<PerfilType, DashboardConfig> = {
     },
     apiConfig: {
       baseEndpoints: {
-        despachos: '/orden/test?estado=En tránsito',
-        'pedidos-stock': '/orden/test?tipo=stock&estado=Pendiente,En producción',
-        recibidos: '/orden/test?estado=Recibido,Recibido con problemas',
-        'confirmar-recepcion': '/orden/test',
+        despachos: '/orden?estado=En tránsito',
+        'pedidos-stock': '/orden?estado=Pendiente',
+        recibidos: '/orden?estado=Recibido,Recibido con problemas',
+        'confirmar-recepcion': '/orden',
         'productos': '/producto'
       },
     },

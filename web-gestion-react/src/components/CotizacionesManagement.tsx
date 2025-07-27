@@ -1,4 +1,6 @@
+import UpdateCotizacion from './UpdateCotizacion';
 import { useState, useEffect } from 'react';
+import Notification from './Notification';
 import { useAuth } from '../hooks/useAuth';
 import { cotizacionService, type CotizacionResponse, ESTADOS_COTIZACION, type EstadoCotizacion } from '../services/cotizacionService';
 import UnauthorizedAccess from './UnauthorizedAccess';
@@ -38,6 +40,15 @@ import {
 } from "lucide-react";
 
 export default function CotizacionesManagement() {
+  // ...existing code...
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error' | 'warning' | 'info';
+    title: string;
+    message?: string;
+  } | null>(null);
+  // ...existing code...
+  const [estadoError, setEstadoError] = useState<string | null>(null);
+  const [precioError, setPrecioError] = useState<string | null>(null);
   const { usuario } = useAuth();
   const [cotizaciones, setCotizaciones] = useState<CotizacionResponse[]>([]);
   const [loadingCotizaciones, setLoadingCotizaciones] = useState(false);
@@ -60,6 +71,9 @@ export default function CotizacionesManagement() {
   const [selectedCotizacion, setSelectedCotizacion] = useState<CotizacionResponse | null>(null);
   const [precioInput, setPrecioInput] = useState('');
   const [estadoInput, setEstadoInput] = useState<EstadoCotizacion>('Solicitud Recibida');
+  // Estados de carga para los diálogos
+  const [savingPrecio, setSavingPrecio] = useState(false);
+  const [savingEstado, setSavingEstado] = useState(false);
 
   // Helper para verificar si hay filtros activos
   const hasActiveFilters = searchTerm || (selectedEstado !== '' && selectedEstado !== 'todos') || (selectedTipo !== '' && selectedTipo !== 'todos');
@@ -106,6 +120,38 @@ export default function CotizacionesManagement() {
     }
   };
 
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  // ...existing code...
+
+  // --- Lógica de edición de cotización ---
+  function handleEditCotizacion(cotizacion: CotizacionResponse) {
+    setSelectedCotizacion(cotizacion);
+    setEditError(null);
+    setShowEditDialog(true);
+  }
+
+  async function saveEditCotizacion(data: Partial<CotizacionResponse>) {
+    if (!selectedCotizacion) return;
+    setSavingEdit(true);
+    setEditError(null);
+    try {
+      await cotizacionService.updateCotizacion(selectedCotizacion.id_producto_personalizado, data);
+      setShowEditDialog(false);
+      setNotification({
+        type: 'success',
+        title: 'Cotización actualizada',
+        message: 'Los datos se guardaron correctamente.'
+      });
+      loadCotizaciones();
+    } catch (error: any) {
+      setEditError(error?.message || 'Error al actualizar cotización');
+    } finally {
+      setSavingEdit(false);
+    }
+  }
 
   // Función para filtrar y ordenar cotizaciones
   const filteredCotizaciones = cotizaciones
@@ -113,8 +159,7 @@ export default function CotizacionesManagement() {
       const matchesSearch = searchTerm === '' || 
         cotizacion.id_producto_personalizado.toString().includes(searchTerm) ||
         cotizacion.nombre_apellido_contacto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cotizacion.email_contacto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cotizacion.telefono_contacto.includes(searchTerm);
+        cotizacion.email_contacto.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesEstado = selectedEstado === '' || selectedEstado === 'todos' || cotizacion.estado === selectedEstado;
       const matchesTipo = selectedTipo === '' || selectedTipo === 'todos' || cotizacion.tipo_puerta === selectedTipo;
@@ -164,38 +209,57 @@ export default function CotizacionesManagement() {
   const handleUpdateEstado = (cotizacion: CotizacionResponse) => {
     setSelectedCotizacion(cotizacion);
     setEstadoInput(cotizacion.estado as EstadoCotizacion);
+    setEstadoError(null);
     setShowEstadoDialog(true);
-  };
+  }
 
   // Función para actualizar precio
   const updatePrecio = async () => {
     if (!selectedCotizacion || !precioInput) return;
-    
+    setPrecioError(null);
+    setSavingPrecio(true);
     try {
       const precio = parseInt(precioInput);
       if (precio <= 0) {
-        alert('El precio debe ser mayor a 0');
+        setPrecioError('El precio debe ser mayor a 0');
+        setSavingPrecio(false);
         return;
       }
-
       await cotizacionService.updatePrecio(selectedCotizacion.id_producto_personalizado, { precio });
       setShowPrecioDialog(false);
+      setNotification({
+        type: 'success',
+        title: 'Precio actualizado',
+        message: 'El precio se asignó correctamente.',
+      });
       loadCotizaciones();
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al actualizar precio');
+    } catch (error: any) {
+      setPrecioError(error?.message || 'Error al actualizar precio');
+      // No mostrar notificación global de error aquí, ya que se muestra en el diálogo
+    } finally {
+      setSavingPrecio(false);
     }
   };
 
   // Función para actualizar estado
   const updateEstado = async () => {
     if (!selectedCotizacion) return;
-    
+    setEstadoError(null);
+    setSavingEstado(true);
     try {
       await cotizacionService.updateEstado(selectedCotizacion.id_producto_personalizado, { estado: estadoInput });
       setShowEstadoDialog(false);
+      setNotification({
+        type: 'success',
+        title: 'Estado actualizado',
+        message: 'El estado se cambió correctamente.',
+      });
       loadCotizaciones();
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Error al actualizar estado');
+    } catch (error: any) {
+      setEstadoError(error?.message || 'Error al actualizar estado');
+      // No mostrar notificación global de error aquí, ya que se muestra en el diálogo
+    } finally {
+      setSavingEstado(false);
     }
   };
 
@@ -269,7 +333,18 @@ export default function CotizacionesManagement() {
   const canManage = usuario.rol === 'administrador' || usuario.rol === 'fabrica';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Notificación global en esquina superior derecha */}
+      {notification && (
+        <div className="fixed top-6 right-6 z-50 w-[350px] max-w-full">
+          <Notification
+            type={notification.type}
+            title={notification.title}
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        </div>
+      )}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -331,7 +406,7 @@ export default function CotizacionesManagement() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Buscar por número, cliente, email o teléfono..."
+                  placeholder="Buscar por N° de cotización, cliente o email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -461,6 +536,20 @@ export default function CotizacionesManagement() {
                                 {canManage && (
                                   <>
                                     <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        handleEditCotizacion(cotizacion);
+                                        // Cerrar el menú manualmente
+                                        const target = e.target as HTMLElement;
+                                        const menu = target.closest('[role="menu"]');
+                                        if (menu) {
+                                          (menu as HTMLElement).blur();
+                                        }
+                                      }}
+                                    >
+                                      <Settings className="mr-2 h-4 w-4" />
+                                      Editar cotización
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleUpdateEstado(cotizacion)}>
                                       <Settings className="mr-2 h-4 w-4" />
                                       Cambiar estado
@@ -480,6 +569,14 @@ export default function CotizacionesManagement() {
                   </TableBody>
                 </Table>
               </div>
+              <UpdateCotizacion
+                open={showEditDialog}
+                onOpenChange={setShowEditDialog}
+                initialData={selectedCotizacion}
+                loading={savingEdit}
+                error={editError}
+                onSave={saveEditCotizacion}
+              />
 
               {/* Paginación */}
               {filteredCotizaciones.length > 0 && (
@@ -639,14 +736,34 @@ export default function CotizacionesManagement() {
                 value={precioInput}
                 onChange={(e) => setPrecioInput(e.target.value)}
                 placeholder="Ingrese el precio"
+                disabled={savingPrecio}
               />
             </div>
+            {precioError && (
+              <Notification
+                type="error"
+                title="Precio inválido"
+                message={precioError}
+                onClose={() => setPrecioError(null)}
+                className="mb-2"
+              />
+            )}
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowPrecioDialog(false)}>
+              <Button variant="outline" onClick={() => setShowPrecioDialog(false)} disabled={savingPrecio}>
                 Cancelar
               </Button>
-              <Button onClick={updatePrecio}>
-                Asignar Precio
+              <Button onClick={updatePrecio} disabled={savingPrecio}>
+                {savingPrecio ? (
+                  <span className="flex items-center justify-center">
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    Guardando...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Asignar Precio
+                  </span>
+                )}
               </Button>
             </div>
           </div>
@@ -665,7 +782,7 @@ export default function CotizacionesManagement() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="estado">Nuevo Estado</Label>
-              <Select value={estadoInput} onValueChange={(value) => setEstadoInput(value as EstadoCotizacion)}>
+              <Select value={estadoInput} onValueChange={(value) => setEstadoInput(value as EstadoCotizacion)} disabled={savingEstado}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -678,12 +795,31 @@ export default function CotizacionesManagement() {
                 </SelectContent>
               </Select>
             </div>
+            {estadoError && (
+              <Notification
+                type="error"
+                title="No se pudo cambiar el estado"
+                message={estadoError}
+                onClose={() => setEstadoError(null)}
+                className="mb-2"
+              />
+            )}
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowEstadoDialog(false)}>
+              <Button variant="outline" onClick={() => setShowEstadoDialog(false)} disabled={savingEstado}>
                 Cancelar
               </Button>
-              <Button onClick={updateEstado}>
-                Cambiar Estado
+              <Button onClick={updateEstado} disabled={savingEstado}>
+                {savingEstado ? (
+                  <span className="flex items-center justify-center">
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    Guardando...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Cambiar Estado
+                  </span>
+                )}
               </Button>
             </div>
           </div>

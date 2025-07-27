@@ -12,7 +12,9 @@ export const getProducts = async (req, res) => {
     // Construir query builder
     const productRepo = AppDataSource.getRepository("Producto");
     let query = productRepo.createQueryBuilder("producto")
-      .leftJoinAndSelect("producto.tipo", "tipo");  // <-- Aquí incluyes la relación tipo
+      .leftJoinAndSelect("producto.tipo", "tipo")
+      .leftJoinAndSelect("producto.material", "material")
+      .leftJoinAndSelect("producto.relleno", "relleno"); // <-- Aquí incluyes la relación relleno
 
     // Filtros
     if (nombre) {
@@ -32,7 +34,7 @@ export const getProducts = async (req, res) => {
 
     const productos = await query.getMany();
 
-    
+ 
     return res.json({
       status: "success",
       data: productos,
@@ -46,6 +48,15 @@ export const getProducts = async (req, res) => {
 // GET /api/products/:id
 export const getProductById = async (req, res) => {
   const id = parseInt(req.params.id);
+  
+  // Validar que el ID sea un número válido
+  if (isNaN(id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "ID de producto inválido" 
+    });
+  }
+  
   try {
     const producto = await productoRepo.findOne({
       where: { id_producto: id },
@@ -120,6 +131,14 @@ export const createProduct = async (req, res) => {
 export const updateProduct = async (req, res) => {
   const id = parseInt(req.params.id);
 
+  // Validar que el ID sea un número válido
+  if (isNaN(id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "ID de producto inválido" 
+    });
+  }
+
   try {
     const producto = await productoRepo.findOneBy({ id_producto: id });
     if (!producto) {
@@ -138,6 +157,14 @@ export const updateProduct = async (req, res) => {
 // DELETE /api/products/:id
 export const deleteProduct = async (req, res) => {
   const id = parseInt(req.params.id);
+
+  // Validar que el ID sea un número válido
+  if (isNaN(id)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "ID de producto inválido" 
+    });
+  }
 
   try {
     const resultado = await productoRepo.delete({ id_producto: id });

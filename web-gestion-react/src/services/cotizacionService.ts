@@ -52,10 +52,21 @@ export const cotizacionService = {
 
   // Actualizar estado de una cotización
   updateEstado: async (id: number, data: UpdateEstadoData): Promise<CotizacionResponse> => {
-    const response = await api.patch(`/productos-personalizados/${id}/estado`, data);
-    return response.data.data;
+    try {
+      const response = await api.patch(`/productos-personalizados/${id}/estado`, data);
+      return response.data.data;
+    } catch (error: any) {
+      // Si el backend responde con error de precio nulo o vacío, lanzar el mensaje
+      const errorMsg = error?.response?.data?.message || error.message || 'Error al actualizar estado';
+      throw new Error(errorMsg);
+    }
   },
 
+  // Actualiar cotización (solo admin y fabrica)
+  updateCotizacion: async (id: number, data: Partial<CotizacionResponse>): Promise<CotizacionResponse> => {
+    const response = await api.patch(`/productos-personalizados/${id}`, data);
+    return response.data.data;
+  },
   // Actualizar precio de una cotización
   updatePrecio: async (id: number, data: UpdatePrecioData): Promise<CotizacionResponse> => {
     const response = await api.patch(`/productos-personalizados/${id}/precio`, data);

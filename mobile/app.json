@@ -2,7 +2,7 @@
   "expo": {
     "name": "mundo-gestion",
     "slug": "mundo-gestion",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mundogestion",
@@ -15,22 +15,27 @@
     "android": {
       "package": "com.mundogestion.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "usesCleartextTraffic": true
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -44,7 +49,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "bc66d249-4b78-4484-babf-0b8c98794d43"
+        "projectId": "34a9afea-6d0a-41ca-ba32-fd1a050e86b8"
       }
     }
   }

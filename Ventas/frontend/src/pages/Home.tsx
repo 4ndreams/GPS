@@ -11,7 +11,7 @@ interface HomeProps {
 }
 
 // Usamos forwardRef para pasar el ref desde App.tsx hacia la sección contacto
-const Home = forwardRef<HTMLElement, HomeProps>((props, ref) => {
+const Home = forwardRef<HTMLElement, HomeProps>((_, ref) => {
   const heroContentRef = useRef<HTMLDivElement>(null);
 
   const cardRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
@@ -46,7 +46,7 @@ const Home = forwardRef<HTMLElement, HomeProps>((props, ref) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BASE}/api/contacto`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/contacto`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { filtro } from "@services/bodega.service";
 
-// ✅ Tipo individual de bodega formateada
 type BodegaUI = {
   id: number;
   tipo: "material" | "relleno";
@@ -28,6 +27,15 @@ interface BodegaRaw {
 
 type ErrorType = string | null;
 
+interface BackendResponse {
+  status: string;
+  message?: string;
+  data?: {
+    bodegasConMaterial?: BodegaRaw[];
+    bodegasConRelleno?: BodegaRaw[];
+  };
+}
+
 const useGetAllBodega = () => {
   const [bodegas, setBodegas] = useState<BodegaUI[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -36,11 +44,15 @@ const useGetAllBodega = () => {
   const fetchBodegas = async () => {
     try {
       setLoading(true);
-      const res = await filtro();
-      const json = await res.json(); // ✅ aquí estaba el error
 
-      const bodegasConMaterial: BodegaRaw[] = json.data.bodegasConMaterial || [];
-      const bodegasConRelleno: BodegaRaw[] = json.data.bodegasConRelleno || [];
+      const json: BackendResponse = await filtro(); // ✅ sin .json()
+
+      if (json.status !== "Success" || !json.data) {
+        throw new Error(json.message || "Respuesta inválida del servidor");
+      }
+
+      const bodegasConMaterial = json.data.bodegasConMaterial || [];
+      const bodegasConRelleno = json.data.bodegasConRelleno || [];
 
       const materiales: BodegaUI[] = bodegasConMaterial
         .filter((b): b is BodegaRaw & { material: Material } => b.material !== null)
@@ -61,6 +73,7 @@ const useGetAllBodega = () => {
         }));
 
       setBodegas([...materiales, ...rellenos]);
+      setError(null);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -76,7 +89,7 @@ const useGetAllBodega = () => {
     fetchBodegas();
   }, []);
 
-  return { bodegas, loading, error, fetchBodegas };
+  return { bodegas, loading, error, fetchBodegas , refetch: fetchBodegas };
 };
 
 export default useGetAllBodega;

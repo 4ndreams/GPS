@@ -6,42 +6,55 @@ type Body = {
   fecha_final?: string;
 };
 
-export default function useVentasTotalesPorMes(body: Body) {
+type ErrorType = string | null;
+
+interface RespuestaBackend {
+  status: string;
+  message?: string;
+  data?: {
+    total: number;
+  };
+}
+
+const useVentasTotalesPorMes = (body: Body) => {
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorType>(null);
+
+  const fetchVentas = async () => {
+    try {
+      setLoading(true);
+
+      const res: RespuestaBackend = await ventasTotalesPorMes(body);
+
+      if (res.status !== "Success" || !res.data) {
+        throw new Error(res.message || "Respuesta inválida del servidor");
+      }
+
+      setTotal(res.data.total);
+      setError(null);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al obtener las ventas");
+      }
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!body) return;
+    fetchVentas();
+  }, []);
 
-    const fetch = async () => {
-      setLoading(true);
-      try {
-        const res = await ventasTotalesPorMes(body);
-        if (res.status === "Success") {
-          setTotal(res.data.total);
-          setError(null);
-        } else {
-          setError(res.message || "Error desconocido");
-        }
-      } catch (err: unknown) {
-        let mensaje = "Error de red";
-        if (err instanceof Error) {
-          mensaje = err.message;
-        } else if (typeof err === "object" && err && "message" in err) {
-          mensaje = String((err as { message: unknown }).message);
-        }
-        setError(mensaje);
-      } finally {
-        setLoading(false);
-      }
-    };
+  return { total, loading, error, fetchVentas };
+};
 
-    fetch();
-  }, [body]); // ✅ Dependencia correcta
+export default useVentasTotalesPorMes;
 
-  return { total, loading, error };
-}
+
 
 
 

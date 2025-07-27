@@ -5,7 +5,7 @@ import { AppDataSource } from "../config/configDb.js";
 export async function getBodegasService() {
   try {
     const repo = AppDataSource.getRepository(Bodega);
-    const bodegas = await repo.find();
+    const bodegas = await repo.find({ relations: ["material", "relleno", "producto"] });
     return [bodegas, null];
   } catch (error) {
     console.error("Error al obtener bodegas:", error);

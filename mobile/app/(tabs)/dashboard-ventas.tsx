@@ -4,18 +4,22 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { BaseDashboard } from '../../components/BaseDashboard';
 import { BaseOrderCard } from '../../components/BaseOrderCard';
 import { getConfigForProfile } from '../../config/dashboardConfig';
 import { useDashboardData } from '../../hooks/useDashboardData';
+import { useOrderActions } from '../../hooks/useOrderActions';
 import { OrdenVentas, PedidoStock } from '../../types/dashboard';
 
 export default function DashboardVentas() {
   const config = getConfigForProfile('tienda');
   const { data, loading, refreshing, onRefresh } = useDashboardData(config);
+  const { procesando, cambiarEstado } = useOrderActions(onRefresh);
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
 
   // Refrescar datos cuando la pantalla recibe foco (ej: al volver de revisar-pedido)
   useFocusEffect(
@@ -98,6 +102,7 @@ export default function DashboardVentas() {
                     </TouchableOpacity>
                   </View>
                 )}
+
               </BaseOrderCard>
             ))
           ) : (
@@ -132,6 +137,7 @@ export default function DashboardVentas() {
       refreshing={refreshing}
       onRefresh={onRefresh}
       renderContent={renderVentasContent}
+      initialTab={tab || undefined}
     />
   );
 }
@@ -193,5 +199,27 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 12,
     textAlign: 'center',
+  },
+  // Estilos copiados de dashboard-fabrica para botones de acción
+  accionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  iniciarButton: {
+    backgroundColor: '#0066CC',
+  },
+  fabricarButton: {
+    backgroundColor: '#059669',
+  },
+  accionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
 });

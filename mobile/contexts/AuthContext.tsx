@@ -2,11 +2,12 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { loginUser } from '../services/authService';
 import { TokenService } from '../services/tokenService';
+import { Alert } from 'react-native';
 
 interface AuthUser {
   id: string;
   email: string;
-  name: string;
+  nombre: string;
   rol?: 'fabrica' | 'tienda' | 'admin';
 }
 
@@ -65,18 +66,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Llamar al servicio de autenticación real
       const response = await loginUser(email, password);
-      
+      //asegurarme que se envie
+      Alert.alert('🔍 Respuesta del backend:', JSON.stringify(response));
       if (response) {
         // Extraer datos del usuario de la respuesta
         const userData: AuthUser = {
           id: response.user?.id_usuario?.toString() || 'unknown',
           email: response.user?.email || email,
-          name: response.user?.nombre || 'Usuario',
+          nombre: response.user?.nombre || 'Usuario',
           rol: response.user?.rol as 'fabrica' | 'tienda' | 'admin'
         };
 
         await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
         setUser(userData);
+        console.log('✅ Login completado, usuario autenticado');
+        
+        // Pequeño delay para asegurar que el token esté disponible
+        setTimeout(() => {
+          console.log('🔄 Token debería estar disponible ahora');
+        }, 200);
+        
         return true;
       }
       
@@ -99,7 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData: AuthUser = {
         id: 'google_' + Date.now(),
         email: 'usuario@gmail.com',
-        name: 'Usuario Google'
+        nombre: 'Usuario Google'
       };
       
       await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
@@ -123,7 +132,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData: AuthUser = {
         id: 'new_' + Date.now(),
         email: email,
-        name: name
+        nombre: name
       };
       
       await AsyncStorage.setItem('auth_user', JSON.stringify(userData));
