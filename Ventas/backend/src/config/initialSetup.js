@@ -58,14 +58,32 @@ async function testConnection() {
       console.log("=> Ya existen tipos en la base de datos.");
     }
 
+    // Insertar rellenos si la tabla está vacía
+    const rellenoRepo = AppDataSource.getRepository("Relleno");
+    const rellenosEjemplo = [
+      { nombre_relleno: "Relleno Sólido", caracteristicas: "Relleno de madera sólida" },
+      { nombre_relleno: "Relleno Hueco", caracteristicas: "Relleno hueco para puertas ligeras" },
+      { nombre_relleno: "Relleno Aislante", caracteristicas: "Relleno con propiedades aislantes" },
+    ];
+    
+    const rellenoCount = await rellenoRepo.count();
+    if (rellenoCount === 0) {
+      await rellenoRepo.save(rellenosEjemplo);
+      console.log("=> Rellenos de ejemplo insertados correctamente.");
+    } else {
+      console.log("=> Ya existen rellenos en la base de datos.");
+    }
+
     // Insertar productos si la tabla está vacía
     const prodCount = await productoRepo.count();
     if (prodCount === 0) {
-      // Obtener materiales y tipos actualizados
+      // Obtener materiales, tipos y rellenos actualizados
       const materiales = await materialRepo.find();
       const tipos = await tipoRepo.find();
+      const rellenos = await rellenoRepo.find();
       const matMap = Object.fromEntries(materiales.map(m => [m.nombre_material, m]));
       const tipoMap = Object.fromEntries(tipos.map(t => [t.nombre_tipo, t]));
+      const rellenoMap = Object.fromEntries(rellenos.map(r => [r.nombre_relleno, r]));
 
       const productosEjemplo = [
         {
@@ -78,6 +96,7 @@ async function testConnection() {
           medida_alto: 4.0,
           imagen_producto: '1.png',
           material: matMap["Madera Wenge"],
+          relleno: rellenoMap["Relleno Sólido"],
           tipo: tipoMap["puertas"],
         },
         {
@@ -90,6 +109,7 @@ async function testConnection() {
           medida_alto: 4.5,
           imagen_producto: '2.jpeg',
           material: matMap["Vidrio Templado"],
+          relleno: rellenoMap["Relleno Hueco"],
           tipo: tipoMap["puertas"],
         },
         {
@@ -102,6 +122,7 @@ async function testConnection() {
           medida_alto: 2.0,
           imagen_producto: 'm1.jpg',
           material: matMap["Roble Sólido"],
+          relleno: rellenoMap["Relleno Sólido"],
           tipo: tipoMap["molduras"],
         },
         {
@@ -114,6 +135,7 @@ async function testConnection() {
           medida_alto: 3.0,
           imagen_producto: 'm2.jpeg',
           material: matMap["Roble Sólido"],
+          relleno: rellenoMap["Relleno Sólido"],
           tipo: tipoMap["molduras"],
         },
         {
@@ -126,6 +148,7 @@ async function testConnection() {
           medida_alto: 5.0,
           imagen_producto: '3.jpeg',
           material: matMap["Acero Reforzado"],
+          relleno: rellenoMap["Relleno Aislante"],
           tipo: tipoMap["puertas"],
         },
         {
@@ -138,6 +161,7 @@ async function testConnection() {
           medida_alto: 1.8,
           imagen_producto: 'm3.jpg',
           material: matMap["MDF Blanco"],
+          relleno: rellenoMap["Relleno Hueco"],
           tipo: tipoMap["molduras"],
         },
       ];

@@ -3,6 +3,7 @@ import { getOrdenes } from '../services/ordenService';
 import { getNotificaciones } from '../services/notificacionService';
 import type { Orden } from '../services/ordenService';
 import type { Notificacion } from '../services/notificacionService';
+import { useSocket } from './useSocket';
 
 interface DashboardData {
   ordenes: Orden[];
@@ -17,6 +18,9 @@ export const useDashboardData = (): DashboardData => {
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Usar Socket.io para actualizaciones en tiempo real
+  const { isConnected, notificaciones: socketNotificaciones } = useSocket();
 
   const fetchData = async () => {
     try {
@@ -59,14 +63,31 @@ export const useDashboardData = (): DashboardData => {
   useEffect(() => {
     fetchData();
     
-    // Polling para actualizar notificaciones cada 30 segundos
-    const interval = setInterval(() => {
-      console.log('🔄 Actualizando notificaciones automáticamente...');
-      fetchData();
-    }, 30000); // 30 segundos
+    // Solo usar polling si no hay conexión Socket.io
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (!isConnected) {
+      interval = setInterval(() => {
+        console.log('🔄 Actualizando notificaciones automáticamente (polling)...');
+        fetchData();
+      }, 30000); // 30 segundos
+    } else {
+      console.log('🔌 Usando Socket.io para actualizaciones en tiempo real');
+    }
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isConnected]);
+
+  // Actualizar notificaciones cuando lleguen por Socket.io
+  useEffect(() => {
+    if (socketNotificaciones.length > 0) {
+      console.log('📨 Notificaciones recibidas via Socket.io:', socketNotificaciones.length);
+      // Recargar datos cuando lleguen notificaciones nuevas
+      fetchData();
+    }
+  }, [socketNotificaciones]);
 
   const refresh = () => {
     fetchData();

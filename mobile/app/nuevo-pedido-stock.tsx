@@ -44,7 +44,7 @@ export default function NuevoPedidoStock() {
   const [saving, setSaving] = useState(false);
 
   // Constantes para el pedido de stock
-  const BODEGA_DEFECTO = 3;
+  const BODEGA_DEFECTO = 1;
 
   useEffect(() => {
     cargarProductos();
@@ -146,12 +146,6 @@ export default function NuevoPedidoStock() {
       return;
     }
 
-    // Verificar que el usuario tenga permisos para crear órdenes
-    if (user.rol !== 'fabrica' && user.rol !== 'admin' && user.rol !== 'tienda') {
-      Alert.alert('Error', 'No tienes permisos para crear pedidos de stock. Solo usuarios de fábrica y administradores pueden crear órdenes.');
-      return;
-    }
-
     try {
       setSaving(true);
 
@@ -249,20 +243,6 @@ export default function NuevoPedidoStock() {
           <Text style={styles.sectionTitle}>Información del Pedido</Text>
           <Text style={styles.sectionSubtitle}>Configuración general del pedido</Text>
 
-          {/* Información del Usuario */}
-          {user && (
-            <View style={styles.userInfo}>
-              <Text style={styles.userInfoText}>
-                Usuario: {user.name} ({user.rol || 'Sin rol'})
-              </Text>
-              {user.rol !== 'fabrica' && user.rol !== 'admin' && (
-                <Text style={styles.warningText}>
-                  ⚠️ Solo usuarios de fábrica y administradores pueden crear pedidos de stock
-                </Text>
-              )}
-            </View>
-          )}
-
           {/* Nivel de Urgencia */}
           <View style={styles.formGroup}>
             <Text style={styles.formLabel}>Nivel de Urgencia</Text>
@@ -325,7 +305,6 @@ export default function NuevoPedidoStock() {
                   onValueChange={(value) => setSelectedProducto(value === '' ? null : Number(value))}
                   style={styles.picker}
                 >
-<<<<<<< HEAD
                   <Picker.Item label="Seleccionar producto" value="" />
                   {productos
                     .filter(producto => producto && producto.nombre_producto && producto.nombre_producto.trim() !== '') 
@@ -336,18 +315,6 @@ export default function NuevoPedidoStock() {
                         value={producto.id_producto}
                       />
                     ))}
-=======
-                  <Picker.Item label="Seleccionar producto" value={null} />
-                  {productos
-                  .filter(producto => producto && producto.nombre_producto && producto.nombre_producto.trim() !== '') 
-                  .map(producto => (
-                    <Picker.Item
-                      key={producto.id_producto}
-                      label={producto.nombre_producto}
-                      value={producto.id_producto}
-                    />
-                  ))}
->>>>>>> dev
                 </Picker>
               </View>
             </View>

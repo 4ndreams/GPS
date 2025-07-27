@@ -70,6 +70,7 @@ const ProductoSchema = new EntitySchema({
                 name: "id_material",
             },
             inverseSide: "materiales",
+            nullable: false
         },
         relleno: {
             type: "many-to-one",
@@ -78,6 +79,7 @@ const ProductoSchema = new EntitySchema({
                 name: "id_relleno",
             },
             inverseSide: "rellenos",
+            nullable: false
         },
         tipo: {
             type: "many-to-one",
@@ -86,6 +88,7 @@ const ProductoSchema = new EntitySchema({
                 name: "id_tipo",
             },
             inverseSide: "productos",
+            nullable: false
         },
     },
 });

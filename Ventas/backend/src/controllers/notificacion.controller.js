@@ -10,6 +10,7 @@ import {
     crearNotificacionRecepcionExitosa
 } from "../services/notificacion.service.js";
 import { handleErrorClient, handleErrorServer, handleSuccess } from "../handlers/responseHandlers.js";
+import { emitNotificacion } from "../services/socket.service.js";
 
 // Crear una nueva notificación/alerta
 export async function createNotificacionController(req, res) {
@@ -34,6 +35,9 @@ export async function createNotificacionController(req, res) {
         if (err) {
             return handleErrorClient(res, 400, err);
         }
+
+        // Emitir notificación via Socket.io
+        emitNotificacion(notificacion);
 
         return handleSuccess(res, 201, "Notificación created successfully", notificacion);
     } catch (error) {

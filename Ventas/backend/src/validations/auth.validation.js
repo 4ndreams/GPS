@@ -15,15 +15,7 @@ Joi.defaults(schema => schema.options({ messages: {
 
 // Valida dominio de email
 const domainEmailValidator = (value, helper) => {
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-  const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl"];
-=======
   const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl","@gps.com", "@terplac.com"];
->>>>>>> Stashed changes
-=======
-  const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl","@gps.com"];
->>>>>>> dev
   
   if (!allowedDomains.some(domain => value.endsWith(domain))) {
     return helper.message(`El email electrónico debe finalizar en uno de los siguientes dominios: ${allowedDomains.join(", ")}.`);
@@ -34,7 +26,7 @@ const domainEmailValidator = (value, helper) => {
 
 export const authValidation = Joi.object({
   email: Joi.string()
-    .min(10)
+    .min(15)
     .max(255)
     .email()
     .required()
@@ -46,12 +38,14 @@ export const authValidation = Joi.object({
     }),
 
   password: Joi.string()
-    .min(6)
+    .min(8)
     .max(26)
+    .pattern(/^[a-zA-Z0-9]+$/)
     .required()
     .messages({
       "string.empty": "La contraseña no puede estar vacía.",
       "any.required": "La contraseña es obligatoria.",
+      "string.pattern.base": "La contraseña solo puede contener letras y números.",
     }),
 }).unknown(false);
 export const registerValidation = Joi.object({
@@ -103,7 +97,7 @@ export const registerValidation = Joi.object({
     }),
 
   password: Joi.string()
-    .min(6)
+    .min(8)
     .max(26)
     .pattern(/^[a-zA-Z0-9]+$/)
     .required()
@@ -113,9 +107,9 @@ export const registerValidation = Joi.object({
     }),
 
   rol: Joi.string()
-    .valid("cliente", "fabrica", "tienda", "administrador")
+    .valid("cliente", "empleado", "administrador")
     .messages({
-      "any.only": "El rol debe ser cliente, fabrica, tienda o administrador.",
+      "any.only": "El rol debe ser cliente, empleado o administrador.",
     }),
 
   flag_blacklist: Joi.boolean().optional(),

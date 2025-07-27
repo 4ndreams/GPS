@@ -8,6 +8,7 @@ import { useDashboardData } from "../hooks/useDashboardData"
 import DashboardStats from "../components/DashboardStats"
 import OrdenesTable from "../components/OrdenesTable"
 import NotificacionesPanel from "../components/NotificacionesPanel"
+// SocketStatus removido
 
 // Las interfaces se importan desde los servicios
 
@@ -99,6 +100,7 @@ export default function Dashboard() {
             Sistema de Gestión de Despachos, Usuarios y Cotizaciones - Bienvenido, {authContext.usuario.nombre}
           </p>
         </div>
+        {/* SocketStatus removido */}
       </div>
 
       {/* Tabs */}
@@ -152,10 +154,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-        {/* Panel de notificaciones */}
-        <div className="lg:col-span-1">
-          <NotificacionesPanel notificaciones={notificaciones} />
-        </div>
-      </div>
+    </div>
   )
 }

@@ -30,6 +30,13 @@ export async function createNotificacionService(notificacionData) {
       observaciones,
       prioridad,
       fecha_creacion: new Date().toISOString(),
+      tiempo: new Date().toLocaleString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
       leida: false,
       resuelta: false
     };

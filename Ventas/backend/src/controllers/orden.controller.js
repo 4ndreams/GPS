@@ -11,6 +11,7 @@ import {
     createNotificacionService,
     crearNotificacionRecepcionExitosa
 } from "../services/notificacion.service.js";
+import { emitNotificacion, emitOrdenActualizada } from "../services/socket.service.js";
 import { 
     getTiendaByNombreService,
     getStockTiendaProductoService,
@@ -72,6 +73,30 @@ export async function createOrdenController(req, res) {
         if (err) {
             return handleErrorServer(res, 500, err);
         }
+
+        // Crear notificación para nueva orden
+        try {
+            const mensaje = `Nueva orden: ${req.body.cantidad} unidades de producto solicitadas desde ${req.body.origen} hacia ${req.body.destino}`;
+            
+            const notificacion = await createNotificacionService({
+                tipo: 'nueva_orden',
+                mensaje,
+                ordenId: newOrden.id_orden,
+                tiendaId: null,
+                observaciones: `Prioridad: ${req.body.prioridad || 'Media'}`,
+                prioridad: 'normal'
+            });
+
+            console.log(`📋 Notificación creada: Nueva orden ${newOrden.id_orden}`);
+            
+            // Emitir notificación via Socket.io
+            emitNotificacion(notificacion);
+            
+        } catch (notifError) {
+            console.error("Error creando notificación para nueva orden:", notifError);
+            // No fallar la creación por error en notificación
+        }
+
         return handleSuccess(res, 201, "Orden created successfully", newOrden);
     } catch (error) {
         console.error(error);
@@ -109,9 +134,9 @@ export async function updateOrdenController(req, res) {
             try {
                 // Notificación cuando la orden pasa a "En tránsito"
                 if (estadoNuevo === "En tránsito" && estadoAnterior !== "En tránsito") {
-                    const mensaje = `Orden ${id_orden}: Despachada desde fábrica hacia ${updatedOrden.destino}`;
+                    const mensaje = `Orden despachada desde fábrica hacia ${updatedOrden.destino}`;
                     
-                    await createNotificacionService({
+                    const notificacion = await createNotificacionService({
                         tipo: 'despacho_en_transito',
                         mensaje,
                         ordenId: id_orden,
@@ -121,6 +146,9 @@ export async function updateOrdenController(req, res) {
                     });
 
                     console.log(`📦 Notificación creada: Orden ${id_orden} en tránsito`);
+                    
+                    // Emitir notificación via Socket.io
+                    emitNotificacion(notificacion);
                 }
 
                 // Notificación cuando la orden es recibida
@@ -129,10 +157,10 @@ export async function updateOrdenController(req, res) {
                     
                     const tipoRecepcion = estadoNuevo === "Recibido" ? 'recepcion_exitosa' : 'recepcion_con_problemas';
                     const mensaje = estadoNuevo === "Recibido" 
-                        ? `Orden ${id_orden}: Recepción completada exitosamente en ${updatedOrden.destino}`
-                        : `Orden ${id_orden}: Recepción con problemas en ${updatedOrden.destino}`;
+                        ? `Recepción completada exitosamente en ${updatedOrden.destino}`
+                        : `Recepción con problemas en ${updatedOrden.destino}`;
 
-                    await createNotificacionService({
+                    const notificacion = await createNotificacionService({
                         tipo: tipoRecepcion,
                         mensaje,
                         ordenId: id_orden,
@@ -142,6 +170,9 @@ export async function updateOrdenController(req, res) {
                     });
 
                     console.log(`📥 Notificación creada: Orden ${id_orden} recibida (${estadoNuevo})`);
+                    
+                    // Emitir notificación via Socket.io
+                    emitNotificacion(notificacion);
                 }
             } catch (notifError) {
                 console.error("Error creando notificación:", notifError);
@@ -180,6 +211,9 @@ export async function updateOrdenController(req, res) {
             }
         }
 
+        // Emitir orden actualizada via Socket.io
+        emitOrdenActualizada(updatedOrden);
+        
         return handleSuccess(res, 200, "Orden updated successfully", updatedOrden);
     } catch (error) {
         console.error(error);

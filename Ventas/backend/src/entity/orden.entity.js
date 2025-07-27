@@ -13,8 +13,19 @@ const OrdenSchema = new EntitySchema({
       primary: true,
       generated: true,
     },
+    id: {
+      type: "int",
+      generated: true,
+    },
     cantidad: {
       type: "int",
+      nullable: false,
+    },
+    total: {
+      type: "decimal",
+      precision: 10,
+      scale: 2,
+      default: 0,
       nullable: false,
     },
     origen: {
@@ -42,6 +53,22 @@ const OrdenSchema = new EntitySchema({
       default: "Pendiente",
       nullable: false,
     },
+    status: {
+      type: "varchar",
+      length: 50,
+      default: "pending",
+      nullable: false,
+    },
+    paymentId: {
+      type: "varchar",
+      length: 255,
+      nullable: true,
+    },
+    preferenceId: {
+      type: "varchar",
+      length: 255,
+      nullable: true,
+    },
     prioridad: {
       type: "varchar",
       length: 20,
@@ -67,6 +94,15 @@ const OrdenSchema = new EntitySchema({
     foto_despacho: {
       type: "text",
       nullable: true
+    },
+    items: {
+      type: "text",
+      nullable: true,
+    },
+    contactInfo: {
+      type: "varchar",
+      length: 500,
+      nullable: true,
     },
     createdAt: {
       type: "timestamp with time zone",

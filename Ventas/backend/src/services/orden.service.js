@@ -31,6 +31,7 @@ export async function createOrdenService(body) {
     const repo = AppDataSource.getRepository(Orden);
     const nuevaOrden = repo.create({
       cantidad: body.cantidad,
+      total: body.total || 0, // Agregar el campo total
       origen: body.origen,
       destino: body.destino,
       fecha_envio: new Date(body.fecha_envio),
@@ -64,6 +65,7 @@ export async function updateOrdenService(id, body) {
 
     const updated = {
       cantidad: body.cantidad ?? orden.cantidad,
+      total: body.total ?? orden.total, // Agregar el campo total
       origen: body.origen ?? orden.origen,
       destino: body.destino ?? orden.destino,
       fecha_envio: body.fecha_envio ? new Date(body.fecha_envio) : orden.fecha_envio,

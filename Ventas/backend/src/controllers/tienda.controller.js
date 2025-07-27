@@ -39,6 +39,7 @@ export async function getTiendasController(req, res) {
     }
 }
 
+
 export async function createTiendaController(req, res) {
     try {
         const { error } = TiendaBodyValidation.validate(req.body);

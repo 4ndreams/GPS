@@ -102,9 +102,7 @@ export default function NotificacionesPanel({ notificaciones }: NotificacionesPa
               notificaciones.map((notificacion) => (
                 <div
                   key={notificacion.id}
-                  className={`p-3 rounded-lg border ${getNotificacionColor(notificacion.tipo)} ${
-                    !notificacion.leida ? 'ring-2 ring-blue-200' : ''
-                  }`}
+                  className={`p-3 rounded-lg border ${getNotificacionColor(notificacion.tipo)}`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-1">
@@ -126,11 +124,7 @@ export default function NotificacionesPanel({ notificaciones }: NotificacionesPa
                         )}
                       </div>
                     </div>
-                    {!notificacion.leida && (
-                      <div className="flex-shrink-0">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                      </div>
-                    )}
+                    {/* Indicador de no leída removido */}
                   </div>
                 </div>
               ))

@@ -13,8 +13,12 @@ export const loginUser = async (email: string, password: string) => {
     console.log('🔍 Respuesta del backend:', response.data);
     
     if (response.data.data.token) {
+      console.log('🔑 Token recibido del backend:', response.data.data.token.substring(0, 20) + '...');
       // Usar el sistema de gestión de tokens
       await TokenService.setToken(response.data.data.token);
+      console.log('✅ Token guardado correctamente');
+    } else {
+      console.log('❌ No se recibió token del backend');
     }
     
     return response.data.data;
