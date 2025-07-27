@@ -144,11 +144,32 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: "Producto no encontrado" });
     }
 
-    productoRepo.merge(producto, req.body);
+    // Preparar los datos para la actualización
+    const updateData = { ...req.body };
+    
+    // Manejar las relaciones correctamente
+    if (req.body.id_material) {
+      updateData.material = { id_material: parseInt(req.body.id_material) };
+    }
+    if (req.body.id_tipo) {
+      updateData.tipo = { id_tipo: parseInt(req.body.id_tipo) };
+    }
+    if (req.body.id_relleno) {
+      updateData.relleno = { id_relleno: parseInt(req.body.id_relleno) };
+    }
+
+    productoRepo.merge(producto, updateData);
     const productoActualizado = await productoRepo.save(producto);
 
-    res.json({ success: true, message: "Producto actualizado", data: productoActualizado });
+    // Obtener el producto actualizado con las relaciones
+    const productoConRelaciones = await productoRepo.findOne({
+      where: { id_producto: id },
+      relations: ["material", "tipo", "relleno", "imagenes"],
+    });
+
+    res.json({ success: true, message: "Producto actualizado", data: productoConRelaciones });
   } catch (err) {
+    console.error("Error al actualizar producto:", err);
     res.status(500).json({ success: false, message: "Error al actualizar el producto", error: err.message });
   }
 };
