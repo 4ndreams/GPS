@@ -1,4 +1,4 @@
-import  { useMemo } from "react";
+import { useMemo } from "react";
 import useGetComprasMes from "@Funciones_Leandro/compras_mes";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
@@ -51,7 +51,6 @@ export default function MaterialStockPieChart({
   fecha_inicial,
   fecha_final,
 }: Props) {
-  // ✅ Memorizar el body para evitar ejecuciones innecesarias del hook
   const filtroCompras = useMemo(() => ({
     id_bodega,
     fecha_inicial,
@@ -63,7 +62,6 @@ export default function MaterialStockPieChart({
   if (loading) return <p>Cargando materiales...</p>;
   if (error) return <p>Error: no se encontraron compras</p>;
 
-  // Agrupamos por tipo
   const materiales: Record<string, number> = {};
   const rellenos: Record<string, number> = {};
 
@@ -132,8 +130,8 @@ export default function MaterialStockPieChart({
                       style={{ backgroundColor: entry.color }}
                     />
                     <span className="flex-1 truncate">{entry.name}</span>
-                    <span className="ml-1 font-medium">
-                      {((entry.value / total) * 100).toFixed(0)}%
+                    <span className="ml-1 font-medium whitespace-nowrap">
+                      {entry.value} ({((entry.value / total) * 100).toFixed(0)}%)
                     </span>
                   </li>
                 ))}
@@ -154,8 +152,8 @@ export default function MaterialStockPieChart({
                       style={{ backgroundColor: entry.color }}
                     />
                     <span className="flex-1 truncate">{entry.name}</span>
-                    <span className="ml-1 font-medium">
-                      {((entry.value / total) * 100).toFixed(0)}%
+                    <span className="ml-1 font-medium whitespace-nowrap">
+                      {entry.value} ({((entry.value / total) * 100).toFixed(0)}%)
                     </span>
                   </li>
                 ))}

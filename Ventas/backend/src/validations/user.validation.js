@@ -4,7 +4,7 @@ import RutValidator from "./rut.validation.js";
 
 
 const domainEmailValidator = (value, helper) => {
-  const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl"];
+  const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@gmail.cl","@gps.com"];
   
   if (!allowedDomains.some(domain => value.endsWith(domain))) {
     return helper.message(`El email electrónico debe finalizar en uno de los siguientes dominios: ${allowedDomains.join(", ")}.`);

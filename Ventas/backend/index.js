@@ -6,6 +6,7 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
+import path from "path";
 
 import indexRoutes from "./src/routes/index.routes.js";
 import { connectDB } from "./src/config/configDb.js";
@@ -16,6 +17,8 @@ import {
   passportJwtSetup,
   passportOAuthSetup,
 } from "./src/auth/passport.auth.js";
+
+const __dirname = path.resolve();
 
 async function setupServer() {
   try {

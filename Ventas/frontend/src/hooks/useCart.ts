@@ -7,6 +7,7 @@ interface CartItem {
   imagen: string;
   categoria: string;
   quantity: number;
+  stock: number; // Stock disponible del producto
 }
 
 const CART_STORAGE_KEY = 'cart';
@@ -53,15 +54,20 @@ export const useCart = () => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === product.id);
       if (existingItem) {
-        // Incrementar cantidad
+        // Incrementar cantidad respetando el stock
+        const newQuantity = Math.min(
+          existingItem.stock, 
+          existingItem.quantity + (product.quantity || 1)
+        );
         return prevItems.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + (product.quantity || 1) }
+            ? { ...item, quantity: newQuantity }
             : item
         );
       } else {
-        // Agregar nuevo producto
-        return [...prevItems, { ...product, quantity: product.quantity || 1 }];
+        // Agregar nuevo producto respetando el stock
+        const quantity = Math.min(product.stock, product.quantity || 1);
+        return [...prevItems, { ...product, quantity }];
       }
     });
   };
@@ -77,7 +83,9 @@ export const useCart = () => {
     
     setCartItems(prevItems => 
       prevItems.map(item => 
-        item.id === productId ? { ...item, quantity: newQuantity } : item
+        item.id === productId 
+          ? { ...item, quantity: Math.min(item.stock, newQuantity) } 
+          : item
       )
     );
   };

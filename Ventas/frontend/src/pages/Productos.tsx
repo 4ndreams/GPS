@@ -21,6 +21,7 @@ interface CartItem {
   precio: number;
   imagen: string;
   categoria: string;
+  stock: number;
   quantity: number;
 }
 
@@ -60,7 +61,7 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
       if (!validatePrices()) return;
       try {
         setLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/all`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products`, {
           params: {
             nombre: nameFilter || undefined,
             minPrecio: minPrice || undefined,
@@ -104,6 +105,7 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
         precio: product.precio,
         imagen: product.imagen || "default.jpeg",
         categoria: product.tipo?.nombre_tipo || "otros",
+        stock: product.stock ?? 0,
         quantity: 1,
       });
     }
