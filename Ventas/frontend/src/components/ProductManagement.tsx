@@ -3,6 +3,7 @@ import axios from "axios";
 import "@styles/productManagement.css";
 import ModalProduct from "./ModalProduct";
 import ConfirmModal from "./ConfirmModal";
+import Notification from "./Notification";
 
 interface Tipo {
   id_tipo: number;
@@ -58,6 +59,9 @@ function ProductManagement({ userRole, token }: Props) {
   const [rellenos, setRellenos] = useState<Relleno[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [productToDelete, setProductToDelete] = useState<{ id: number, name: string } | null>(null);
+  // Add state for filters
+  const [filter, setFilter] = useState("");
+  const [sortStock, setSortStock] = useState<"asc" | "desc" | "none">("none");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -235,42 +239,146 @@ function ProductManagement({ userRole, token }: Props) {
   };
 
   if (loading) return <p>Cargando productos...</p>;
-  if (error) return <p>{error}</p>;
+  if (error) return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 0' }}>
+      <Notification message={error} type="error" onClose={() => {}} />
+    </div>
+  );
 
   return (
-    <div className="product-management">
-      <h2 className="pm-title">Panel de Gestión de Productos</h2>
-
-      <div className="pm-form">
+    <div className="product-management" style={{ maxWidth: 900, margin: '0 auto', padding: '32px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
+        <h2 style={{ fontWeight: 700, fontSize: 28, color: '#EC221F', margin: 0 }}>Panel de Gestión de Productos</h2>
         <button
+          className="pm-btn-create"
           type="button"
           onClick={openCreateModal}
           disabled={tipos.length === 0 || materiales.length === 0}
+          style={{
+            background: '#EC221F', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 22px', fontWeight: 600, fontSize: 16, boxShadow: '0 2px 8px #0001', transition: 'background 0.2s', cursor: 'pointer', whiteSpace: 'nowrap', opacity: tipos.length === 0 || materiales.length === 0 ? 0.6 : 1
+          }}
         >
-          Crear nuevo producto
+          Crear producto
         </button>
       </div>
 
-      <ul className="pm-list pm-list-scroll">
-        {products.length > 0 ? (
-          products.map((p) => (
-            <li className="pm-item" key={p.id_producto}>
-              <h4>{p.nombre_producto}</h4>
-              <p>${Number(p.precio).toLocaleString("es-CL")}</p>
-              <p>{p.stock} unidades</p>
-              <div>
-                <button className="edit-btn" onClick={() => openEditModal(p)}>Editar</button>
-                <button className="delete-btn" onClick={() => handleDeleteClick(p.id_producto!, p.nombre_producto)}>Eliminar</button>
+      {/* Filtros visuales */}
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+        <input
+          type="text"
+          placeholder="Filtrar por nombre..."
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
+          style={{ minWidth: 220, padding: '10px 14px', borderRadius: 8, border: '1.5px solid #e0e0e0', background: '#fafbfc', fontSize: 15, outline: 'none', boxShadow: '0 1px 4px #0001' }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f5f5f7', borderRadius: 8, padding: '6px 12px' }}>
+          <span style={{ fontSize: 15, color: '#444', fontWeight: 500 }}>Ordenar por stock</span>
+          <button
+            type="button"
+            onClick={() => setSortStock(sortStock === "asc" ? "none" : "asc")}
+            style={{
+              background: sortStock === "asc" ? '#EC221F' : '#fff',
+              color: sortStock === "asc" ? '#fff' : '#222',
+              border: '1.5px solid #e0e0e0',
+              borderRadius: 6,
+              padding: '4px 12px',
+              cursor: 'pointer',
+              fontWeight: 700,
+              fontSize: 18,
+              boxShadow: sortStock === "asc" ? '0 2px 8px #EC221F22' : 'none',
+              transition: 'all 0.2s'
+            }}
+            aria-label="Ordenar stock ascendente"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            onClick={() => setSortStock(sortStock === "desc" ? "none" : "desc")}
+            style={{
+              background: sortStock === "desc" ? '#EC221F' : '#fff',
+              color: sortStock === "desc" ? '#fff' : '#222',
+              border: '1.5px solid #e0e0e0',
+              borderRadius: 6,
+              padding: '4px 12px',
+              cursor: 'pointer',
+              fontWeight: 700,
+              fontSize: 18,
+              boxShadow: sortStock === "desc" ? '0 2px 8px #EC221F22' : 'none',
+              transition: 'all 0.2s'
+            }}
+            aria-label="Ordenar stock descendente"
+          >
+            ↓
+          </button>
+        </div>
+      </div>
+
+      {/* Notification panel (shows only if error or success/info is set) */}
+      {error && (
+        <div style={{ marginBottom: 20 }}>
+          <Notification message={error} type="error" onClose={() => {}} />
+        </div>
+      )}
+
+      {/* Product cards grid with filters applied visually */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
+        {(products
+          .filter((p) =>
+            filter.trim().length === 0
+              ? true
+              : p.nombre_producto.toLowerCase().includes(filter.trim().toLowerCase())
+          )
+          .sort((a, b) => {
+            if (sortStock === "none") return 0;
+            const stockA = Number(a.stock);
+            const stockB = Number(b.stock);
+            return sortStock === "asc" ? stockA - stockB : sortStock === "desc" ? stockB - stockA : 0;
+          })
+        ).length > 0 ? (
+          (products
+            .filter((p) =>
+              filter.trim().length === 0
+                ? true
+                : p.nombre_producto.toLowerCase().includes(filter.trim().toLowerCase())
+            )
+            .sort((a, b) => {
+              if (sortStock === "none") return 0;
+              const stockA = Number(a.stock);
+              const stockB = Number(b.stock);
+              return sortStock === "asc" ? stockA - stockB : sortStock === "desc" ? stockB - stockA : 0;
+            })
+          ).map((p) => (
+            <div key={p.id_producto} style={{ background: '#fff', borderRadius: 14, boxShadow: '0 2px 16px #0002', padding: 24, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 180, position: 'relative', border: '1.5px solid #f2f2f2' }}>
+              <div style={{ fontWeight: 700, fontSize: 20, color: '#222', marginBottom: 4 }}>{p.nombre_producto}</div>
+              <div style={{ color: '#EC221F', fontWeight: 600, fontSize: 18 }}>${Number(p.precio).toLocaleString("es-CL")}</div>
+              <div style={{ color: '#555', fontSize: 15 }}>{p.stock} unidades</div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                <button
+                  className="edit-btn"
+                  onClick={() => openEditModal(p)}
+                  style={{ background: '#fff', color: '#EC221F', border: '1.5px solid #EC221F', borderRadius: 6, padding: '6px 16px', fontWeight: 600, fontSize: 15, cursor: 'pointer', transition: 'all 0.2s' }}
+                >
+                  Editar
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDeleteClick(p.id_producto!, p.nombre_producto)}
+                  style={{ background: '#EC221F', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', fontWeight: 600, fontSize: 15, cursor: 'pointer', transition: 'all 0.2s' }}
+                >
+                  Eliminar
+                </button>
               </div>
-            </li>
+            </div>
           ))
         ) : (
-          <li className="pm-item">
-            <p>No hay productos disponibles.</p>
-          </li>
+          <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#888', fontSize: 18, padding: 40, background: '#fff', borderRadius: 14, boxShadow: '0 2px 16px #0001', border: '1.5px solid #f2f2f2' }}>
+            No hay productos disponibles.
+          </div>
         )}
-      </ul>
+      </div>
 
+      {/* ...existing code for modals and confirm modal... */}
       {isModalOpen && editData && (
         <ModalProduct
           isOpen={isModalOpen}
@@ -285,11 +393,17 @@ function ProductManagement({ userRole, token }: Props) {
           loadingRellenos={rellenos.length === 0}
           extraFields={
             <>
-              <label>
+              <label style={{ marginTop: 10 }}>
                 Imagen del producto:
                 <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
               </label>
-              {imagePreview && <img src={imagePreview} alt="Preview" style={{ maxHeight: "150px", marginTop: "8px" }} />}
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  style={{ maxHeight: "150px", marginTop: "8px", borderRadius: 8, boxShadow: '0 2px 8px #0002' }}
+                />
+              )}
             </>
           }
         />

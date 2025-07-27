@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 import "../styles/modal.css";
 
 interface Tipo {
@@ -121,7 +122,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
@@ -269,6 +270,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default ModalProduct;
