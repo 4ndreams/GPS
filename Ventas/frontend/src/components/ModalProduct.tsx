@@ -33,6 +33,7 @@ interface ModalProductProps {
   materiales: Material[];
   loadingTipos?: boolean;
   loadingMateriales?: boolean;
+  extraFields?: React.ReactNode;
 }
 
 const ModalProduct: React.FC<ModalProductProps> = ({
@@ -44,6 +45,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
   materiales,
   loadingTipos = false,
   loadingMateriales = false,
+  extraFields,
 }) => {
   const [formData, setFormData] = useState<ProductData>({
     nombre_producto: "",
@@ -57,7 +59,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     descripcion: "",
   });
 
-  const [file, setFile] = useState<File | null>(null);
+
 
   useEffect(() => {
     if (editData) {
@@ -86,7 +88,7 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         descripcion: "",
       });
     }
-    setFile(null);
+
   }, [editData]);
 
   const handleChange = (
@@ -96,12 +98,6 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-    }
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -109,10 +105,6 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     Object.entries(formData).forEach(([key, value]) => {
       data.append(key, String(value));
     });
-
-    if (file) {
-      data.append("imagen", file);
-    }
 
     onSubmit(data);
     onClose();
@@ -242,15 +234,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
               </select>
             </label>
 
-            {/* 🔽 Campo para subir imagen al final del formulario */}
-            <label>
-              Imagen del producto
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-            </label>
+            {/* Campos extra */}
+            {extraFields}
           </div>
 
           <div className="modal-actions">

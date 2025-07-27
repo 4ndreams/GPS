@@ -132,7 +132,7 @@ function validateAncho(value: string | number, fieldName: string, tipoPuerta: st
 }
 
 function validateAlto(value: string | number, fieldName: string): string | null {
-  const numValue = typeof value === 'number' ? value : parseFloat(value as string);
+  const numValue = typeof value === 'number' ? value : parseFloat(value);
   if (!value || isNaN(numValue)) return `${fieldName} es requerido`;
   const limits = VALIDATION_RULES.medidas.alto;
   if (numValue < limits.min) {
@@ -197,9 +197,33 @@ function validateMedida(value: string | number, fieldName: string, dimension: 'a
     validateFieldRealtime(field, value);
   };
 
+  // Helpers to extract id_material and id_relleno
+  function getMaterialId(material: any): number | undefined {
+    if (material) {
+      if (typeof material === 'object' && material !== null && 'id_material' in material) {
+        return material.id_material;
+      } else if (!isNaN(Number(material))) {
+        return Number(material);
+      }
+    }
+    return undefined;
+  }
+
+  function getRellenoId(relleno: any): number | undefined {
+    if (relleno) {
+      if (typeof relleno === 'object' && relleno !== null && 'id_relleno' in relleno) {
+        return relleno.id_relleno;
+      } else if (!isNaN(Number(relleno))) {
+        return Number(relleno);
+      }
+    }
+    return undefined;
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+
     // Validaciones igual que Cotizar.tsx
     const nombreError = validateNombre(form.nombre_apellido_contacto || '');
     const emailError = validateEmail(form.email_contacto || '');
@@ -207,6 +231,7 @@ function validateMedida(value: string | number, fieldName: string, dimension: 'a
     const tipoPuertaError = (!form.tipo_puerta || (form.tipo_puerta !== 'puertaPaso' && form.tipo_puerta !== 'puertaCloset')) ? 'Debe seleccionar un tipo de puerta válido' : null;
     const anchoError = validateMedida(form.medida_ancho ?? '', 'El ancho', 'ancho', form.tipo_puerta || '');
     const altoError = validateMedida(form.medida_alto ?? '', 'El alto', 'alto', form.tipo_puerta || '');
+
     setFieldErrors({
       nombre_apellido_contacto: nombreError,
       email_contacto: emailError,
@@ -215,33 +240,21 @@ function validateMedida(value: string | number, fieldName: string, dimension: 'a
       medida_ancho: anchoError,
       medida_alto: altoError,
     });
+
     const allErrors = [nombreError, emailError, rutError, tipoPuertaError, anchoError, altoError].filter(Boolean);
     if (allErrors.length > 0) {
       setFormError(allErrors[0] as string);
       return;
     }
+
     // Enviar espesor como medida_largo según el tipo de puerta
     let espesor: number | undefined = undefined;
     if (form.tipo_puerta === 'puertaPaso') espesor = 45;
     else if (form.tipo_puerta === 'puertaCloset') espesor = 18;
 
-    // Extraer solo los ids para material y relleno
-    let id_material: number | undefined = undefined;
-    if (form.material) {
-      if (typeof form.material === 'object' && form.material !== null && 'id_material' in form.material) {
-        id_material = form.material.id_material;
-      } else if (!isNaN(Number(form.material))) {
-        id_material = Number(form.material);
-      }
-    }
-    let id_relleno: number | undefined = undefined;
-    if (form.relleno) {
-      if (typeof form.relleno === 'object' && form.relleno !== null && 'id_relleno' in form.relleno) {
-        id_relleno = form.relleno.id_relleno;
-      } else if (!isNaN(Number(form.relleno))) {
-        id_relleno = Number(form.relleno);
-      }
-    }
+    // Extraer solo los ids para material y relleno usando helpers
+    const id_material = getMaterialId(form.material);
+    const id_relleno = getRellenoId(form.relleno);
 
     // Eliminar id_producto_personalizado, material, relleno y usuario antes de enviar al backend
     const { id_producto_personalizado, material, relleno, usuario, ...rest } = form;
@@ -266,43 +279,67 @@ function validateMedida(value: string | number, fieldName: string, dimension: 'a
             {/* Material y Relleno en la misma fila */}
             <div>
               <Label>Material</Label>
-              <Select
-                value={typeof form.material === 'object' && form.material !== null ? String(form.material.id_material) : form.material ? String(form.material) : ''}
-                onValueChange={v => handleChange('material', v)}
-                disabled={loading || loadingMateriales}
-                required
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccione un material" />
-                </SelectTrigger>
-                <SelectContent>
-                  {materiales.map(mat => (
-                    <SelectItem key={mat.id_material} value={String(mat.id_material)}>
-                      {mat.nombre_material}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/*
+                Extraer el valor del material para evitar ternarios anidados en JSX
+              */}
+              {(() => {
+                // eslint-disable-next-line
+                var materialValue = '';
+                if (typeof form.material === 'object' && form.material !== null) {
+                  materialValue = String(form.material.id_material);
+                } else if (form.material) {
+                  materialValue = String(form.material);
+                }
+                return (
+                  <Select
+                    value={materialValue}
+                    onValueChange={v => handleChange('material', v)}
+                    disabled={loading || loadingMateriales}
+                    required
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccione un material" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {materiales.map(mat => (
+                        <SelectItem key={mat.id_material} value={String(mat.id_material)}>
+                          {mat.nombre_material}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                );
+              })()}
             </div>
             <div>
               <Label>Relleno</Label>
-              <Select
-                value={typeof form.relleno === 'object' && form.relleno !== null ? String(form.relleno.id_relleno) : form.relleno ? String(form.relleno) : ''}
-                onValueChange={v => handleChange('relleno', v)}
-                disabled={loading || loadingRellenos}
-                required
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Seleccione un relleno" />
-                </SelectTrigger>
-                <SelectContent>
-                  {rellenos.map(rel => (
-                    <SelectItem key={rel.id_relleno} value={String(rel.id_relleno)}>
-                      {rel.nombre_relleno}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {(() => {
+                let rellenoValue = '';
+                if (typeof form.relleno === 'object' && form.relleno !== null) {
+                  rellenoValue = String(form.relleno.id_relleno);
+                } else if (form.relleno) {
+                  rellenoValue = String(form.relleno);
+                }
+                return (
+                  <Select
+                    value={rellenoValue}
+                    onValueChange={v => handleChange('relleno', v)}
+                    disabled={loading || loadingRellenos}
+                    required
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccione un relleno" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rellenos.map(rel => (
+                        <SelectItem key={rel.id_relleno} value={String(rel.id_relleno)}>
+                          {rel.nombre_relleno}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                );
+              })()}
             </div>
             <div>
               <Label>Nombre</Label>
