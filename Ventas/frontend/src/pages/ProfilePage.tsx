@@ -4,6 +4,7 @@ import ProfileInfo from "@components/ProfileInfo";
 import UserInfo from "@components/UserInfo";
 import ProductManagement from "@components/ProductManagement";
 import MisCotizaciones from "@components/MisCotizaciones.tsx";
+import UserTable from "@components/UserTable";
 import { TokenService } from '@services/tokenService';
 import "@styles/ProfileInfo.css";
 import "@styles/animations.css";
@@ -15,6 +16,7 @@ const dinamicTabs = (role: string) => {
       { key: "orders", label: "Mis Compras" },
       { key: "cotizaciones", label: "Mis Cotizaciones" },
       { key: "products", label: "Gestión de Productos" },
+      { key: "users", label: "Usuarios del sistema" },
     ];
   }
 
@@ -87,11 +89,15 @@ const ProfilePage: React.FC = () => {
             }}
           />
         )}
-   
 
         {activeTab === "products" &&
           userRole.toLowerCase() === "administrador" && (
             <ProductManagement userRole={userRole} token={TokenService.getToken() ?? ""} />
+          )}
+
+        {activeTab === "users" &&
+          userRole.toLowerCase() === "administrador" && (
+            <UserTable/>
           )}
 
         {activeTab === "orders" && <div>No se han realizado compras aún.</div>}
