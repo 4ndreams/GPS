@@ -4,6 +4,14 @@ import { getAllProductos } from "@services/añadirPuertaService";
 interface Producto {
   id_producto: number;
   nombre_producto: string;
+  material?: {
+    id_material: number;
+    nombre_material: string;
+  };
+  relleno?: {
+    id_relleno: number;
+    nombre_relleno: string;
+  };
 }
 
 export default function useGetAllProductos() {
@@ -16,7 +24,7 @@ export default function useGetAllProductos() {
     const fetchProductos = async () => {
       setLoading(true);
       const { data, error } = await getAllProductos();
-      console.log("Datos de productos:", data);
+  
       if (error) {
         setError(error);
         setProductos([]);

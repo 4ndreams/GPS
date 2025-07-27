@@ -1,24 +1,22 @@
 import { useEffect, useState } from "react";
-import { getInfoAll } from "@services/añadirPuertaService";
+import { getAllProductos } from "@services/añadirPuertaService";
 
 type TipoItem = "producto" | "material" | "relleno";
 
 interface Producto {
   id_producto: number;
   nombre_producto: string;
-  [key: string]: any;
+  // otras propiedades específicas si se conocen
 }
 
 interface Material {
   id_material: number;
   nombre_material: string;
-  [key: string]: any;
 }
 
 interface Relleno {
   id_relleno: number;
   nombre_relleno: string;
-  [key: string]: any;
 }
 
 interface ItemUnificado {
@@ -34,22 +32,35 @@ export default function useInfoBodegaUnificada() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      const res = await getInfoAll();
-      if (res.error) {
-        setError(res.error);
-      } else if (res.data) {
-        setData(res.data);
+      try {
+        const res = await getAllProductos();
+        if (res.error) {
+          setError(res.error);
+        } else if (res.data) {
+          // Transformar Producto[] a ItemUnificado[]
+          const productos: Producto[] = res.data;
+          const itemsUnificados: ItemUnificado[] = productos.map((producto) => ({
+            id_bodega: producto.id_producto, // Ajusta según la estructura real
+            stock: 0, // Asigna el stock real si está disponible
+            tipo: "producto",
+            detalle: producto,
+          }));
+          setData(itemsUnificados);
+        } else {
+          setError("Error desconocido al obtener productos.");
+        }
+      } catch (err) {
+        setError("Ocurrió un error inesperado." + (err as Error).message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
-    fetch();
+
+    fetchData();
   }, []);
 
-  return {
-    data,     // lista de bodega unificada
-    loading,  // booleano mientras carga
-    error,    // error en string o null
-  };
+  return { data, loading, error };
 }
+
