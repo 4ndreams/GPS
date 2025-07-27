@@ -47,7 +47,6 @@ function App() {
     updateCartItemQuantity,
     getCartItemQuantity,
     cartItemCount,
-    clearCart,
   } = useCart();
 
   // Cargar perfil de usuario
@@ -120,7 +119,6 @@ function App() {
           element={
             <Checkout 
               cartItems={cartItems}
-              clearCart={clearCart}
             />
           } 
         />

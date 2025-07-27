@@ -9,18 +9,15 @@ export const getProducts = async (req, res) => {
   try {
     const { nombre, minPrecio, maxPrecio, categoria } = req.query;
 
-    // Construir query builder
     const productRepo = AppDataSource.getRepository("Producto");
     let query = productRepo.createQueryBuilder("producto")
       .leftJoinAndSelect("producto.tipo", "tipo")
+      .leftJoinAndSelect("producto.imagenes", "imagenes");
       .leftJoinAndSelect("producto.material", "material")
       .leftJoinAndSelect("producto.relleno", "relleno"); // <-- Aquí incluyes la relación relleno
 
-    // Filtros
     if (nombre) {
-      query = query.andWhere("producto.nombre_producto ILIKE :nombre", {
-        nombre: `%${nombre}%`,
-      });
+      query = query.andWhere("producto.nombre_producto ILIKE :nombre", { nombre: `%${nombre}%` });
     }
     if (minPrecio) {
       query = query.andWhere("producto.precio >= :minPrecio", { minPrecio });
@@ -34,16 +31,18 @@ export const getProducts = async (req, res) => {
 
     const productos = await query.getMany();
 
- 
-    return res.json({
-      status: "success",
-      data: productos,
-    });
+    const productosConImagen = productos.map(p => ({
+      ...p,
+      imagen: p.imagenes?.length > 0 ? p.imagenes[0].ruta_imagen : "default.jpeg",
+    }));
+
+    return res.json({ status: "success", data: productosConImagen });
   } catch (error) {
     console.error(error);
     res.status(500).json({ status: "error", message: "Error al obtener productos" });
   }
 };
+
 
 // GET /api/products/:id
 export const getProductById = async (req, res) => {

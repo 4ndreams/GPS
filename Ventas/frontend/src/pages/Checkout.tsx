@@ -23,6 +23,7 @@ interface ContactInfo {
 
 interface CheckoutProps {
   cartItems: CartItem[];
+  clearCart: () => void;
 }
 
 const Checkout: React.FC<CheckoutProps> = ({ cartItems }) => {

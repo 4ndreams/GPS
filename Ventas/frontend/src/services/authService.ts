@@ -68,10 +68,6 @@ export const verifyEmail = async (token: string) => {
   return axios.get(`${import.meta.env.VITE_API_BASE_URL}/verify-email`, { params: { token } });
 };
 
-export const recoverPassword = async (token: string, newPassword: string) => {
-  return axios.post(`${import.meta.env.VITE_API_BASE_URL}/recover-password`, { token, newPassword });
-};
-
 // Función para obtener el perfil del usuario actual
 export const getUserProfile = async () => {
   try {
@@ -106,7 +102,7 @@ export const isCurrentUserAdmin = async (): Promise<boolean> => {
 // Función para recuperar/restablecer contraseña
 export const recoverPassword = async (token: string, newPassword: string) => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/recover-password`, {
+    const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/reset-password`, {
       token,
       newPassword
     });
