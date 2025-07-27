@@ -23,10 +23,9 @@ interface ContactInfo {
 
 interface CheckoutProps {
   cartItems: CartItem[];
-  clearCart: () => void;
 }
 
-const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
+const Checkout: React.FC<CheckoutProps> = ({ cartItems }) => {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     nombre: "",
     apellidos: "",
@@ -254,7 +253,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                     onReady={() => {
                       console.log('Wallet listo');
                     }}
-                    onError={(error) => {
+                    onError={(error: any) => {
                       console.error('Error en Mercado Pago:', error);
                       alert('Error en el proceso de pago. Por favor intenta nuevamente.');
                       setPreferenceId(null);

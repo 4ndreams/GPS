@@ -236,14 +236,7 @@ const ProfileInfo: React.FC<{ onUserLoaded?: (user: UserProfile) => void }> = ({
           <div><div className="profile-label">Email</div><div className="profile-value">{user.email}</div></div>
           <div><div className="profile-label">RUT</div><div className="profile-value">{user.rut}</div></div>
         </div>
-        <div className="profile-newsletter-box">
-          <div className="profile-label" style={{ fontWeight: 600 }}>Boletín informativo</div>
-          <div className="profile-newsletter-desc">¿Quiere recibir boletines informativos promocionales?</div>
-          <label className="profile-checkbox">
-            <input type="checkbox" />
-            <span>Quiero recibir el boletín informativo con promociones.</span>
-          </label>
-        </div>
+       
       </div>
 
       <ModalProfile

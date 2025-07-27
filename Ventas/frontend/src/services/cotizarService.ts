@@ -11,6 +11,7 @@ export interface CotizacionData {
   medida_largo: number;
   tipo_puerta: string; // 'puertaPaso' o 'puertaCloset'
   mensaje: string;
+  telefono_contacto: string;
   // Campos opcionales para usuarios no logueados
   nombre_apellido_contacto?: string;
   rut_contacto?: string;

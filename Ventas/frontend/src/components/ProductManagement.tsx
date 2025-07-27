@@ -144,7 +144,6 @@ function ProductManagement({ userRole, token }: Props) {
         id_tipo: Number(productData.id_tipo),
       };
 
-      // 1. Guardar producto
       let savedProduct;
       if (productData.id_producto) {
         await axios.patch(`${API_BASE_URL}/products/${productData.id_producto}`, parsedProduct, axiosConfig);
@@ -154,7 +153,6 @@ function ProductManagement({ userRole, token }: Props) {
         savedProduct = res.data.data;
       }
 
-      // 2. Si hay imagen, subirla
       if (selectedImage && savedProduct?.id_producto) {
         const formData = new FormData();
         formData.append("file", selectedImage);
@@ -173,6 +171,25 @@ function ProductManagement({ userRole, token }: Props) {
     } catch {
       setError("Error al guardar producto");
     }
+  };
+
+  // ✅ Este es el cambio importante:
+  const handleModalSubmit = (formData: FormData) => {
+    const productData: ProductData = {
+      nombre_producto: formData.get("nombre_producto") as string,
+      precio: formData.get("precio") as string,
+      stock: formData.get("stock") as string,
+      id_tipo: Number(formData.get("id_tipo")),
+      id_material: Number(formData.get("id_material")),
+      medida_ancho: formData.get("medida_ancho") as string,
+      medida_largo: formData.get("medida_largo") as string,
+      medida_alto: formData.get("medida_alto") as string,
+      descripcion: (formData.get("descripcion") as string) || "",
+    };
+    if (editData?.id_producto) {
+      productData.id_producto = editData.id_producto;
+    }
+    void handleSaveProduct(productData);
   };
 
   const handleDeleteClick = (id: number, name: string) => {
@@ -247,7 +264,7 @@ function ProductManagement({ userRole, token }: Props) {
           tipos={tipos}
           materiales={materiales}
           onClose={closeModal}
-          onSubmit={handleSaveProduct}
+          onSubmit={handleModalSubmit}
           loadingTipos={tipos.length === 0}
           loadingMateriales={materiales.length === 0}
           extraFields={
