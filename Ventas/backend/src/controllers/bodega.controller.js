@@ -40,7 +40,7 @@ export async function getBodegasController(req, res) {
 }
 export async function createBodegaController(req, res) {
     try {
-        console.log("Creating Bodega with body:", req.body);
+        
         const { error } = bodegaBodyValidation.validate(req.body);
         if (error) {
             return handleErrorClient(res, 400, error.details[0].message);

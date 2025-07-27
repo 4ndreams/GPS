@@ -25,17 +25,20 @@ export async function getImagenByIdService(id) {
   }
 }
 
-export async function createImagenService(body) {
+export async function createImagenService(data) {
   try {
-    const repo = AppDataSource.getRepository(ImagenSchema);
-    const nueva = repo.create(body);
-    await repo.save(nueva);
-    return [nueva, null];
+    const imagenesRepository = AppDataSource.getRepository(Imagenes);
+    const newImagen = imagenesRepository.create({
+      ruta_imagen: data.ruta_imagen, // usa la propiedad correcta
+      id_producto: data.id_producto,
+    });
+    return await imagenesRepository.save(newImagen);
   } catch (error) {
-    console.error("Error al crear imagen:", error);
-    return [null, "Error interno del servidor"];
+    console.error("Error al crear la imagen:", error);
+    return null;
   }
 }
+
 
 export async function updateImagenService(id, body) {
   try {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { getImagePath } from '@utils/getImagePath';
+
 import '@styles/Carrito.css';
 
 interface Product {
@@ -48,7 +48,7 @@ function Carrito({ cartItems, removeFromCart, updateQuantity }: CarritoProps) {
               <div key={item.id} className="carrito-item">
                 <div className="item-imagen">
                   <img 
-                    src={getImagePath(`${item.categoria}/${item.imagen}`)} 
+                    src={item.imagen} 
                     alt={item.nombre} 
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';

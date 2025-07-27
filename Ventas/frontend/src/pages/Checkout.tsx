@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserProfile } from "@services/userService";
 import { createPaymentOrder } from "@services/paymentService";
-import { getImagePath } from "@utils/getImagePath";
+
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import "@styles/Checkout.css";
 import { TokenService } from "@services/tokenService";
@@ -24,10 +24,10 @@ interface ContactInfo {
 
 interface CheckoutProps {
   cartItems: CartItem[];
-  clearCart: () => void;
+  clearCart?: () => void;
 }
 
-const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
+const Checkout: React.FC<CheckoutProps> = ({ cartItems }) => {
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     nombre: "",
     apellidos: "",
@@ -261,7 +261,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                     onReady={() => {
                       console.log('Wallet listo');
                     }}
-                    onError={(error) => {
+                    onError={(error: any) => {
                       console.error('Error en Mercado Pago:', error);
                       alert('Error en el proceso de pago. Por favor intenta nuevamente.');
                       setPreferenceId(null);
@@ -293,7 +293,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                   <div key={item.id} className="cart-item">
                     <div className="item-image">
                       <img 
-                        src={getImagePath(`${item.categoria}/${item.imagen}`)} 
+                        src={item.imagen} 
                         alt={item.nombre}
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';

@@ -326,7 +326,7 @@ const MisCotizaciones: React.FC = () => {
                     Contacto
                   </h4>
                   <p>
-                    <strong>Teléfono:</strong> {cotizacion.telefono_contacto}
+                    <strong>Email:</strong> {cotizacion.email_contacto}
                   </p>
                   <p>
                     <strong>Email:</strong> {cotizacion.email_contacto}

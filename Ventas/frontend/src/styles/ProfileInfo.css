@@ -101,13 +101,13 @@ button:focus,
   border: none;
   border-radius: 22px;           
   width: 100%;
-  max-width: 1200px;             
+  max-width: 700px;              /* Menos ancha */
   margin: 0 auto;
-  padding: 18px 24px 18px 24px;  
+  padding: 32px 48px 32px 48px;
   box-shadow: 0 6px 32px rgba(30, 41, 59, 0.10), 0 1.5px 6px rgba(30, 41, 59, 0.06); /* Sombra suave */
   display: flex;
   flex-direction: column;
-  gap: 24px;                     
+  gap: 40px;
   transition: box-shadow 0.2s;
 }
 
@@ -146,7 +146,7 @@ button:focus,
 .profile-info-grid {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 40px 64px; /* Más separación entre filas y columnas */
   align-items: start;
 }
 
@@ -155,6 +155,7 @@ button:focus,
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+  padding-bottom: 16px; /* Más espacio debajo de cada dato */
 }
 
 .profile-label {
