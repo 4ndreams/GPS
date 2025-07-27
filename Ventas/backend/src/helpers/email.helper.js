@@ -393,6 +393,12 @@ export async function sendCotizacionConfirmationEmail(cotizacion) {
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
                           <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
                         </tr>
+                        ${cotizacion.precio != null ? `
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Precio:</td>
+                          <td style="padding: 0.3rem 0; color: #28a745; font-weight: 700;">$${Number(cotizacion.precio).toLocaleString('es-CL')}</td>
+                        </tr>
+                        ` : ''}
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Estado:</td>
                           <td style="padding: 0.3rem 0; color: #EC221F; font-weight: 600;">${estado}</td>
