@@ -3,6 +3,8 @@ import type { Ref } from 'react';
 import TerplacFoto1 from '@assets/TerplacFoto1.png';
 import '@styles/Home.css';
 import '@styles/animations.css';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface HomeProps {
   contactoRef?: Ref<HTMLElement>;
@@ -122,6 +124,29 @@ const Home = forwardRef<HTMLElement, HomeProps>((_, ref) => {
     return () => observers.forEach(o => o.disconnect());
   }, [nosotrosRefs]);
 
+  // Productos destacados
+  const [destacados, setDestacados] = useState<any[]>([]);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Obtener productos destacados del backend
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/productos-destacados`)
+      .then(res => {
+        setDestacados(res.data.data || []);
+      })
+      .catch(() => setDestacados([]));
+  }, []);
+
+  // Carrusel automático
+  useEffect(() => {
+    if (destacados.length === 0) return;
+    const interval = setInterval(() => {
+      setCarouselIndex(idx => (idx + 1) % destacados.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [destacados]);
+
   return (
     <div className="home-page fade-in">
       <section className="hero-section">
@@ -194,6 +219,47 @@ const Home = forwardRef<HTMLElement, HomeProps>((_, ref) => {
         <div className="hero-content-mobile">
           <h1 style={{ color: 'black' }}>Productos destacados</h1>
           <hr style={{ borderColor: 'black' }} />
+        </div>
+        {/* Carrusel de productos destacados */}
+        <div className="destacados-carousel">
+          {destacados.length > 0 && (
+            <div className="destacado-card" style={{ textAlign: "center" }}>
+              <div
+                style={{ cursor: "pointer" }}
+                onClick={() => navigate(`/product/${destacados[carouselIndex].producto.id_producto}`)}
+              >
+                <img
+                  src={`/img/${destacados[carouselIndex].producto.tipo?.nombre_tipo || "otros"}/${destacados[carouselIndex].producto.imagen || "default.jpeg"}`}
+                  alt={destacados[carouselIndex].producto.nombre_producto}
+                  style={{ maxWidth: "220px", borderRadius: "12px", marginBottom: "1rem" }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).src = "/img/puertas/default.jpeg"; }}
+                />
+                <h2>{destacados[carouselIndex].producto.nombre_producto}</h2>
+                <p style={{ fontWeight: "bold", color: "#e53935" }}>
+                  ${Number(destacados[carouselIndex].producto.precio).toLocaleString("es-CL")}
+                </p>
+                <p style={{ color: "#666" }}>
+                  {destacados[carouselIndex].producto.descripcion}
+                </p>
+              </div>
+              {/* Controles del carrusel */}
+              <div style={{ marginTop: "1rem" }}>
+                {destacados.map((_, idx) => (
+                  <button
+                    key={idx}
+                    style={{
+                      width: 12, height: 12, borderRadius: "50%",
+                      margin: "0 4px", border: "none",
+                      background: idx === carouselIndex ? "#e53935" : "#ccc",
+                      cursor: "pointer"
+                    }}
+                    onClick={() => setCarouselIndex(idx)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {destacados.length === 0 && <p>No hay productos destacados disponibles.</p>}
         </div>
         <div className="hero-buttons">
           <button onClick={() => window.location.href = '/productos'}>Ver todos los productos</button>

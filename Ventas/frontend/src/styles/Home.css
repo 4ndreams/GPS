@@ -454,3 +454,24 @@
     box-sizing: border-box;
   }
 }
+
+/* Estilos para el carrusel de destacados */
+.destacados-carousel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+  margin-bottom: 2rem;
+}
+.destacado-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgb(0 0 0 / 0.09);
+  padding: 32px;
+  max-width: 400px;
+  margin: 0 auto;
+  transition: box-shadow 0.3s;
+}
+.destacado-card:hover {
+  box-shadow: 0 10px 25px rgba(44, 62, 80, 0.13);
+}

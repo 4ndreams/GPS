@@ -27,7 +27,7 @@ async function setupServer() {
     app.disable("x-powered-by");
 
     app.use(cors({
-      origin: true,  // Permite solicitudes desde cualquier origen
+      origin: true,
       credentials: true
     }));
 
@@ -41,7 +41,7 @@ async function setupServer() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: true,       // true si usas HTTPS
+        secure: false,       // true si usas HTTPS
         httpOnly: true,
         sameSite: "strict",  // evita CSRF
       },

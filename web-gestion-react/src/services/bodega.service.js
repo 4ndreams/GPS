@@ -22,7 +22,7 @@ export async function getBodegas() {
 export async function filtro() {
   try {
     const response = await api.get('/com_mes/Filtros');
-    console.log("Filtro response:", response.data);
+  
     return response.data;
   } catch (error) {
     console.error("Error al obtener filtros:", error);
