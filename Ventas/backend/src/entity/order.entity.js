@@ -2,7 +2,7 @@ import { EntitySchema } from "typeorm";
 
 export const OrderEntity = new EntitySchema({
     name: "Order",
-    tableName: "ordenes",
+    tableName: "orders", // Tabla diferente para evitar conflicto con 'ordenes'
     columns: {
         id: {
             type: "int",
