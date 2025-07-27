@@ -1,6 +1,11 @@
 "use strict";
 import { DataSource } from "typeorm";
 import { DATABASE, DB_USERNAME, HOST, PASSWORD } from "./configEnv.js";
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -9,9 +14,9 @@ export const AppDataSource = new DataSource({
   username: `${DB_USERNAME}`,
   password: `${PASSWORD}`,
   database: `${DATABASE}`,
-  entities: ["src/entity/**/*.js"],
+  entities: [path.join(__dirname, "../entity/**/*.js")],
   synchronize: true,
-  logging: false,
+  logging: false, // Deshabilitado para limpiar la consola
 });
 
 export async function connectDB() {

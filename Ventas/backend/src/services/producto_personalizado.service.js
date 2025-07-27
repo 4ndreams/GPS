@@ -1,6 +1,8 @@
 "use strict";
 import { AppDataSource } from "../config/configDb.js";
-import { sendCotizacionConfirmationEmail, sendCotizacionStatusChangeEmail } from "../helpers/email.helper.js";
+import { sendCotizacionConfirmationEmail, sendCotizacionStatusChangeEmail, sendCotizacionEditedEmail, sendVentaProductoPersonalizadoEmail } from "../helpers/email.helper.js";
+import { createVentaService } from "./venta.service.js";
+
 
 export async function getProductosPersonalizadosService() {
     try {
@@ -131,7 +133,15 @@ export async function updateProductoPersonalizadoService(id_producto_personaliza
             where: { id_producto_personalizado },
             relations: ["relleno", "material", "usuario"]
         });
-        
+
+        // Enviar email de notificación de edición de cotización
+        try {
+            await sendCotizacionEditedEmail(updated);
+        } catch (emailError) {
+            console.error(`Error al enviar email de edición para cotización #${updated.id_producto_personalizado}:`, emailError.message);
+            // No fallar la edición si el email falla, solo registrar el error
+        }
+
         return [updated, null];
     } catch (error) {
         return [error, "Error al actualizar producto personalizado"];
@@ -177,10 +187,10 @@ export async function getProductosPersonalizadosByUserService(id_usuario, rut_co
     }
 }
 
+
 export async function updateEstadoProductoPersonalizadoService(id_producto_personalizado, estado) {
     try {
         const repository = AppDataSource.getRepository("ProductoPersonalizado");
-        
         // Verificar que el producto personalizado existe y obtener el estado anterior
         const exists = await repository.findOne({
             where: { id_producto_personalizado },
@@ -189,23 +199,18 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
         if (!exists) {
             return [null, "Producto personalizado / cotización no encontrado"];
         }
-        
         const estadoAnterior = exists.estado;
-        
         // Validar que el precio no sea null ni vacío antes de cambiar el estado
         if (exists.precio === null || exists.precio === "" || typeof exists.precio === "undefined") {
             return [null, "No se le ha ingresado un precio a la cotización."];
         }
-
         // Actualizar solo el estado
         await repository.update({ id_producto_personalizado }, { estado });
-
         // Obtener el registro actualizado con relaciones
         const updated = await repository.findOne({
             where: { id_producto_personalizado },
             relations: ["relleno", "material", "usuario"]
         });
-
         // Enviar email de cambio de estado solo si el estado realmente cambió
         if (estadoAnterior !== estado) {
             try {
@@ -215,7 +220,46 @@ export async function updateEstadoProductoPersonalizadoService(id_producto_perso
             }
         }
 
-        return [updated, null];
+        // Crear venta si el estado es "Producto Entregado" y no existe una venta asociada
+        let ventaResult = null;
+        if (estado === "Producto Entregado") {
+            const ventaRepository = AppDataSource.getRepository("Venta");
+            const ventaExistente = await ventaRepository.findOne({
+                where: { informacion: `ProductoPersonalizado:${id_producto_personalizado}` }
+            });
+            if (!ventaExistente) {
+                const ventaBody = {
+                    fecha_solicitud: new Date(),
+                    estado_pago: "Pagado",
+                    fecha_pago: new Date(),
+                    informacion: `Venta de Producto Personalizado con ID:${id_producto_personalizado}`.slice(0, 150),
+                    cantidad: 1,
+                    precio_venta: Number(exists.precio) || 0,
+                    usuario: exists.usuario ? exists.usuario : null
+                };
+                try {
+                    const [venta, ventaError] = await createVentaService(ventaBody);
+                    if (ventaError) {
+                        ventaResult = { success: false, error: ventaError, venta: null };
+                    } else {
+                        ventaResult = { success: true, error: null, venta };
+                        // Enviar correo de resumen de venta
+                        try {
+                            await sendVentaProductoPersonalizadoEmail({ venta, productoPersonalizado: exists });
+                        } catch (mailError) {
+                            console.error(`❌ Error al enviar correo de venta para producto personalizado #${id_producto_personalizado}:`, mailError.message);
+                        }
+                    }
+                } catch (ventaError) {
+                    console.error(`❌ Error al crear venta para producto personalizado #${id_producto_personalizado}:`, ventaError.message);
+                    ventaResult = { success: false, error: ventaError.message, venta: null };
+                }
+            } else {
+                ventaResult = { success: true, error: null, venta: ventaExistente };
+            }
+        }
+
+        return [updated, null, ventaResult];
     } catch (error) {
         return [error, "Error al actualizar el estado del producto personalizado"];
     }

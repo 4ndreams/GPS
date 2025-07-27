@@ -5,6 +5,12 @@ import { AppDataSource } from "../config/configDb.js";
 export async function getProductosService() {
   try {
     const repository = AppDataSource.getRepository(Producto);
+<<<<<<< HEAD
+    let productos = await repository.find({ 
+      relations: ["material", "tipo", "imagenes"] 
+    });
+
+=======
     let productos = await repository.find({ relations: ["material", "tipo", "relleno"] });
     
     // Si no hay productos, insertar materiales, tipos y productos de ejemplo
@@ -143,7 +149,10 @@ export async function getProductosService() {
 export async function getProductoByIdService(id_producto) {
   try {
     const repository = AppDataSource.getRepository(Producto);
-    const producto = await repository.findOneBy({ id_producto });
+    const producto = await repository.findOne({ 
+      where: { id_producto },
+      relations: ["material", "tipo", "relleno", "imagenes"]
+    });
     return producto ? [producto, null] : [null, "Producto no encontrado"];
   } catch (error) {
     return [null, "Error al buscar producto"];

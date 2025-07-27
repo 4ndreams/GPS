@@ -7,10 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview --port 443 " 
+    "preview": "vit"
   },
   "dependencies": {
-    "@mercadopago/sdk-react": "^1.0.3",
     "axios": "^1.10.0",
     "bootstrap-icons": "^1.13.1",
     "mercadopago": "^2.8.0",

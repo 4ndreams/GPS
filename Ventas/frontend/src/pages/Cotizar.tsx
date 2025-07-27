@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getUserProfile } from '@services/userService';
 import { crearCotizacion, estaLogueado, type CotizacionData } from '@services/cotizarService';
 import { 
@@ -14,8 +14,6 @@ import { formatRut } from '@utils/validations';
 
 import '@styles/Cotizar.css';
 
-// Establecer el título de la página
-import { useRef } from 'react';
 
 // Constantes de validación
 const VALIDATION_RULES = {

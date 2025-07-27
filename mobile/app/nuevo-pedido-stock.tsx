@@ -42,7 +42,7 @@ export default function NuevoPedidoStock() {
   const cargarProductos = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/products/all');
+      const response = await api.get('/products');
       setProductos(response.data.data || []);
     } catch (error) {
       Alert.alert('Error', 'No se pudieron cargar los productos');

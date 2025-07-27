@@ -11,7 +11,7 @@ export class TokenService {
   private static readonly TOKEN_DURATION = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
   private static readonly REFRESH_THRESHOLD = 2 * 60 * 60 * 1000; // Renovar si quedan menos de 2 horas
   
-  private static expirationCheckInterval: number | null = null;
+  private static expirationCheckInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
    * Guarda el token con información de expiración

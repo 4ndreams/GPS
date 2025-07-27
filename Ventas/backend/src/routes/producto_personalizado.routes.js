@@ -17,7 +17,7 @@ router
     .get('/my', authenticateJwt, getMyProductosPersonalizadosController) // Requiere autenticación - mis cotizaciones
     .get('/:id_producto_personalizado', optionalAuthJwt, getProductoPersonalizadoController) // Público/opcional
     .post('/', optionalAuthJwt, createProductoPersonalizadoController) // Público - permite usuarios logueados y anónimos
-    .put('/:id_producto_personalizado', authenticateJwt, isFabricaOrAdmin, updateProductoPersonalizadoController) // Solo fábrica/admin pueden editar
+    .patch('/:id_producto_personalizado', authenticateJwt, isFabricaOrAdmin, updateProductoPersonalizadoController) // Solo fábrica/admin pueden editar
     .patch('/:id_producto_personalizado/estado', authenticateJwt, isFabricaOrAdmin, updateEstadoProductoPersonalizadoController) // Solo fábrica/admin pueden cambiar estado
     .patch('/:id_producto_personalizado/precio', authenticateJwt, isFabricaOrAdmin, updatePrecioProductoPersonalizadoController) // Solo fábrica/admin pueden asignar precio
     .delete('/:id_producto_personalizado', authenticateJwt, authorizeRoles('administrador'), deleteProductoPersonalizadoController); // Solo admin puede eliminar
