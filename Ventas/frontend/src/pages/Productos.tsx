@@ -40,6 +40,7 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
   const [maxPrice, setMaxPrice] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("todos");
   const [priceError, setPriceError] = useState("");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | ''>('');
 
 
 
@@ -70,8 +71,14 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
           },
         });
         // Validar que la respuesta tenga la estructura esperada
-        const productsData = response.data?.data;
+        let productsData = response.data?.data;
         if (Array.isArray(productsData)) {
+          // Ordenar productos según sortOrder
+          if (sortOrder === 'asc') {
+            productsData = [...productsData].sort((a, b) => a.precio - b.precio);
+          } else if (sortOrder === 'desc') {
+            productsData = [...productsData].sort((a, b) => b.precio - a.precio);
+          }
           setProducts(productsData);
         } else {
           console.warn('La respuesta de la API no tiene el formato esperado:', response.data);
@@ -86,7 +93,7 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
       }
     };
     fetchProducts();
-  }, [nameFilter, minPrice, maxPrice, categoryFilter]);
+  }, [nameFilter, minPrice, maxPrice, categoryFilter, sortOrder]);
 
   const clearFilters = () => {
     setNameFilter("");
@@ -171,6 +178,24 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
                 <option value="todos">Todos</option>
                 <option value="puertas">Puertas</option>
                 <option value="molduras">Molduras</option>
+              </select>
+            </label>
+          </div>
+
+          {/* Selector de orden de precio */}
+          <div className="filtro-group">
+            <label>
+              Ordenar por precio:
+              <br />
+              <select
+                value={sortOrder}
+                onChange={e => setSortOrder(e.target.value as 'asc' | 'desc' | '')}
+                className="orden-precio-select"
+                style={{ marginTop: 4 }}
+              >
+                <option value="">Sin orden</option>
+                <option value="asc">Menor a mayor</option>
+                <option value="desc">Mayor a menor</option>
               </select>
             </label>
           </div>

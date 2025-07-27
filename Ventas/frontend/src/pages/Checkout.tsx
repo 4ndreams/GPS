@@ -5,6 +5,7 @@ import { createPaymentOrder } from "@services/paymentService";
 import { getImagePath } from "@utils/getImagePath";
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import "@styles/Checkout.css";
+import { TokenService } from "@services/tokenService";
 
 interface CartItem {
   id: number;
@@ -52,7 +53,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
   // Función para obtener información del usuario logueado
   const loadUserProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = TokenService.getToken();
       if (!token) return;
 
       const userData = await getUserProfile();
@@ -152,6 +153,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                     onChange={handleContactChange}
                     placeholder="Tu nombre"
                     required
+                    readOnly={isLoggedIn}
+                    className={isLoggedIn ? "input-disabled" : ""}
                   />
                 </div>
                 <div className="form-group">
@@ -164,6 +167,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                     onChange={handleContactChange}
                     placeholder="Tus apellidos"
                     required
+                    readOnly={isLoggedIn}
+                    className={isLoggedIn ? "input-disabled" : ""}
                   />
                 </div>
               </div>
@@ -178,6 +183,8 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems, clearCart }) => {
                     onChange={handleContactChange}
                     placeholder="Tu correo electrónico"
                     required
+                    readOnly={isLoggedIn}
+                    className={isLoggedIn ? "input-disabled" : ""}
                   />
                 </div>
               </div>

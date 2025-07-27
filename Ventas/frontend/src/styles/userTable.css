@@ -1,31 +1,188 @@
-/* styles/UsersTable.css */
 
-.users-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1rem;
-  font-size: 0.95rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* UserTable.css - Estilo profesional y moderno para la tabla de usuarios */
+
+.user-table-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 2rem;
+  max-width: 900px;
+  margin: 2rem auto;
 }
 
-.users-table th,
-.users-table td {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e0e0e0;
+.user-table-container h2 {
+  color: #1a202c;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+
+.btn-create-user {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.2s;
+}
+.btn-create-user:hover {
+  background: #c53030;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f7fafc;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.user-table th, .user-table td {
+  padding: 0.85rem 1rem;
   text-align: left;
 }
 
-.users-table th {
-  background-color: #f5f5f5;
+
+.user-table th {
+  background: #e53e3e;
+  color: #fff;
   font-weight: 600;
-  color: #333;
+  border-bottom: 2px solid #feb2b2;
 }
 
-.users-table tr:nth-child(even) {
-  background-color: #fafafa;
+.user-table tr {
+  transition: background 0.2s;
 }
 
-.users-table tr:hover {
-  background-color: #ffe6e6;
-  transition: background-color 0.2s ease;
+.user-table tr:nth-child(even) {
+  background: #fff5f5;
+}
+.user-table tr:hover {
+  background: #feb2b2;
+}
+
+.user-table td {
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(44, 62, 80, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  padding: 2rem 2.5rem;
+  min-width: 350px;
+  max-width: 400px;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #e53e3e;
+  cursor: pointer;
+}
+.create-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #e53e3e;
+}
+
+.create-user-form input,
+.create-user-form select {
+  margin-top: 0.4rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #feb2b2;
+  border-radius: 5px;
+  font-size: 1rem;
+  background: #fff5f5;
+  color: #2d3748;
+  outline: none;
+  transition: border 0.2s;
+}
+.create-user-form input:focus,
+.create-user-form select:focus {
+  border-color: #e53e3e;
+}
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  background: #e53e3e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #c53030;
+}
+
+.btn-secondary {
+  background: #fff5f5;
+  color: #e53e3e;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-secondary:hover {
+  background: #feb2b2;
+}
+.error-message {
+  color: #e53e3e;
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  margin: 0.7rem 0;
+  font-size: 1rem;
+  text-align: center;
 }

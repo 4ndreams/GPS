@@ -20,6 +20,7 @@ import productoPersonalizadoRoutes from "./producto_personalizado.routes.js"; //
 import tiendaRoutes from "./tienda.routes.js";
 import imagenesRoutes from "./imagenes.routes.js"; 
 import notificacionRoutes from "./notificacion.routes.js"; // Import notificacion routes 
+import productoDestacadoRoutes from "./producto_destacado.routes.js";
 import orderRoutes from "./order.routes.js"; // Import order routes for Mercado Pago 
 
 const router = Router();
@@ -39,6 +40,7 @@ router.use('/orden', ordenRoutes);
 router.use('/despachos', despachoRoutes);
 router.use('/venta', ventaRoutes);
 router.use('/item_carrito', itemCarritoRoutes);
+router.use('/productos-destacados', productoDestacadoRoutes);
 
 router.use('/compras', comprasRoutes);
 router.use('/users',userRoutes); 
@@ -50,6 +52,7 @@ router.use('/users',userRoutes);
 router.use('/products', productRoutes); 
 router.use('/materiales', materialRoutes);
 router.use('/tipos', tipoRoutes); 
+
 
 router.use('/rellenos', rellenoRoutes); 
 router.use('/productos-personalizados', productoPersonalizadoRoutes); // Rutas para cotizaciones/productos personalizados
