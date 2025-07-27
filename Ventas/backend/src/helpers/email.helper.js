@@ -1,3 +1,107 @@
+// correo con el resumen de la venta de un producto personalizado
+export async function sendVentaProductoPersonalizadoEmail({ venta, productoPersonalizado }) {
+  if (!venta || !productoPersonalizado) return;
+  const {
+    id_venta,
+    estado_pago,
+    fecha_pago,
+    precio_venta,
+    usuario
+  } = venta;
+  const {
+    id_producto_personalizado,
+    nombre_apellido_contacto,
+    email_contacto,
+    medida_ancho,
+    medida_alto,
+    medida_largo,
+    tipo_puerta,
+    material,
+    relleno
+  } = productoPersonalizado;
+
+  // Determinar destinatario
+  const destinatarioEmail = email_contacto || usuario?.email;
+  const destinatarioNombre = nombre_apellido_contacto || usuario?.nombre || '';
+  if (!destinatarioEmail) return;
+
+  await transporter.sendMail({
+    to: destinatarioEmail,
+    subject: `Resumen de Venta - Cotización #${id_producto_personalizado} / Recibo Pago - TERPLAC`,
+    html: `
+      <div style="font-family: 'Inter', Arial, sans-serif; background: #fff; padding: 0; margin: 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background: #fff; padding: 0; margin: 0;">
+          <tr>
+            <td align="center">
+              <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 2rem auto; background: #111; border-radius: 12px; box-shadow: 0 4px 24px rgba(236,34,31,0.08); overflow: hidden;">
+                <tr>
+                  <td style="background: #EC221F; padding: 2rem 0;">
+                    <h1 style="color: #fff; font-size: 2.2rem; margin: 0; font-weight: 700; letter-spacing: 1px; text-align: center;">TERPLAC</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 2rem 2.5rem 1rem 2.5rem;">
+                    <h2 style="color: #fff; font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; text-align: center;">¡Venta Registrada!</h2>
+                    <p style="color: #fff; font-size: 1.1rem; margin-bottom: 1.5rem; text-align: center;">
+                      Hola ${destinatarioNombre}, el pago de tu cotización ha sido registrado exitosamente.<br/>
+                      Aquí tienes el resumen de tu venta.
+                    </p>
+                    <div style="background: #1a1a1a; padding: 1.5rem; border-radius: 8px; margin: 1.5rem 0;">
+                      <h3 style="color: #EC221F; font-size: 1.2rem; margin: 0 0 1rem 0; font-weight: 600;">Venta Número #${id_venta} - Cotización Número #${id_producto_personalizado}</h3>
+                      <table style="width: 100%; color: #ccc; font-size: 0.95rem;">
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Tipo de puerta:</td>
+                          <td style="padding: 0.3rem 0;">${formatTipoPuerta(tipo_puerta)}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Material:</td>
+                          <td style="padding: 0.3rem 0;">${material?.nombre_material || 'No especificado'}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Relleno:</td>
+                          <td style="padding: 0.3rem 0;">${relleno?.nombre_relleno || 'No especificado'}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
+                          <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Precio total:</td>
+                          <td style="padding: 0.3rem 0; color: #28a745; font-weight: 700;">$${Number(precio_venta).toLocaleString('es-CL')}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Estado:</td>
+                          <td style="padding: 0.3rem 0;">${estado_pago}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Fecha de pago:</td>
+                          <td style="padding: 0.3rem 0;">${new Date(fecha_pago).toLocaleString('es-CL')}</td>
+                        </tr>
+                      </table>
+                    </div>
+                    <p style="color: #ccc; font-size: 0.98rem; margin-bottom: 0.5rem; text-align: center;">
+                      Si tienes dudas o necesitas más información, contáctanos.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background: #1a1a1a; padding: 1.2rem 2.5rem; border-top: 1px solid #222; color: #ccc; font-size: 0.95rem; text-align: center;">
+                    Esta es una notificación automática del sistema de gestión TERPLAC.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align: center; padding: 1rem 0 0.5rem 0;">
+                    <span style="color: #EC221F; font-size: 1.2rem; font-weight: bold;">TERPLAC</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `
+  });
+}
 // Notificación de edición de cotización
 export async function sendCotizacionEditedEmail(cotizacion, editor = null) {
   const {
@@ -289,6 +393,12 @@ export async function sendCotizacionConfirmationEmail(cotizacion) {
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Dimensiones:</td>
                           <td style="padding: 0.3rem 0;">${medida_ancho}cm × ${medida_alto}cm × ${medida_largo}mm</td>
                         </tr>
+                        ${cotizacion.precio != null ? `
+                        <tr>
+                          <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Precio:</td>
+                          <td style="padding: 0.3rem 0; color: #28a745; font-weight: 700;">$${Number(cotizacion.precio).toLocaleString('es-CL')}</td>
+                        </tr>
+                        ` : ''}
                         <tr>
                           <td style="padding: 0.3rem 0; font-weight: 600; color: #fff;">Estado:</td>
                           <td style="padding: 0.3rem 0; color: #EC221F; font-weight: 600;">${estado}</td>

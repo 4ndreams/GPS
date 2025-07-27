@@ -7,10 +7,11 @@ import { isFabricaOrAdmin } from "../middlewares/autorization.middleware.js";
 
 const router = Router();
 
-
+router.use(authenticateJwt);
+router.use(isFabricaOrAdmin);
 
 router.post("/compras", async (req, res) => {
-    console.log("Ruta:", req.body);
+
     const body = req.body;
     console.log("Cuerpo de la solicitud:", body);
     const [compras, error] = await compras_totales_filtradas(body);
@@ -26,7 +27,7 @@ router.post("/compras", async (req, res) => {
     return handleSuccess(res, 200, "Compras totales filtradas obtenidas correctamente", compras);
 });
 router.post("/ventas", async (req, res) => {
-    const body = req.body;
+    
     const [ventas, error] = await ventasTotalesPorMes(body);
     if (error) {
         if (error.includes("Formato de fecha inválido")) {

@@ -207,7 +207,7 @@ export async function updateEstadoProductoPersonalizadoController(req, res) {
             return handleErrorClient(res, 400, estadoValidation.error.details[0].message);
         }
 
-        const [updatedProductoPersonalizado, errorMessage] = await updateEstadoProductoPersonalizadoService(Number(id_producto_personalizado), estado);
+        const [updatedProductoPersonalizado, errorMessage, ventaResult] = await updateEstadoProductoPersonalizadoService(Number(id_producto_personalizado), estado);
 
         if (errorMessage) {
             // Si el error es por precio nulo o vacío, devolver 400
@@ -217,7 +217,11 @@ export async function updateEstadoProductoPersonalizadoController(req, res) {
             return handleErrorClient(res, 404, errorMessage);
         }
 
-        return handleSuccess(res, 200, "Estado del producto personalizado actualizado exitosamente", updatedProductoPersonalizado);
+        // Incluir ventaResult en la respuesta
+        return handleSuccess(res, 200, "Estado del producto personalizado actualizado exitosamente", {
+            productoPersonalizado: updatedProductoPersonalizado,
+            ventaResult
+        });
     } catch (error) {
         console.error(error);
         return handleErrorServer(res, 500, "Error interno del servidor");

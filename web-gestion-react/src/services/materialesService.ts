@@ -14,13 +14,38 @@ export interface Relleno {
 // Base function for API calls
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+
 const apiCall = async (endpoint: string, options: RequestInit = {}) => {
+  // Obtener token de localStorage (ajusta la clave si usas otra)
+
+
+  const token = localStorage.getItem('token');
+  let extraHeaders: Record<string, string> = {};
+  if (options.headers) {
+    if (options.headers instanceof Headers) {
+      extraHeaders = Object.fromEntries(options.headers.entries());
+    } else if (Array.isArray(options.headers)) {
+      extraHeaders = Object.fromEntries(options.headers);
+    } else {
+      extraHeaders = { ...options.headers } as Record<string, string>;
+    }
+  }
+  // Solo agregar Authorization si no existe ya
+  if (token && !('Authorization' in extraHeaders)) {
+    extraHeaders['Authorization'] = `Bearer ${token}`;
+  }
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...extraHeaders,
+  };
+  // Debug: log token y headers si no es producción
+  if (import.meta.env.DEV) {
+    console.debug('API token:', token);
+    console.debug('API headers:', headers);
+  }
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
     ...options,
   });
 
@@ -31,6 +56,7 @@ const apiCall = async (endpoint: string, options: RequestInit = {}) => {
 
   return response.json();
 };
+
 
 // Materiales
 export const obtenerMateriales = async (): Promise<Material[]> => {
@@ -70,6 +96,29 @@ export const obtenerMaterialPorId = async (id: number): Promise<Material | null>
   }
 };
 
+
+export const editMaterial = async (id: number, material: Partial<Material>): Promise<Material | null> => {
+  try {
+    const result = await apiCall(`/materiales/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(material),
+    });
+    // Manejar la estructura de respuesta
+    let data = result.data ?? null;
+    
+    // Si data es un array y el primer elemento es el objeto, extraerlo
+    if (Array.isArray(data) && data.length > 0 && data[0]?.id_material) {
+      data = data[0];
+    }
+    
+    return data?.id_material ? data : null;
+  } catch (error) {
+    console.error(`Error al editar material ${id}:`, error);
+    throw new Error('No se pudo editar el material');
+  }
+}
+
+
 // Rellenos
 export const obtenerRellenos = async (): Promise<Relleno[]> => {
   try {
@@ -107,3 +156,26 @@ export const obtenerRellenoPorId = async (id: number): Promise<Relleno | null> =
     return null;
   }
 };
+
+
+export const editRelleno = async (id: number, relleno: Partial<Relleno>): Promise<Relleno | null> => {
+  try {
+    const result = await apiCall(`/rellenos/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(relleno),
+    });
+    // Manejar la estructura de respuesta
+    let data = result.data ?? null;
+    
+    // Si data es un array y el primer elemento es el objeto, extraerlo
+    if (Array.isArray(data) && data.length > 0 && data[0]?.id_relleno) {
+      data = data[0];
+    }
+    
+    return data?.id_relleno ? data : null;
+  } catch (error) {
+    console.error(`Error al editar relleno ${id}:`, error);
+    throw new Error('No se pudo editar el relleno');
+  }
+};
+

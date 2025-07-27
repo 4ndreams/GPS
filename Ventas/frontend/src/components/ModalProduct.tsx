@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 import "../styles/modal.css";
 
 interface Tipo {
@@ -11,6 +12,11 @@ interface Material {
   nombre_material: string;
 }
 
+interface Relleno {
+  id_relleno: number;
+  nombre_relleno: string;
+}
+
 interface ProductData {
   id_producto?: number;
   nombre_producto: string;
@@ -18,8 +24,8 @@ interface ProductData {
   stock: string | number;
   id_tipo: number | string;
   id_material: number | string;
+  id_relleno: number | string;
   medida_ancho: string;
-  medida_largo: string;
   medida_alto: string;
   descripcion?: string;
 }
@@ -31,8 +37,11 @@ interface ModalProductProps {
   editData: ProductData | null;
   tipos: Tipo[];
   materiales: Material[];
+  rellenos: Relleno[];
   loadingTipos?: boolean;
   loadingMateriales?: boolean;
+  loadingRellenos?: boolean;
+  extraFields?: React.ReactNode;
 }
 
 const ModalProduct: React.FC<ModalProductProps> = ({
@@ -42,8 +51,11 @@ const ModalProduct: React.FC<ModalProductProps> = ({
   editData,
   tipos,
   materiales,
+  rellenos,
   loadingTipos = false,
   loadingMateriales = false,
+  loadingRellenos = false,
+  extraFields,
 }) => {
   const [formData, setFormData] = useState<ProductData>({
     nombre_producto: "",
@@ -51,13 +63,13 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     stock: "",
     id_tipo: "",
     id_material: "",
+    id_relleno: "",
     medida_ancho: "",
-    medida_largo: "",
     medida_alto: "",
     descripcion: "",
   });
 
-  const [file, setFile] = useState<File | null>(null);
+
 
   useEffect(() => {
     if (editData) {
@@ -68,8 +80,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         stock: editData.stock,
         id_tipo: editData.id_tipo || "",
         id_material: editData.id_material || "",
+        id_relleno: editData.id_relleno || "",
         medida_ancho: editData.medida_ancho || "",
-        medida_largo: editData.medida_largo || "",
         medida_alto: editData.medida_alto || "",
         descripcion: editData.descripcion || "",
       });
@@ -80,13 +92,13 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         stock: "",
         id_tipo: "",
         id_material: "",
+        id_relleno: "",
         medida_ancho: "",
-        medida_largo: "",
         medida_alto: "",
         descripcion: "",
       });
     }
-    setFile(null);
+
   }, [editData]);
 
   const handleChange = (
@@ -94,12 +106,6 @@ const ModalProduct: React.FC<ModalProductProps> = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -110,17 +116,13 @@ const ModalProduct: React.FC<ModalProductProps> = ({
       data.append(key, String(value));
     });
 
-    if (file) {
-      data.append("imagen", file);
-    }
-
     onSubmit(data);
     onClose();
   };
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="modal-overlay">
       <div className="modal-container">
         <div className="modal-header">
@@ -169,16 +171,6 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 name="medida_ancho"
                 placeholder="Ancho"
                 value={formData.medida_ancho}
-                onChange={handleChange}
-              />
-            </label>
-            <label>
-              Largo
-              <input
-                type="text"
-                name="medida_largo"
-                placeholder="Largo"
-                value={formData.medida_largo}
                 onChange={handleChange}
               />
             </label>
@@ -241,16 +233,29 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                 )}
               </select>
             </label>
-
-            {/* 🔽 Campo para subir imagen al final del formulario */}
             <label>
-              Imagen del producto
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
+              Relleno
+              <select
+                name="id_relleno"
+                value={formData.id_relleno}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccionar relleno</option>
+                {loadingRellenos ? (
+                  <option disabled>Cargando rellenos...</option>
+                ) : (
+                  rellenos.map((relleno) => (
+                    <option key={relleno.id_relleno} value={relleno.id_relleno}>
+                      {relleno.nombre_relleno}
+                    </option>
+                  ))
+                )}
+              </select>
             </label>
+
+            {/* Campos extra */}
+            {extraFields}
           </div>
 
           <div className="modal-actions">
@@ -265,6 +270,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default ModalProduct;

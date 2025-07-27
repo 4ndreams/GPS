@@ -37,6 +37,18 @@ export interface UpdateEstadoData {
   estado: string;
 }
 
+export interface UpdateEstadoResponse {
+  productoPersonalizado: CotizacionResponse;
+  ventaResult?: {
+    success: boolean;
+    error: string | null;
+    venta: {
+      id_venta: number;
+      // ...otros campos relevantes de la venta si los necesitas
+    } | null;
+  };
+}
+
 export const cotizacionService = {
   // Obtener todas las cotizaciones
   getAllCotizaciones: async (): Promise<CotizacionResponse[]> => {
@@ -51,7 +63,7 @@ export const cotizacionService = {
   },
 
   // Actualizar estado de una cotización
-  updateEstado: async (id: number, data: UpdateEstadoData): Promise<CotizacionResponse> => {
+  updateEstado: async (id: number, data: UpdateEstadoData): Promise<UpdateEstadoResponse> => {
     try {
       const response = await api.patch(`/productos-personalizados/${id}/estado`, data);
       return response.data.data;

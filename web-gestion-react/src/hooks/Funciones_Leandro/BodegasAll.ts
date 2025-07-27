@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
-import { getBodegas} from "@services/bodega.service";
+import { getBodegas } from "@services/bodega.service";
+import type { Bodega } from "@services/bodega.service";
 
 export default function useGetAllBodegas() {
-  const [bodegas, setBodegas] = useState([]);
+  const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBodegas = async () => {
       setLoading(true);
       const result = await getBodegas();
       if (result.status === "Error") {
-        setError(result.message);
+        setError(result.message ?? "Error desconocido");
       } else {
-        setBodegas(result);
+        setBodegas(result.data ?? []);
       }
       setLoading(false);
     };

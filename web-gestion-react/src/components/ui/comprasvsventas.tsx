@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import useGetComprasMes from "@/hooks/Funciones_Leandro/compras_mes";
 import useVentasTotalesPorMes from "@/hooks/Funciones_Leandro/ventas_mes";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 const generateColorPalette = (count: number): string[] =>
   Array.from({ length: count }, (_, i) => `hsl(${(i * 360) / count}, 65%, 55%)`);
@@ -55,7 +56,6 @@ export default function ComprasVsVentasPieChart({
   fecha_inicial,
   fecha_final,
 }: Props) {
-  // ✅ Memoizamos los bodies para evitar llamadas innecesarias
   const comprasBody = useMemo(() => ({
     id_bodega,
     fecha_inicial,
@@ -70,17 +70,39 @@ export default function ComprasVsVentasPieChart({
   const { total: totalCompras = 0, loading: loadingCompras, error: errorCompras } = useGetComprasMes(comprasBody);
   const { total: totalVentas = 0, loading: loadingVentas, error: errorVentas } = useVentasTotalesPorMes(ventasBody);
 
-  if (loadingCompras || loadingVentas) return <p>Cargando datos...</p>;
-  if (errorCompras && errorVentas) return <p>Error al cargar datos: no se encontraron compras ni ventas </p>;
-  if (errorCompras) return <p>Error al cargar compras: no se encontraron compras</p>;
-  if (errorVentas) return <p>Error al cargar ventas: no se encontraron ventas</p>;
+  if (loadingCompras || loadingVentas) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-10 text-gray-500">
+        <Loader2 className="animate-spin w-6 h-6 mb-2" />
+        <p className="text-sm">Cargando datos...</p>
+      </div>
+    );
+  }
+
+  if (errorCompras && errorVentas) {
+    return (
+      <ErrorMessage message="No se encontraron compras ni ventas." />
+    );
+  }
+
+  if (errorCompras) {
+    return (
+      <ErrorMessage message="No se encontraron compras." />
+    );
+  }
+
+  if (errorVentas) {
+    return (
+      <ErrorMessage message="No se encontraron ventas." />
+    );
+  }
 
   const hasCompras = totalCompras > 0;
   const hasVentas = totalVentas > 0;
 
-  if (!hasCompras && !hasVentas) return <p>No se encontraron compras ni ventas.</p>;
-  if (!hasCompras) return <p>No se encontraron compras.</p>;
-  if (!hasVentas) return <p>No se encontraron ventas.</p>;
+  if (!hasCompras && !hasVentas) return <ErrorMessage message="No se encontraron compras ni ventas." />;
+  if (!hasCompras) return <ErrorMessage message="No se encontraron compras." />;
+  if (!hasVentas) return <ErrorMessage message="No se encontraron ventas." />;
 
   const data = [
     { name: "Compras", value: totalCompras },
@@ -135,6 +157,15 @@ export default function ComprasVsVentasPieChart({
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-10 text-red-600">
+      <AlertTriangle className="w-6 h-6 mb-2" />
+      <p className="text-sm font-medium">{message}</p>
     </div>
   );
 }
