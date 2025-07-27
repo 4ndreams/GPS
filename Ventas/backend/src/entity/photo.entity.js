@@ -1,12 +1,12 @@
 "use strict";
 import { EntitySchema } from "typeorm";
-import ProductoSchema from "./producto.entity.js";
+import OrdenSchema from "./orden.entity.js";
 
-const ImagenSchema = new EntitySchema({
-  name: "Imagen",
-  tableName: "imagenes",
+const PhotoSchema = new EntitySchema({
+  name: "Photo",
+  tableName: "Photos",
   columns: {
-    id_img: {
+    id_pht: {
       type: "int",
       primary: true,
       generated: true,
@@ -16,28 +16,21 @@ const ImagenSchema = new EntitySchema({
       length: 255,
       nullable: false,
     },
-    id_producto: {
+    id_orden: {
       type: "int",
       nullable: false,
     },
   },
   relations: {
-    producto: {
+    orden: {
       type: "many-to-one",
-      target: ProductoSchema,
+      target: OrdenSchema,
       joinColumn: {
-        name: "id_producto",
+        name: "id_orden",
       },
       nullable: false,
     },
   },
-  indices: [
-    {
-      name: "idx_img_id",
-      columns: ["id_img"],
-      unique: true,
-    },
-  ],
 });
 
-export default ImagenSchema;
+export default PhotoSchema;

@@ -6,6 +6,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   TextInput,
+  Alert,
+  Image,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BaseDashboard } from '../../components/BaseDashboard';
@@ -14,6 +17,8 @@ import { getConfigForProfile } from '../../config/dashboardConfig';
 import { useOrderActions } from '../../hooks/useOrderActions';
 import { useDashboardData } from '../../hooks/useDashboardData';
 import { OrdenFabrica } from '../../types/dashboard';
+import * as ImagePicker from 'expo-image-picker';
+import { TokenService } from '../../services/tokenService';
 
 export default function DashboardFabrica() {
   const config = getConfigForProfile('fabrica');
@@ -23,6 +28,10 @@ export default function DashboardFabrica() {
   const [ordenesSeleccionadas, setOrdenesSeleccionadas] = useState<number[]>([]);
   const [transportista, setTransportista] = useState('');
   const [observacionesDespacho, setObservacionesDespacho] = useState('');
+  const [fotosDespacho, setFotosDespacho] = useState<string[]>([]);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
+  
 
   const toggleOrdenSeleccionada = (id_orden: number) => {
     if (ordenesSeleccionadas.includes(id_orden)) {
@@ -32,36 +41,203 @@ export default function DashboardFabrica() {
     }
   };
 
+  // Función para subir una imagen individual después de procesar una orden
+  const subirImagenIndividual = async (uri: string, id_orden: number): Promise<string> => {
+    try {
+      console.log('=== SUBIENDO IMAGEN INDIVIDUAL ===');
+      console.log('URI:', uri);
+      console.log('ID Orden:', id_orden);
+      
+      // Obtener token de autenticación
+      const token = await TokenService.getToken();
+      if (!token) {
+        throw new Error('No hay token de autenticación');
+      }
+
+      const formData = new FormData();
+      const nombreArchivo = uri.split('/').pop() || `despacho-${Date.now()}.jpg`;
+
+      // Agregar la imagen al FormData con el nombre que espera tu backend ("file")
+      formData.append('file', {
+        uri,
+        name: nombreArchivo,
+        type: 'image/jpeg'
+      } as any);
+
+      // Agregar el id_orden que tu backend necesita
+      formData.append('id_orden', id_orden.toString());
+
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_API_BASE_URL}/photo`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      console.log('Respuesta:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error del servidor:', errorText);
+        throw new Error(`Error al subir imagen: ${response.status} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Imagen subida exitosamente:', data);
+      
+      // Tu backend devuelve la imagen con la URL de MinIO
+      return data.data?.ruta_imagen || data.ruta_imagen || '';
+    } catch (error) {
+      console.error('Error al subir imagen individual:', error);
+      throw error;
+    }
+  };
+
+  // Función para tomar foto con cámara
+  const tomarFoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Error', 'Se necesitan permisos de cámara para tomar fotos');
+        return;
+      }
+
+      setSubiendoFoto(true);
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ Usar la versión que funciona
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        // Solo guardar localmente, NO subir aún - se subirá al crear el despacho
+        setSelectedFiles(prev => [...prev, asset]);
+        setFotosDespacho(prev => [...prev, asset.uri]);
+        Alert.alert('Éxito', 'Foto agregada correctamente');
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      Alert.alert('Error', 'No se pudo agregar la foto. Intenta nuevamente.');
+    } finally {
+      setSubiendoFoto(false);
+    }
+  };
+
+  // Elimina imagen de ambos arreglos
+  const eliminarFoto = (index: number) => {
+    setFotosDespacho(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Sube todas las imágenes después de cambiar estado de órdenes
+  const subirTodasLasImagenes = async (ordenesActualizadas: number[]): Promise<string[]> => {
+    const urls: string[] = [];
+    
+    try {
+      console.log('📸 Iniciando subida de todas las imágenes...');
+      console.log(`🔢 Total de imágenes a subir: ${selectedFiles.length}`);
+      console.log(`📦 Órdenes actualizadas: ${ordenesActualizadas}`);
+      
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const asset = selectedFiles[i];
+        
+        // Para cada imagen, usar una orden procesada (rotación para distribuir las imágenes)
+        const ordenIndex = i % ordenesActualizadas.length;
+        const ordenId = ordenesActualizadas[ordenIndex];
+
+        console.log(`📤 Subiendo imagen ${i + 1}/${selectedFiles.length} para orden ID: ${ordenId}`);
+        
+        try {
+          // Subir imagen asociándola directamente con el id_orden
+          const urlImagen = await subirImagenIndividual(asset.uri, ordenId);
+          urls.push(urlImagen);
+          console.log(`✅ Imagen ${i + 1} subida exitosamente: ${urlImagen}`);
+        } catch (imageError) {
+          console.error(`❌ Error al subir imagen ${i + 1}:`, imageError);
+          // Continuar con las demás imágenes en lugar de fallar completamente
+          console.warn(`⚠️ Saltando imagen ${i + 1} debido a error de subida`);
+        }
+      }
+      
+      console.log('🎉 Proceso de subida completado');
+      console.log(`📋 URLs generadas exitosamente: ${urls.length}/${selectedFiles.length}`);
+      
+      if (urls.length === 0) {
+        throw new Error('No se pudo subir ninguna imagen');
+      }
+      
+      return urls;
+    } catch (error) {
+      console.error('❌ Error en el proceso de subida de imágenes:', error);
+      throw error;
+    }
+  };
+
+  // Crear despacho: 
+  // 1. Primero procesar órdenes (cambiar estado)
+  // 2. Luego subir imágenes asociándolas directamente con los ids de orden
   const handleCrearDespacho = async () => {
-    // Validar que se haya ingresado la información requerida
+    // Validaciones
     if (!transportista.trim()) {
-      alert('Por favor, ingresa el nombre del transportista');
+      Alert.alert('Error', 'Por favor ingresa el nombre del transportista');
       return;
     }
 
     if (ordenesSeleccionadas.length === 0) {
-      alert('Por favor, selecciona al menos una orden para el despacho');
+      Alert.alert('Error', 'Selecciona al menos una orden para el despacho');
+      return;
+    }
+
+    if (selectedFiles.length === 0) {
+      Alert.alert('Error', 'Debes agregar al menos una foto del despacho');
       return;
     }
 
     try {
-      // Crear el despacho con la información completa
-      //await crearDespacho(ordenesSeleccionadas, transportista, observacionesDespacho);
-      
-      // Cambiar estado de todas las órdenes seleccionadas a "En tránsito" y agregar transportista
+      setSubiendoFoto(true);
+      console.log('🚚 Iniciando creación de despacho...');
+      console.log('📦 Órdenes seleccionadas:', ordenesSeleccionadas);
+      console.log('📸 Fotos a subir:', selectedFiles.length);
+
+      // PASO 1: Cambiar estado de las órdenes
+      const ordenesActualizadas: number[] = [];
       for (const ordenId of ordenesSeleccionadas) {
         await cambiarEstado(ordenId, 'En tránsito', { 
-
-          observaciones: observacionesDespacho.trim(),
+          //transportista: transportista.trim(),
+          observaciones: observacionesDespacho.trim() || null,
         });
+        ordenesActualizadas.push(ordenId);
       }
-      
-      // Limpiar formulario después del éxito
+      console.log('✅ Órdenes actualizadas exitosamente');
+
+      // PASO 2: Subir imágenes asociándolas directamente con las órdenes procesadas
+      const uploadedUrls = await subirTodasLasImagenes(ordenesActualizadas);
+      console.log('✅ URLs de imágenes subidas:', uploadedUrls);
+
+      // Limpiar formulario
       setOrdenesSeleccionadas([]);
       setTransportista('');
       setObservacionesDespacho('');
-    } catch (error) {
-      console.error('Error al crear despacho y cambiar estados:', error);
+      setFotosDespacho([]);
+      setSelectedFiles([]);
+      
+      Alert.alert(
+        'Éxito', 
+        `Despacho creado correctamente:\n• ${ordenesActualizadas.length} orden(es) actualizadas\n• ${uploadedUrls.length} foto(s) subida(s) a MinIO`
+      );
+    } catch (error: any) {
+      console.error('❌ Error al crear despacho:', error);
+      Alert.alert('Error', `No se pudo crear el despacho: ${error.message || 'Error desconocido'}`);
+    } finally {
+      setSubiendoFoto(false);
     }
   };
 
@@ -102,6 +278,57 @@ export default function DashboardFabrica() {
                 multiline
                 numberOfLines={3}
               />
+            </View>
+
+            {/* Sección de fotos */}
+            <View style={styles.formGroup}>
+              <Text style={[styles.formLabel, styles.requiredField]}>
+                Fotos del Despacho *
+              </Text>
+              
+              {/* Botón para tomar foto */}
+              <TouchableOpacity
+                style={styles.fotoButton}
+                onPress={tomarFoto}
+                disabled={subiendoFoto}
+              >
+                {subiendoFoto ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Ionicons name="camera" size={20} color="#FFFFFF" />
+                )}
+                <Text style={styles.fotoButtonText}>
+                  {subiendoFoto ? 'Subiendo...' : 'Tomar Foto'}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Mostrar fotos tomadas */}
+              {fotosDespacho.length > 0 && (
+                <ScrollView horizontal style={styles.fotosContainer} showsHorizontalScrollIndicator={false}>
+                  {fotosDespacho.map((foto, index) => (
+                    <View key={index} style={styles.fotoItem}>
+                      <Image source={{ uri: foto }} style={styles.fotoPreview} />
+                      <TouchableOpacity
+                        style={styles.eliminarFotoButton}
+                        onPress={() => eliminarFoto(index)}
+                      >
+                        <Ionicons name="close-circle" size={20} color="#DC2626" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+              
+              {/* Mostrar contador de fotos y mensaje de requerimiento */}
+              {fotosDespacho.length > 0 ? (
+                <Text style={styles.fotoCounter}>
+                  {fotosDespacho.length} foto{fotosDespacho.length !== 1 ? 's' : ''} agregada{fotosDespacho.length !== 1 ? 's' : ''}
+                </Text>
+              ) : (
+                <Text style={styles.fotoRequiredMessage}>
+                  Debes tomar al menos una foto para crear el despacho
+                </Text>
+              )}
             </View>
 
             <Text style={styles.sectionTitle}>Pedidos Fabricados Disponibles</Text>
@@ -228,6 +455,9 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginBottom: 8,
   },
+  requiredField: {
+    color: '#DC2626',
+  },
   formInput: {
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
@@ -240,6 +470,57 @@ const styles = StyleSheet.create({
   formInputMultiline: {
     height: 80,
     textAlignVertical: 'top',
+  },
+  fotoButton: {
+    backgroundColor: '#0066CC',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  fotoButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  fotosContainer: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  fotoItem: {
+    position: 'relative',
+    marginRight: 12,
+  },
+  fotoPreview: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  eliminarFotoButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+  },
+  fotoCounter: {
+    fontSize: 12,
+    color: '#059669',
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  fotoRequiredMessage: {
+    fontSize: 12,
+    color: '#DC2626',
+    textAlign: 'center',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   sectionTitle: {
     fontSize: 16,

@@ -1,3 +1,11 @@
+/* Estilo para inputs deshabilitados en el checkout */
+.input-disabled {
+  background-color: #f3f3f3 !important;
+  color: #888 !important;
+  border: 1px solid #e0e0e0 !important;
+  cursor: not-allowed !important;
+  opacity: 0.85;
+}
 /* Main checkout content panel */
 .checkout-page {
   flex: 2;

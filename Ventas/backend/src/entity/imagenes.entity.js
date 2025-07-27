@@ -13,7 +13,7 @@ const ImagenesSchema = new EntitySchema({
     ruta_imagen: {
       type: "varchar",
       length: 500,
-      nullable: false,
+      nullable: true,
     },
     id_producto: {
       type: "int",

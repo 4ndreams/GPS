@@ -155,7 +155,7 @@ async function testConnection() {
       {
         nombre: "Admin",
         apellidos: "Ejemplo",
-        email: "admin@ejemplo.com",
+        email: "admin@gmail.com",
         password: "admin123",
         rol: "administrador",
         rut: null
@@ -163,7 +163,7 @@ async function testConnection() {
       {
         nombre: "Tienda",
         apellidos: "Ejemplo",
-        email: "tienda@ejemplo.com",
+        email: "tienda@gmail.com",
         password: "tienda123",
         rol: "tienda",
         rut: null
@@ -171,7 +171,7 @@ async function testConnection() {
       {
         nombre: "Fabrica",
         apellidos: "Ejemplo",
-        email: "fabrica@ejemplo.com",
+        email: "fabrica@gmail.com",
         password: "fabrica123",
         rol: "fabrica",
         rut: null

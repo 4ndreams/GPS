@@ -97,25 +97,7 @@ const OrdenSchema = new EntitySchema({
       nullable: false,
     },
   },
-  indices: [
-    {
-      name: "idx_orden_id",
-      columns: ["id_orden"],
-      unique: true,
-    },
-    {
-      name: "idx_orden_bodega",
-      columns: ["id_bodega"],
-    },
-    {
-      name: "idx_orden_producto",
-      columns: ["id_producto"],
-    },
-    {
-      name: "idx_orden_usuario",
-      columns: ["id_usuario"],
-    },
-  ],
 });
 
 export default OrdenSchema;
+

@@ -4,6 +4,7 @@ import axios from "axios";
 
 import { isCurrentUserAdmin } from "@services/authService";
 import { updateProduct } from "@services/productService";
+import { TokenService } from "@services/tokenService";
 import "@styles/ProductDetail.css";
 import Notification from "../components/Notification";
 
@@ -52,7 +53,11 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ precio: 0, stock: 0 });
   const [updating, setUpdating] = useState(false);
+ moises_branch
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const [isDestacado, setIsDestacado] = useState(false);
+  const [destacadoId, setDestacadoId] = useState<number | null>(null);
+  const [destacadoLoading, setDestacadoLoading] = useState(false);
 
   useEffect(() => {
     const fetchProducto = async () => {
@@ -83,8 +88,28 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
       }
     };
 
+    const fetchDestacadoStatus = async () => {
+      if (!id) return;
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/productos-destacados`);
+        const destacados: Array<{ id_destacado: number; producto: Producto }> = res.data.data || [];
+        const found = destacados.find((d) => d.producto?.id_producto === Number(id));
+        if (found) {
+          setIsDestacado(true);
+          setDestacadoId(found.id_destacado);
+        } else {
+          setIsDestacado(false);
+          setDestacadoId(null);
+        }
+      } catch {
+        setIsDestacado(false);
+        setDestacadoId(null);
+      }
+    };
+
     fetchProducto();
     checkAdminStatus();
+    fetchDestacadoStatus();
   }, [id]);
 
 
@@ -166,6 +191,77 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
       precio: producto?.precio,
       stock: producto?.stock
     });
+  };
+
+  // Funciones para agregar/quitar destacado
+  const fetchDestacadoStatus = async () => {
+    if (!id) return;
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/productos-destacados`);
+      const destacados: Array<{ id_destacado: number; producto: Producto }> = res.data.data || [];
+      const found = destacados.find((d) => d.producto?.id_producto === Number(id));
+      if (found) {
+        setIsDestacado(true);
+        setDestacadoId(found.id_destacado);
+      } else {
+        setIsDestacado(false);
+        setDestacadoId(null);
+      }
+    } catch {
+      setIsDestacado(false);
+      setDestacadoId(null);
+    }
+  };
+
+  const handleAgregarDestacado = async () => {
+    if (!producto) return;
+    setDestacadoLoading(true);
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/productos-destacados`,
+        { id_producto: producto.id_producto },
+        {
+          headers: {
+            Authorization: `Bearer ${TokenService.getToken()}`,
+          },
+        }
+      );
+      await fetchDestacadoStatus(); // Refresca estado
+      alert("Producto agregado como destacado.");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data?.message || "Error al agregar producto destacado. Verifica permisos.");
+      } else {
+        alert("Error al agregar producto destacado. Verifica permisos.");
+      }
+    } finally {
+      setDestacadoLoading(false);
+    }
+  };
+
+  const handleEliminarDestacado = async () => {
+    if (!destacadoId) return;
+    setDestacadoLoading(true);
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/productos-destacados/${destacadoId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${TokenService.getToken()}`,
+          },
+        }
+      );
+      await fetchDestacadoStatus(); // Refresca estado
+      alert("Producto eliminado de destacados.");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        alert(error.response?.data?.message || "Error al eliminar producto destacado. Verifica permisos.");
+      } else {
+        alert("Error al eliminar producto destacado. Verifica permisos.");
+      }
+    } finally {
+      setDestacadoLoading(false);
+    }
   };
 
   // Modal de opciones de compra
@@ -272,7 +368,49 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
               marginBottom: "20px",
               boxShadow: "0 2px 8px rgba(44,62,80,0.07)"
             }}>
-              <h3 style={{ color: "#e53935", marginBottom: "18px", fontWeight: 700, fontSize: "1.2rem", letterSpacing: 1 }}>🔧 Panel de Administrador</h3>
+              <h3 style={{ color: "#e53935", marginBottom: "15px" }}>
+                🔧 Panel de Administrador
+              </h3>
+              
+              {/* Botón para agregar/eliminar destacado */}
+              <div style={{ marginBottom: "15px" }}>
+                {isDestacado ? (
+                  <button
+                    onClick={handleEliminarDestacado}
+                    disabled={destacadoLoading}
+                    style={{
+                      background: "#6c757d",
+                      color: "white",
+                      border: "none",
+                      padding: "10px 20px",
+                      borderRadius: "5px",
+                      cursor: destacadoLoading ? "not-allowed" : "pointer",
+                      fontSize: "14px",
+                      marginBottom: "8px"
+                    }}
+                  >
+                    {destacadoLoading ? "⏳ Quitando..." : "Quitar de destacados"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleAgregarDestacado}
+                    disabled={destacadoLoading}
+                    style={{
+                      background: "#e53935",
+                      color: "white",
+                      border: "none",
+                      padding: "10px 20px",
+                      borderRadius: "5px",
+                      cursor: destacadoLoading ? "not-allowed" : "pointer",
+                      fontSize: "14px",
+                      marginBottom: "8px"
+                    }}
+                  >
+                    {destacadoLoading ? "⏳ Agregando..." : "Agregar a destacados"}
+                  </button>
+                )}
+              </div>
+              
               {!isEditing ? (
                 <button
                   className="btn-comprar"
