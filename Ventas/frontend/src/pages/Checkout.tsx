@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getUserProfile } from "@services/userService";
 import { createPaymentOrder } from "@services/paymentService";
-import { getImagePath } from "@utils/getImagePath";
+
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import "@styles/Checkout.css";
 
@@ -286,7 +286,7 @@ const Checkout: React.FC<CheckoutProps> = ({ cartItems }) => {
                   <div key={item.id} className="cart-item">
                     <div className="item-image">
                       <img 
-                        src={getImagePath(`${item.categoria}/${item.imagen}`)} 
+                        src={item.imagen} 
                         alt={item.nombre}
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/img/puertas/default.jpeg';
