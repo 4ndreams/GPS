@@ -12,7 +12,7 @@ export const getProducts = async (req, res) => {
     const productRepo = AppDataSource.getRepository("Producto");
     let query = productRepo.createQueryBuilder("producto")
       .leftJoinAndSelect("producto.tipo", "tipo")
-      .leftJoinAndSelect("producto.imagenes", "imagenes");
+      .leftJoinAndSelect("producto.imagenes", "imagenes")
       .leftJoinAndSelect("producto.material", "material")
       .leftJoinAndSelect("producto.relleno", "relleno"); // <-- Aquí incluyes la relación relleno
 
