@@ -68,10 +68,6 @@ export const verifyEmail = async (token: string) => {
   return axios.get(`${import.meta.env.VITE_API_BASE_URL}/verify-email`, { params: { token } });
 };
 
-export const recoverPassword = async (token: string, newPassword: string) => {
-  return axios.post(`${import.meta.env.VITE_API_BASE_URL}/recover-password`, { token, newPassword });
-};
-
 // Función para obtener el perfil del usuario actual
 export const getUserProfile = async () => {
   try {
