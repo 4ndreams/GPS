@@ -89,7 +89,7 @@ const useGetAllBodega = () => {
     fetchBodegas();
   }, []);
 
-  return { bodegas, loading, error, fetchBodegas };
+  return { bodegas, loading, error, fetchBodegas , refetch: fetchBodegas };
 };
 
 export default useGetAllBodega;

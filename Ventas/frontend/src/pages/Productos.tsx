@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { getImagePath } from "@utils/getImagePath";
+
 import "@styles/Productos.css";
 
 
@@ -10,6 +10,13 @@ interface Product {
   nombre_producto: string;
   precio: number;
   imagen?: string;
+  imagenes?: Array<{
+    id_img: number;
+    ruta_imagen: string;
+    id_producto: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
   tipo?: { nombre_tipo: string };
   stock?: number;
 }
@@ -61,7 +68,7 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
       if (!validatePrices()) return;
       try {
         setLoading(true);
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products/`, {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/products`, {
           params: {
             nombre: nameFilter || undefined,
             minPrecio: minPrice || undefined,
@@ -103,7 +110,9 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
         id: product.id_producto,
         nombre: product.nombre_producto,
         precio: product.precio,
-        imagen: product.imagen || "default.jpeg",
+        imagen: product.imagenes && product.imagenes.length > 0 
+          ? product.imagenes[0].ruta_imagen 
+          : "/img/puertas/default.jpeg",
         categoria: product.tipo?.nombre_tipo || "otros",
         stock: product.stock ?? 0,
         quantity: 1,
@@ -211,7 +220,9 @@ function Productos({ addToCart, getCartItemQuantity }: ProductosProps) {
                   <div className="producto-imagen-container">
                     <div className="producto-categoria-badge">{tipo.toUpperCase()}</div>
                     <img
-                      src={getImagePath(`${tipo}/${product.imagen}`)}
+                      src={product.imagenes && product.imagenes.length > 0 
+                        ? product.imagenes[0].ruta_imagen 
+                        : "/img/puertas/default.jpeg"}
                       alt={product.nombre_producto}
                       className={agotado ? 'img-agotada' : ''}
                       onError={(e) => {

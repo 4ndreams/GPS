@@ -12,6 +12,11 @@ interface Material {
   nombre_material: string;
 }
 
+interface Relleno {
+  id_relleno: number;
+  nombre_relleno: string;
+}
+
 interface ProductData {
   id_producto?: number;
   nombre_producto: string;
@@ -19,8 +24,8 @@ interface ProductData {
   stock: string | number;
   id_tipo: number | string;
   id_material: number | string;
+  id_relleno: number | string;
   medida_ancho: string;
-  medida_largo: string;
   medida_alto: string;
   descripcion?: string;
 }
@@ -32,8 +37,10 @@ interface ModalProductProps {
   editData: ProductData | null;
   tipos: Tipo[];
   materiales: Material[];
+  rellenos: Relleno[];
   loadingTipos?: boolean;
   loadingMateriales?: boolean;
+  loadingRellenos?: boolean;
   extraFields?: React.ReactNode;
 }
 
@@ -44,8 +51,10 @@ const ModalProduct: React.FC<ModalProductProps> = ({
   editData,
   tipos,
   materiales,
+  rellenos,
   loadingTipos = false,
   loadingMateriales = false,
+  loadingRellenos = false,
   extraFields,
 }) => {
   const [formData, setFormData] = useState<ProductData>({
@@ -54,8 +63,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
     stock: "",
     id_tipo: "",
     id_material: "",
+    id_relleno: "",
     medida_ancho: "",
-    medida_largo: "",
     medida_alto: "",
     descripcion: "",
   });
@@ -71,8 +80,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         stock: editData.stock,
         id_tipo: editData.id_tipo || "",
         id_material: editData.id_material || "",
+        id_relleno: editData.id_relleno || "",
         medida_ancho: editData.medida_ancho || "",
-        medida_largo: editData.medida_largo || "",
         medida_alto: editData.medida_alto || "",
         descripcion: editData.descripcion || "",
       });
@@ -83,8 +92,8 @@ const ModalProduct: React.FC<ModalProductProps> = ({
         stock: "",
         id_tipo: "",
         id_material: "",
+        id_relleno: "",
         medida_ancho: "",
-        medida_largo: "",
         medida_alto: "",
         descripcion: "",
       });
@@ -166,16 +175,6 @@ const ModalProduct: React.FC<ModalProductProps> = ({
               />
             </label>
             <label>
-              Largo
-              <input
-                type="text"
-                name="medida_largo"
-                placeholder="Largo"
-                value={formData.medida_largo}
-                onChange={handleChange}
-              />
-            </label>
-            <label>
               Alto
               <input
                 type="text"
@@ -229,6 +228,26 @@ const ModalProduct: React.FC<ModalProductProps> = ({
                   materiales.map((material) => (
                     <option key={material.id_material} value={material.id_material}>
                       {material.nombre_material}
+                    </option>
+                  ))
+                )}
+              </select>
+            </label>
+            <label>
+              Relleno
+              <select
+                name="id_relleno"
+                value={formData.id_relleno}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccionar relleno</option>
+                {loadingRellenos ? (
+                  <option disabled>Cargando rellenos...</option>
+                ) : (
+                  rellenos.map((relleno) => (
+                    <option key={relleno.id_relleno} value={relleno.id_relleno}>
+                      {relleno.nombre_relleno}
                     </option>
                   ))
                 )}

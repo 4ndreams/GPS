@@ -93,8 +93,29 @@ interface BodegaRaw {
     } | null;
   };
 
+  export type Bodega = {
+    id_bodega: number;
+    stock: number;
+    material: {
+      nombre_material: string;
+      caracteristicas: string | null;
+    } | null;
+    relleno: {
+      nombre_relleno: string;
+      caracteristicas: string | null;
+    } | null;
+    producto: {
+      id_producto: number;
+      nombre_producto: string;
+      caracteristicas: string | null;
+    } | null;
+  };
+
+ 
+
   // Funciones que exportas desde el backend
   export function filtro(): Promise<Response>;
   export function comprasTotalesFiltradas(body: ComprasFiltroBody): Promise<ComprasTotalesFiltradasResponse>;
   export function ventasTotalesPorMes(body: VentaFiltroBody): Promise<VentasTotalesPorMesResponse>;
+  export function getBodegas(): Promise<BackendResponse<Bodega[]>>;
 }

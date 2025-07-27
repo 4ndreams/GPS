@@ -255,24 +255,12 @@ const datosCheckout = {
             >
               Ventas vs Compras
             </button>
-            <button
-              onClick={() => setGraficoSeleccionado('puertas')}
-              className={`px-3 py-1 rounded-t-md ${graficoSeleccionado === 'puertas' ? 'border-b-2 border-blue-600 font-semibold' : 'text-gray-500'}`}
-            >
-              Puertas Vendidas
-            </button>
           </div>
           <div className="min-h-[200px]">{renderGrafico()}</div>
         </CardContent>
       </Card>
 
       {/* Debug */}
-      <div className="p-4 bg-gray-100 rounded-md">
-        <h4 className="text-sm font-bold">Checkout JSON:</h4>
-        <pre className="text-xs bg-white p-2 mt-2 rounded border">
-          {JSON.stringify(datosCheckout, null, 2)}
-        </pre>
-      </div>
     </div>
   );
 }
