@@ -55,7 +55,7 @@ export async function getAllProductos(
      error?: string;
    }> {
      try {
-       const res = await api.get("/products/all");
+       const res = await api.get("/products/");
        return { data: res.data?.data };
      } catch (err: any) {
        const errorMsg = err.response?.data?.message || "Error inesperado";
