@@ -41,6 +41,45 @@ export default function DashboardFabrica() {
     }
   };
 
+  // Función para tomar foto con cámara
+  const tomarFoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Error', 'Se necesitan permisos de cámara para tomar fotos');
+        return;
+      }
+
+      setSubiendoFoto(true);
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ Usar la versión que funciona
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        // Solo guardar localmente, NO subir aún - se subirá al crear el despacho
+        setSelectedFiles(prev => [...prev, asset]);
+        setFotosDespacho(prev => [...prev, asset.uri]);
+        Alert.alert('Éxito', 'Foto agregada correctamente');
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      Alert.alert('Error', 'No se pudo agregar la foto. Intenta nuevamente.');
+    } finally {
+      setSubiendoFoto(false);
+    }
+  };
+
+  // Elimina imagen de ambos arreglos
+  const eliminarFoto = (index: number) => {
+    setFotosDespacho(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Función para subir una imagen individual después de procesar una orden
   const subirImagenIndividual = async (uri: string, id_orden: number): Promise<string> => {
     try {
@@ -98,45 +137,6 @@ export default function DashboardFabrica() {
     }
   };
 
-  // Función para tomar foto con cámara
-  const tomarFoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Error', 'Se necesitan permisos de cámara para tomar fotos');
-        return;
-      }
-
-      setSubiendoFoto(true);
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ Usar la versión que funciona
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-        exif: false,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        // Solo guardar localmente, NO subir aún - se subirá al crear el despacho
-        setSelectedFiles(prev => [...prev, asset]);
-        setFotosDespacho(prev => [...prev, asset.uri]);
-        Alert.alert('Éxito', 'Foto agregada correctamente');
-      }
-    } catch (error) {
-      console.error('Error al tomar foto:', error);
-      Alert.alert('Error', 'No se pudo agregar la foto. Intenta nuevamente.');
-    } finally {
-      setSubiendoFoto(false);
-    }
-  };
-
-  // Elimina imagen de ambos arreglos
-  const eliminarFoto = (index: number) => {
-    setFotosDespacho(prev => prev.filter((_, i) => i !== index));
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
   // Sube todas las imágenes después de cambiar estado de órdenes
   const subirTodasLasImagenes = async (ordenesActualizadas: number[]): Promise<string[]> => {
     const urls: string[] = [];
@@ -149,26 +149,29 @@ export default function DashboardFabrica() {
       for (let i = 0; i < selectedFiles.length; i++) {
         const asset = selectedFiles[i];
         
-        // Para cada imagen, usar una orden procesada (rotación para distribuir las imágenes)
-        const ordenIndex = i % ordenesActualizadas.length;
-        const ordenId = ordenesActualizadas[ordenIndex];
-
-        console.log(`📤 Subiendo imagen ${i + 1}/${selectedFiles.length} para orden ID: ${ordenId}`);
-        
-        try {
-          // Subir imagen asociándola directamente con el id_orden
-          const urlImagen = await subirImagenIndividual(asset.uri, ordenId);
-          urls.push(urlImagen);
-          console.log(`✅ Imagen ${i + 1} subida exitosamente: ${urlImagen}`);
-        } catch (imageError) {
-          console.error(`❌ Error al subir imagen ${i + 1}:`, imageError);
-          // Continuar con las demás imágenes en lugar de fallar completamente
-          console.warn(`⚠️ Saltando imagen ${i + 1} debido a error de subida`);
+        // Para cada imagen, subirla para TODAS las órdenes seleccionadas
+        for (const ordenId of ordenesActualizadas) {
+          console.log(`📤 Subiendo imagen ${i + 1}/${selectedFiles.length} para orden ID: ${ordenId}`);
+          
+          try {
+            // Subir imagen asociándola directamente con el id_orden
+            const urlImagen = await subirImagenIndividual(asset.uri, ordenId);
+            
+            // Solo agregar la URL una vez por imagen (no por cada orden)
+            if (!urls.includes(urlImagen)) {
+              urls.push(urlImagen);
+            }
+            
+            console.log(`✅ Imagen ${i + 1} subida exitosamente para orden ${ordenId}: ${urlImagen}`);
+          } catch (imageError) {
+            console.error(`❌ Error al subir imagen ${i + 1} para orden ${ordenId}:`, imageError);
+            // Continuar con las demás órdenes
+          }
         }
       }
       
       console.log('🎉 Proceso de subida completado');
-      console.log(`📋 URLs generadas exitosamente: ${urls.length}/${selectedFiles.length}`);
+      console.log(`📋 URLs generadas: ${urls.length}`);
       
       if (urls.length === 0) {
         throw new Error('No se pudo subir ninguna imagen');
@@ -180,6 +183,7 @@ export default function DashboardFabrica() {
       throw error;
     }
   };
+
 
   // Crear despacho: 
   // 1. Primero procesar órdenes (cambiar estado)
