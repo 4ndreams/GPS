@@ -33,10 +33,8 @@ export const getProducts = async (req, res) => {
 
     const productos = await query.getMany();
 
-    const productosConImagen = productos.map(p => ({
-      ...p,
-      imagen: p.imagenes?.length > 0 ? p.imagenes[0].ruta_imagen : "default.jpeg",
-    }));
+    // No sobrescribir el campo imagen, dejar que el frontend use imagenes
+    const productosConImagen = productos;
 
     return res.json({ status: "success", data: productosConImagen });
   } catch (error) {
