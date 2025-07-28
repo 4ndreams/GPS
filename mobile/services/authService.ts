@@ -6,14 +6,11 @@ import { Alert } from 'react-native';
 // Función para iniciar sesión con email y contraseña
 export const loginUser = async (email: string, password: string) => {
   try {
-    Alert.alert('Login', `🔄 Iniciando login para: ${email}`);
     const response = await api.post('/login', { 
       email, 
       password 
       //token 
     });
-
-    Alert.alert('🔍 Respuesta del backend:', JSON.stringify(response.data));
 
     if (response.data.data.token) {
       // Usar el sistema de gestión de tokens

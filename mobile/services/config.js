@@ -8,7 +8,7 @@ const isWeb = Platform.OS === 'web';
 // URLs base según el entorno
 const API_URLS = {
   // Para desarrollo web (navegador)
-  web: 'http://localhost:3000/api',
+  web: 'http://192.168.1.105:3000/api',
   
   // Para desarrollo móvil (necesitas usar tu IP local)
   // Reemplaza con tu IP local cuando pruebes en dispositivo
