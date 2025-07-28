@@ -8,9 +8,9 @@ import { AppDataSource } from "../config/configDb.js";
 
 export async function compras_totales_filtradas(body) {
     try {
-        console.log("Cuerpo de la solicitud:", body);
+        
         let { fecha_inicial, fecha_final, id_bodega ,tipo} = body || {};
-        console.log("Cuerpo de la solicitud:", body);
+        
         const añoActual = new Date().getFullYear();
         const mesActual = new Date().getMonth() + 1;
         const diaActual = new Date().getDate();

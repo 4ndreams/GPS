@@ -14,7 +14,7 @@ export async function getAllProductosDesdeBodega(): Promise<{
   try {
     const res = await api.get("/bodega/");
     const rawList = res.data?.data?.[0];
-    console.log("Datos de bodega:", rawList);
+    
     if (!Array.isArray(rawList)) {
       return { error: "Formato inesperado en respuesta de bodega" };
     }
@@ -27,7 +27,7 @@ export async function getAllProductosDesdeBodega(): Promise<{
         stock: item.stock,
         tipo: "producto",
       }));
-      console.log("Productos en bodega:", productos);
+      
     return { data: productos };
   } catch (err: any) {
     const errorMsg = err.response?.data?.message || "Error inesperado en bodega";

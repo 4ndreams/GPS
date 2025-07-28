@@ -5,8 +5,10 @@ import { AppDataSource } from "../config/configDb.js";
 export async function getProductosService() {
   try {
     const repository = AppDataSource.getRepository(Producto);
-    let productos = await repository.find({ relations: ["material", "tipo", "relleno"] });
-    console.log("Productos obtenidos:", productos);
+    let productos = await repository.find({ 
+      relations: ["material", "tipo", "imagenes", "relleno"] 
+    });
+    
     // Si no hay productos, insertar materiales, tipos y productos de ejemplo
     if (!productos || productos.length === 0) {
       // Insertar materiales si no existen

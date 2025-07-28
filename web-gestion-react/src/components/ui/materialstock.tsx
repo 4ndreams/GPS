@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import useGetComprasMes from "@Funciones_Leandro/compras_mes";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { Loader2, AlertTriangle } from "lucide-react";
 
 // Generador de colores dinámicos
 const generateColorPalette = (count: number): string[] =>
@@ -59,8 +60,18 @@ export default function MaterialStockPieChart({
 
   const { compras, loading, error } = useGetComprasMes(filtroCompras);
 
-  if (loading) return <p>Cargando materiales...</p>;
-  if (error) return <p>Error: no se encontraron compras</p>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-10 text-gray-500">
+        <Loader2 className="animate-spin w-6 h-6 mb-2" />
+        <p className="text-sm">Cargando materiales y rellenos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <ErrorMessage message="No se encontraron compras registradas." />;
+  }
 
   const materiales: Record<string, number> = {};
   const rellenos: Record<string, number> = {};
@@ -80,7 +91,9 @@ export default function MaterialStockPieChart({
     ...Object.entries(rellenos).map(([name, value]) => ({ name, value, tipo: "relleno" })),
   ];
 
-  if (data.length === 0) return <p>No hay datos para mostrar.</p>;
+  if (data.length === 0) {
+    return <ErrorMessage message="No hay datos de materiales o rellenos para mostrar." />;
+  }
 
   const total = data.reduce((s, d) => s + d.value, 0);
   const colors = generateColorPalette(data.length);
@@ -88,11 +101,11 @@ export default function MaterialStockPieChart({
   return (
     <div className="w-full">
       <h2 className="text-lg font-semibold text-center mb-4">
-        Cantidad de Materiales y Rellenos comprados
+        Cantidad de Materiales y Rellenos Comprados
       </h2>
 
       <div className="flex h-72">
-        {/* Gráfico */}
+        {/* Gráfico circular */}
         <div className="flex-1">
           <ResponsiveContainer>
             <PieChart>
@@ -116,7 +129,7 @@ export default function MaterialStockPieChart({
 
         {/* Leyendas separadas */}
         <div className="w-44 ml-4 flex flex-col gap-4">
-          {/* Scroll Materiales */}
+          {/* Materiales */}
           <div className="overflow-y-auto max-h-32 pr-1">
             <h4 className="text-sm font-semibold mb-1">Materiales</h4>
             <ul className="space-y-1 text-xs">
@@ -138,7 +151,7 @@ export default function MaterialStockPieChart({
             </ul>
           </div>
 
-          {/* Scroll Rellenos */}
+          {/* Rellenos */}
           <div className="overflow-y-auto max-h-32 pr-1">
             <h4 className="text-sm font-semibold mb-1">Rellenos</h4>
             <ul className="space-y-1 text-xs">
@@ -165,5 +178,12 @@ export default function MaterialStockPieChart({
   );
 }
 
-
-
+// Componente de mensaje de error reutilizable
+function ErrorMessage({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-10 text-red-600">
+      <AlertTriangle className="w-6 h-6 mb-2" />
+      <p className="text-sm font-medium">{message}</p>
+    </div>
+  );
+}

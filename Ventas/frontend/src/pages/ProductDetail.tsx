@@ -53,7 +53,6 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ precio: 0, stock: 0 });
   const [updating, setUpdating] = useState(false);
- moises_branch
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [isDestacado, setIsDestacado] = useState(false);
   const [destacadoId, setDestacadoId] = useState<number | null>(null);
@@ -411,6 +410,7 @@ const ProductDetail = ({ addToCart, getCartItemQuantity }: ProductDetailProps) =
                 )}
               </div>
               
+              <h3 style={{ color: "#e53935", marginBottom: "18px", fontWeight: 700, fontSize: "1.2rem", letterSpacing: 1 }}>🔧 Panel de Administrador</h3>
               {!isEditing ? (
                 <button
                   className="btn-comprar"

@@ -14,8 +14,6 @@ export default function AñadirPuertasForm() {
   } = useGetAllBodega();
   const {
     productosBodega,
-    loading: loadingBodega2,
-    error: errorBodega2,
     refetch: refetchProductosBodega,
   } = useGetAllProductosDesdeBodega();
   const { añadirPuertas, loading, error, response } = useAñadirPuertas();
@@ -33,7 +31,7 @@ export default function AñadirPuertasForm() {
   }, [productos, selectedProducto]);
 
   const productoEnBodega = useMemo(() => {
-    const data = productosBodega?.data ?? productosBodega ?? [];
+    const data = productosBodega ?? [];
     return data.find(
       (b) => normalizar(b.nombre_producto) === normalizar(selectedProducto)
     );

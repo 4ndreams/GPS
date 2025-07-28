@@ -11,6 +11,7 @@ import UsersManagement from "../components/UsersManagement"
 import CotizacionesManagement from "../components/CotizacionesManagement"
 import ComprarBodega from "../components/ComprarBodega"
 import AñadirPuertasForm from "../components/añadirProducto"
+import MaterialesRellenos from "../components/MaterialesRellenos"
 
 interface OrdenDespacho {
   id: string;
@@ -190,7 +191,7 @@ export default function Dashboard() {
   const authContext = useContext(AuthContext)
   const navigate = useNavigate()
   const [selectedRows, setSelectedRows] = useState<string[]>([])
-  const [activeTab, setActiveTab] = useState<'ordenes' | 'usuarios' | 'cotizaciones' | 'compras' | 'produccion'>('ordenes')
+  const [activeTab, setActiveTab] = useState<'ordenes' | 'usuarios' | 'cotizaciones' | 'compras' | 'produccion' | 'materiales'>('ordenes')
 
   useEffect(() => {
     if (!authContext?.usuario) {
@@ -284,6 +285,14 @@ export default function Dashboard() {
           `}
           onClick={() => setActiveTab('produccion')}
         >Producción</button>
+        <button
+          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
+            ${activeTab === 'materiales'
+              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
+              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
+          `}
+          onClick={() => setActiveTab('materiales')}
+        >Materiales y Rellenos</button>
       </div>
 
       {/* Estadísticas solo para Órdenes */}
@@ -327,6 +336,11 @@ export default function Dashboard() {
       {activeTab === 'produccion' && (
         <div>
           <AñadirPuertasForm />
+        </div>
+      )}
+      {activeTab === 'materiales' && (
+        <div>
+          <MaterialesRellenos />
         </div>
       )}
     </div>
