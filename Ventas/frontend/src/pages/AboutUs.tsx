@@ -79,9 +79,9 @@ const AboutUs: React.FC = () => {
                   <i className="bi bi-lightning-charge"></i>
                 </div>
                 <p className="innovation-text">
-                  Las puertas TERPLAC se fabrican de acuerdo a un nuevo concepto que difiere substancialmente 
-                  de los sistemas tradicionales en que una puerta consiste en un marco soportante al cual se 
-                  encolan las planchas que forman las caras.
+                  Las puertas TERPLAC están fabricadas bajo un concepto innovador que se diferencia significativamente de los sistemas tradicionales. 
+                  Mientras que en las puertas convencionales se utiliza un marco estructural al que se adhieren las planchas que forman las caras, 
+                  en las puertas TERPLAC el enfoque es completamente distinto.
                 </p>
               </div>
               <div className="innovation-card">
@@ -89,8 +89,8 @@ const AboutUs: React.FC = () => {
                   <i className="bi bi-arrow-repeat"></i>
                 </div>
                 <p className="innovation-text">
-                  En la puerta TERPLAC la instalación se invierte ya que las planchas de revestimientos al ser 
-                  prensadas al núcleo de Honey Comb son las que soportan la puerta.
+                  En este nuevo sistema, el proceso de fabricación se invierte: las planchas de revestimiento se prensan directamente sobre un núcleo tipo Honeycomb, 
+                  y son ellas mismas las que otorgan la resistencia estructural a la puerta. Esto elimina la necesidad de un marco interno como soporte principal.
                 </p>
               </div>
               <div className="innovation-card">
@@ -98,8 +98,9 @@ const AboutUs: React.FC = () => {
                   <i className="bi bi-shield-check"></i>
                 </div>
                 <p className="innovation-text">
-                  Su estructura en forma de panal de abeja hace un trabajo similar al del alma de una viga doble 
-                  consiguiendo una gran estabilidad y resistencia a la flexión y al impacto.
+                  El núcleo con estructura de panal de abeja cumple una función similar al alma de una viga doble T, 
+                  lo que le permite brindar una notable estabilidad estructural, 
+                  gran resistencia a la flexión y una alta capacidad para absorber impactos.
                 </p>
               </div>
             </div>

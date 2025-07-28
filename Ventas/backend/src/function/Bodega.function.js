@@ -9,7 +9,7 @@ import {
 
 export async function añadir_puertas(body) {
   try {
-    console.log("Añadiendo puertas con body:", body);
+   
     const repoBodega = AppDataSource.getRepository(Bodega);
     const repoProducto = AppDataSource.getRepository(Producto);
 
