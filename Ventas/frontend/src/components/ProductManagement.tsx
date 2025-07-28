@@ -72,7 +72,7 @@ function ProductManagement({ userRole, token }: Props) {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE_URL}/products/all`, axiosConfig);
+      const res = await axios.get(`${API_BASE_URL}/products/`, axiosConfig);
       setProducts(res.data.data);
       setError("");
     } catch {
