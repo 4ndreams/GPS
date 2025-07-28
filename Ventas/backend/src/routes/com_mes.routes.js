@@ -26,8 +26,9 @@ router.post("/compras", async (req, res) => {
     }
     return handleSuccess(res, 200, "Compras totales filtradas obtenidas correctamente", compras);
 });
+
 router.post("/ventas", async (req, res) => {
-    
+    const body = req.body;
     const [ventas, error] = await ventasTotalesPorMes(body);
     if (error) {
         if (error.includes("Formato de fecha inválido")) {
@@ -46,6 +47,7 @@ router.post("/ventas", async (req, res) => {
     }
     return handleSuccess(res, 200, "Ventas totales por mes obtenidas correctamente", ventas);
 });
+
 router.get("/Filtros", async (req, res) => {
     const [filtros, error] = await FiltroCompra();
     if (error) {
