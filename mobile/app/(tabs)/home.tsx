@@ -1,11 +1,13 @@
-import { Text, View, Image, TouchableOpacity } from 'react-native';
+import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../styles/indexStyles'; 
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import { useRouter } from 'expo-router';
 
 export default function Home() {
   console.log('🚀 Componente Home iniciando...');
+  const router = useRouter();
 
   // fetch de datos de ordenes (minutas)
   const [ordenes, setOrdenes] = useState([]);
@@ -44,81 +46,74 @@ export default function Home() {
     }
   }
 
-
-  // Datos para la tabla de resumen
+  // Datos para la tabla de resumen - versión móvil optimizada
   const summaryData = [
-    { title: 'Total', value: ordenes.length },
-    { title: 'Pendiente', value: ordenes.filter((orden: any) => orden.estado === 'Pendiente').length },
-    { title: 'En producción', value: ordenes.filter((orden: any) => orden.estado === 'En producción').length },
-    { title: 'Fabricada', value: ordenes.filter((orden: any) => orden.estado === 'Fabricada').length },
-    { title: 'En tránsito', value: ordenes.filter((orden: any) => orden.estado === 'En tránsito').length },
-    { title: 'Recibido', value: ordenes.filter((orden: any) => orden.estado === 'Recibido').length },
-    { title: 'Recibido con problemas', value: ordenes.filter((orden: any) => orden.estado === 'Recibido con problemas').length },
-    { title: 'Cancelado', value: ordenes.filter((orden: any) => orden.estado === 'Cancelado').length },
+    { title: 'Total', value: ordenes.length, icon: 'list', color: '#374151' },
+    { title: 'Pendiente', value: ordenes.filter((orden: any) => orden.estado === 'Pendiente').length, icon: 'time', color: '#FFA500' },
+    { title: 'En producción', value: ordenes.filter((orden: any) => orden.estado === 'En producción').length, icon: 'construct', color: '#8B5CF6' },
+    { title: 'Fabricada', value: ordenes.filter((orden: any) => orden.estado === 'Fabricada').length, icon: 'checkmark-circle', color: '#059669' },
+    { title: 'En tránsito', value: ordenes.filter((orden: any) => orden.estado === 'En tránsito').length, icon: 'car', color: '#0066CC' },
+    { title: 'Recibido', value: ordenes.filter((orden: any) => orden.estado === 'Recibido').length, icon: 'checkmark-done', color: '#10B981' },
+    { title: 'Con problemas', value: ordenes.filter((orden: any) => orden.estado === 'Recibido con problemas').length, icon: 'warning', color: '#DC2626' },
+    { title: 'Cancelado', value: ordenes.filter((orden: any) => orden.estado === 'Cancelado').length, icon: 'close-circle', color: '#666666' },
   ];
-
-
 
   console.log('✅ Renderizando componente principal con', ordenes.length, 'órdenes');
 
   return (
-    <View style={styles.container}>
-      {/* Barra superior con logo */}
-      <View style={styles.headerBar}>
-        <Image
-          source={require('../../assets/logo.png')}
-          style={[styles.logo, {marginTop: 15}]}
-          resizeMode="contain"
-          onError={(error) => console.log('❌ Error cargando logo:', error)}
-        />
+    <View style={styles.homeContainer}>
+      {/* Header simplificado */}
+      <View style={styles.homeHeader}>
+        <View style={styles.homeHeaderContent}>
+          <Text style={styles.homeTitle}>Control de Despachos</Text>
+          <Text style={styles.homeSubtitle}>
+            Estado de despachos realizados durante el día
+          </Text>
+        </View>
+        {/* Botón de información a la derecha */}
+        <TouchableOpacity
+          style={{ position: 'absolute', right: 16, top: 16 }}
+          onPress={() => router.push('/(tabs)/about')}
+        >
+          <Ionicons name="information-circle-outline" size={28} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
       
       {/* Contenido principal */}
-      <View style={styles.innerContainer}>
-        <Text style={[styles.title, {marginTop: -100}]}>Control de despachos</Text>
-        <Text style={[styles.headerSubtitle, {marginTop: -40}]}>
-          (Estado de despachos realizados durante el día)
-        </Text>
-
-        {/* Tabla estilizada */}
-        <View style={[styles.table, {marginTop: -20}]}>
-          {/* Encabezados de tabla */}
-          <View style={[styles.row, styles.headerRow]}>
-            <Text style={styles.headerCell}>Estado</Text>
-            <Text style={styles.headerCell}>Cantidad</Text>
-          </View>
+      <ScrollView 
+        style={styles.homeScrollContainer} 
+        contentContainerStyle={styles.homeContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Resumen de estadísticas */}
+        <View style={styles.statsContainer}>
+          <Text style={styles.statsTitle}>Resumen de Estados</Text>
           
-          {/* Filas de datos */}
-          {summaryData.map((item, index) => (
-            <View 
-              key={index} 
-              style={[
-                styles.row,
-                index % 2 === 0 ? styles.evenRow : styles.oddRow
-              ]}
-            >
-              <Text style={styles.cell}>{item.title}</Text>
-              <Text style={[styles.cell, styles.valueCell]}>{item.value}</Text>
-            </View>
-          ))}
+          {/* Grid de estadísticas */}
+          <View style={styles.statsGrid}>
+            {summaryData.map((item, index) => (
+              <View key={index} style={styles.statsCard}>
+                <View style={[styles.statsIconContainer, { backgroundColor: item.color + '20' }]}>
+                  <Ionicons name={item.icon as any} size={24} color={item.color} />
+                </View>
+                <Text style={styles.statsValue}>{item.value}</Text>
+                <Text style={styles.statsLabel}>{item.title}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
-        <View style={styles.reminderContainer}>
-          <Ionicons name="warning-outline" size={20} color="#DC2626" />
-          <Text style={styles.reminderText}>
-            Todas las minutas deben ser confirmadas en tienda para evitar irregularidades
+        {/* Información importante */}
+        <View style={styles.infoContainer}>
+          <View style={styles.infoHeader}>
+            <Ionicons name="information-circle" size={20} color="#DC2626" />
+            <Text style={styles.infoTitle}>Información Importante</Text>
+          </View>
+          <Text style={styles.infoText}>
+            Todas las minutas deben ser confirmadas en tienda para evitar irregularidades en el proceso de despacho.
           </Text>
         </View>
-
-        {/* Ver listas de despachos */}
-        <TouchableOpacity
-          style={styles.despachosButton}
-          onPress={() => console.log("Navegar a listas de despachos")}
-        >
-          <Text style={styles.despachosButtonText}>Ver listas de despachos</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }

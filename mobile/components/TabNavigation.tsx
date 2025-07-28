@@ -44,14 +44,14 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: 'row',
     backgroundColor: '#E5E7EB',
-    marginHorizontal: 20,
-    marginTop: 10,
+    marginHorizontal: 16, // Reducido para móviles
+    marginTop: 8, // Reducido para móviles
     borderRadius: 8,
-    padding: 4,
+    padding: 3, // Reducido para móviles
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 8, // Reducido para móviles
     alignItems: 'center',
     borderRadius: 6,
   },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 12, // Reducido para móviles
     fontWeight: '600',
     color: '#6B7280',
   },

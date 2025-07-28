@@ -116,6 +116,7 @@ export const BaseDashboard: React.FC<BaseDashboardProps> = ({
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        showsVerticalScrollIndicator={false}
       >
         {renderContent(activeTab, data, loading)}
       </ScrollView>
@@ -162,9 +163,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   header: {
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingTop: 50, // Reducido para móviles
+    paddingBottom: 16, // Reducido para móviles
+    paddingHorizontal: 16, // Reducido para móviles
   },
   headerContent: {
     flexDirection: 'row',
@@ -172,19 +173,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18, // Reducido para móviles
     fontWeight: 'bold',
     color: '#FFFFFF',
     textAlign: 'center',
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 12, // Reducido para móviles
     color: '#FFFFFF',
     opacity: 0.8,
     textAlign: 'center',
   },
   contentContainer: {
     flex: 1,
-    padding: 20,
+    padding: 16, // Reducido para móviles
   },
 });

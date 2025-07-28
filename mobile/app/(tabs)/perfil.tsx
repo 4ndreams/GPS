@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Google from 'expo-auth-session/providers/google';
 import styles from '../../styles/perfilStyles'; 
@@ -32,32 +32,26 @@ export default function ProfileScreen() {
     }
   };
         
-
   return (
-    
     <View style={styles.container}>
-      <View style={styles.headerBar}>
-        <Image
-          source={require('../../assets/logo.png')}
-          style={[styles.logo, {marginTop: 15}]}
-          resizeMode="contain"
-        />    
-      </View >
-        <View style={styles.innerContainer}>
-        <Text style={[styles.title, {marginTop: -100}]}>Perfil de Usuario</Text>
-        <Text style={styles.subtitle}>Gestiona tu información personal</Text>
-        
+      {/* Header con fondo rojo y letras blancas */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Perfil de Usuario</Text>
+        <Text style={styles.headerSubtitle}>Gestiona tu información personal</Text>
+      </View>
+
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.contentContainer}>
         {/* Información del usuario actual */}
         {user && (
-          <View style={[styles.section, { width: '100%' }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-              <Ionicons name="person-circle" size={24} color="#DC2626" style={{ marginRight: 8 }} />
-              <Text style={styles.sectionTitle}>Usuario Actual</Text>
+          <View style={styles.section}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="person-circle-outline" size={24} color="#DC2626" />
             </View>
-            <View style={{ marginLeft: 32 }}>
+            <View style={styles.sectionContent}>
+              <Text style={styles.sectionTitle}>Usuario Actual</Text>
               <Text style={styles.sectionText}>
                 <Text style={{ fontWeight: 'bold' }}>Nombre: </Text>
-                {user.name || 'Usuario'}
+                {user.nombre || 'Usuario'}
               </Text>
               <Text style={styles.sectionText}>
                 <Text style={{ fontWeight: 'bold' }}>Email: </Text>
@@ -68,12 +62,12 @@ export default function ProfileScreen() {
         )}
         
         {/* Sección de Perfil Asignado */}
-        <View style={[styles.section, { width: '100%' }]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-            <Ionicons name="shield-checkmark" size={24} color="#DC2626" style={{ marginRight: 8 }} />
-            <Text style={styles.sectionTitle}>Perfil Asignado</Text>
+        <View style={styles.section}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="shield-checkmark-outline" size={24} color="#DC2626" />
           </View>
-          <View style={{ marginLeft: 32 }}>
+          <View style={styles.sectionContent}>
+            <Text style={styles.sectionTitle}>Perfil Asignado</Text>
             <Text style={styles.sectionText}>
               {user?.rol ? 
                 (user.rol === 'fabrica' ? 'Personal de Fábrica' : 
@@ -90,7 +84,7 @@ export default function ProfileScreen() {
             <View style={styles.perfilButtonsContainer}>
               {user.rol === 'fabrica' && (
                 <View style={[styles.perfilButton, styles.perfilButtonActive]}>
-                  <Ionicons name="build" size={24} color="#FFFFFF" />
+                  <Ionicons name="build-outline" size={24} color="#FFFFFF" />
                   <Text style={[styles.perfilButtonText, styles.perfilButtonTextActive]}>
                     Operaciones de Fábrica
                   </Text>
@@ -99,7 +93,7 @@ export default function ProfileScreen() {
 
               {user.rol === 'tienda' && (
                 <View style={[styles.perfilButton, styles.perfilButtonActive]}>
-                  <Ionicons name="storefront" size={24} color="#FFFFFF" />
+                  <Ionicons name="storefront-outline" size={24} color="#FFFFFF" />
                   <Text style={[styles.perfilButtonText, styles.perfilButtonTextActive]}>
                     Operaciones de Tienda
                   </Text>
@@ -108,7 +102,7 @@ export default function ProfileScreen() {
 
               {user.rol === 'admin' && (
                 <View style={[styles.perfilButton, styles.perfilButtonActive]}>
-                  <Ionicons name="settings" size={24} color="#FFFFFF" />
+                  <Ionicons name="settings-outline" size={24} color="#FFFFFF" />
                   <Text style={[styles.perfilButtonText, styles.perfilButtonTextActive]}>
                     Administración
                   </Text>
@@ -118,28 +112,33 @@ export default function ProfileScreen() {
 
             {/* Información adicional sobre las capacidades del rol */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Capacidades del Rol</Text>
-              {user.rol === 'fabrica' && (
-                <Text style={styles.sectionText}>
-                  • Crear y gestionar despachos{'\n'}
-                  • Ver lista de productos{'\n'}
-                  • Confirmar órdenes de producción
-                </Text>
-              )}
-              {user.rol === 'tienda' && (
-                <Text style={styles.sectionText}>
-                  • Revisar minutas de entrega{'\n'}
-                  • Confirmar recepción de productos{'\n'}
-                  • Gestionar inventario de tienda
-                </Text>
-              )}
-              {user.rol === 'admin' && (
-                <Text style={styles.sectionText}>
-                  • Acceso completo al sistema{'\n'}
-                  • Gestión de usuarios{'\n'}
-                  • Supervisión de operaciones
-                </Text>
-              )}
+              <View style={styles.iconContainer}>
+                <Ionicons name="information-circle-outline" size={24} color="#DC2626" />
+              </View>
+              <View style={styles.sectionContent}>
+                <Text style={styles.sectionTitle}>Capacidades del Rol</Text>
+                {user.rol === 'fabrica' && (
+                  <Text style={styles.sectionText}>
+                    • Crear y gestionar despachos{'\n'}
+                    • Ver lista de productos{'\n'}
+                    • Confirmar órdenes de producción
+                  </Text>
+                )}
+                {user.rol === 'tienda' && (
+                  <Text style={styles.sectionText}>
+                    • Revisar minutas de entrega{'\n'}
+                    • Confirmar recepción de productos{'\n'}
+                    • Gestionar inventario de tienda
+                  </Text>
+                )}
+                {user.rol === 'admin' && (
+                  <Text style={styles.sectionText}>
+                    • Acceso completo al sistema{'\n'}
+                    • Gestión de usuarios{'\n'}
+                    • Supervisión de operaciones
+                  </Text>
+                )}
+              </View>
             </View>
           </>
         )}
@@ -147,10 +146,15 @@ export default function ProfileScreen() {
         {/* Mensaje si no hay rol asignado */}
         {user && !user.rol && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Sin Rol Asignado</Text>
-            <Text style={styles.sectionText}>
-              Contacta con el administrador para que te asigne un rol.
-            </Text>
+            <View style={styles.iconContainer}>
+              <Ionicons name="alert-circle-outline" size={24} color="#DC2626" />
+            </View>
+            <View style={styles.sectionContent}>
+              <Text style={styles.sectionTitle}>Sin Rol Asignado</Text>
+              <Text style={styles.sectionText}>
+                Contacta con el administrador para que te asigne un rol.
+              </Text>
+            </View>
           </View>
         )}
 
@@ -164,38 +168,33 @@ export default function ProfileScreen() {
           <>
             <TextInput 
               placeholder="example@gmail.com"
-              style={styles.Textinput}
+              style={styles.textInput}
               placeholderTextColor="#999"
             />
             <TextInput 
               placeholder="Contraseña"
-              style={styles.Textinput}
+              style={styles.textInput}
               placeholderTextColor="#999"
               secureTextEntry={true}
             />
-            <Text style={styles.texto}>
+            <Text style={styles.helpText}>
               ¿Tienes problemas para iniciar sesión?
             </Text>
 
-            <TouchableOpacity 
-              style={styles.botonIniciar}
-            >
-              <Text style={styles.botonTexto}>Iniciar sesión</Text>
+            <TouchableOpacity style={styles.loginButton}>
+              <Text style={styles.loginButtonText}>Iniciar sesión</Text>
             </TouchableOpacity>
         
-            <Text style={styles.texto}>
-              ¿No tienes cuenta? <Text style={{ color: 'blue' }}>Regístrate</Text>
+            <Text style={styles.helpText}>
+              ¿No tienes cuenta? <Text style={{ color: '#DC2626' }}>Regístrate</Text>
             </Text>     
 
-            <Pressable
-              onPress={() => {
-                promptAsync().catch((e) => {
-                  console.error('Error al iniciar sesión: ', e);
-                })}}
-            >   
+            <Pressable onPress={handleGoogleLogin}>
               <View style={styles.section}>
-                <Ionicons name="person-circle-outline" size={32} color="#DC2626" style={styles.icon} />
-                <View>
+                <View style={styles.iconContainer}>
+                  <Ionicons name="logo-google" size={24} color="#DC2626" />
+                </View>
+                <View style={styles.sectionContent}>
                   <Text style={styles.sectionTitle}>Iniciar Sesión</Text>
                   <Text style={styles.sectionText}>
                     Login con Google
@@ -209,21 +208,15 @@ export default function ProfileScreen() {
         {/* Botón de logout - solo mostrar si está autenticado */}
         {user && (
           <TouchableOpacity 
-            style={[styles.botonIniciar, { 
-              backgroundColor: '#DC2626', 
-              marginTop: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }]}
+            style={styles.logoutButton}
             onPress={handleLogout}
           >
             <Ionicons name="log-out-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-            <Text style={styles.botonTexto}>Cerrar Sesión</Text>
+            <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
           </TouchableOpacity>
         )}
-       </View>
-</View>
-    );
-    }   
+      </ScrollView>
+    </View>
+  );
+}   
 

@@ -13,7 +13,7 @@ const API_URLS = {
   // Para desarrollo móvil (necesitas usar tu IP local)
   // Reemplaza con tu IP local cuando pruebes en dispositivo
 
-  mobile: 'http://146.83.198.35:1237/api', // Cambia esta IP
+  mobile: 'http://192.168.1.31:3000/api', // Cambia esta IP
   
   // Para producción
   production: 'http://146.83.198.35:1237/api'

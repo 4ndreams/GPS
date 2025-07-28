@@ -3,17 +3,39 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: '#F5F5F5',
   },
-    innerContainer: {
+  header: {
+    backgroundColor: '#DC2626',
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#B91C1C',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    color: '#FECACA',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 20,
+  },
+  innerContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-  },
-  header: {
-    marginBottom: 30,
-    alignItems: 'center',
   },
   headerBar: {
     flexDirection: 'row',
@@ -23,7 +45,7 @@ export default StyleSheet.create({
     justifyContent: 'flex-start',
     backgroundColor: '#FFFFFF',
   },
-    logo: {
+  logo: {
     width: 150,
     height: 100,
     marginRight: 10,
@@ -39,30 +61,51 @@ export default StyleSheet.create({
     color: '#A1A1AA',
     fontSize: 16,
   },
-  texto: {
-    color: '#A1A1AA',
+  helpText: {
+    color: '#6B7280',
     fontSize: 14,
     marginBottom: 10,
+    textAlign: 'center',
   },
   section: {
     flexDirection: 'row',
-    backgroundColor: '#1F1F1F',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FEE2E2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  sectionContent: {
+    flex: 1,
   },
   icon: {
     marginRight: 15,
   },
   sectionTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
+    color: '#374151',
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 4,
   },
   sectionText: {
-    color: '#A1A1AA',
+    color: '#6B7280',
     fontSize: 14,
     lineHeight: 20,
   },
@@ -74,25 +117,41 @@ export default StyleSheet.create({
     color: '#6B7280',
     fontSize: 12,
   },
-  Textinput: {
-    backgroundColor: '#1F1F1F',
-    color: '#FFF',
+  textInput: {
+    backgroundColor: '#FFFFFF',
+    color: '#374151',
     borderRadius: 8,
     padding: 15,
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    fontSize: 16,
   },
-  botonIniciar: {
+  loginButton: {
     backgroundColor: '#DC2626',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 10,
   },
-    botonTexto: {
-    color: '#FFF',
+  loginButtonText: {
+    color: '#FFFFFF',
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 16,
+  },
+  logoutButton: {
+    backgroundColor: '#DC2626',
+    padding: 15,
     borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  logoutButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   
   // Estilos para selector de perfiles
@@ -105,7 +164,7 @@ export default StyleSheet.create({
   },
   perfilButton: {
     flex: 1,
-    backgroundColor: '#1F1F1F',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#DC2626',
@@ -113,6 +172,14 @@ export default StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 100,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   perfilButtonActive: {
     backgroundColor: '#DC2626',
@@ -120,7 +187,7 @@ export default StyleSheet.create({
   },
   perfilButtonText: {
     color: '#DC2626',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     marginTop: 8,
     textAlign: 'center',
@@ -146,13 +213,12 @@ export default StyleSheet.create({
     marginVertical: 20,
   },
   separadorText: {
-    color: '#A1A1AA',
+    color: '#6B7280',
     fontSize: 16,
     fontWeight: 'bold',
-    backgroundColor: '#000000',
+    backgroundColor: '#F5F5F5',
     paddingHorizontal: 20,
     position: 'relative',
   },
-
 });
 

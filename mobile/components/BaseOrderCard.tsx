@@ -60,68 +60,88 @@ export const BaseOrderCard: React.FC<BaseOrderCardProps> = ({
   const renderInfo = () => {
     return (
       <View style={styles.ordenInfo}>
-        {/* Información específica del cliente/vendedor */}
-        {(orden.cliente || orden.vendedor) && (
-          <Text style={styles.clienteText}>
-            {orden.cliente || orden.vendedor}
-          </Text>
-        )}
+        {/* Información compacta para móviles */}
+        <View style={styles.mobileInfoRow}>
+          {/* Cliente/Vendedor */}
+          {(orden.cliente || orden.vendedor) && (
+            <View style={styles.mobileInfoItem}>
+              <Ionicons name="person" size={14} color="#6B7280" />
+              <Text style={styles.mobileInfoText}>
+                {orden.cliente || orden.vendedor}
+              </Text>
+            </View>
+          )}
+          
+          {/* Origen/Destino para ventas */}
+          {tipo === 'ventas' && orden.origen && orden.destino && (
+            <View style={styles.mobileInfoItem}>
+              <Ionicons name="location" size={14} color="#6B7280" />
+              <Text style={styles.mobileInfoText}>
+                {orden.origen} → {orden.destino}
+              </Text>
+            </View>
+          )}
+        </View>
         
-        {/* Información de origen/destino para ventas */}
-        {tipo === 'ventas' && orden.origen && orden.destino && (
-          <Text style={styles.origenDestinoText}>
-            {orden.origen} → {orden.destino}
-          </Text>
-        )}
-        
-        {/* Tipo de pedido para stock */}
-        {tipo === 'stock' && (
-          <Text style={styles.tipoText}>Pedido de stock interno</Text>
-        )}
-        
-        {/* Producto con vista previa de foto */}
-        <View style={styles.productoContainer}>
-          <View style={styles.productoInfo}>
-            <Text style={styles.productoText}>
-              • {orden.producto.nombre_producto}
+        {/* Producto con vista previa compacta */}
+        <View style={styles.mobileProductoContainer}>
+          <View style={styles.mobileProductoInfo}>
+            <Text style={styles.mobileProductoText}>
+              {orden.producto.nombre_producto}
             </Text>
-            {/* Cantidad */}
-            <Text style={styles.cantidadText}>
-              Cantidad: {orden.cantidad} unidades
+            <Text style={styles.mobileCantidadText}>
+              {orden.cantidad} unidades
             </Text>
           </View>
           <OrderPhotoPreview id_orden={orden.id_orden} size="small" />
         </View>
         
-        {/* Fechas */}
-        {orden.fecha_solicitud && (
-          <Text style={styles.fechaText}>
-            Solicitado: {new Date(orden.fecha_solicitud).toLocaleDateString()}
-          </Text>
-        )}
-        {orden.fecha_envio && (
-          <Text style={styles.fechaText}>
-            Enviado: {new Date(orden.fecha_envio).toLocaleDateString()}
-          </Text>
-        )}
-        {orden.fecha_entrega && (
-          <Text style={styles.fechaText}>
-            Entregado: {new Date(orden.fecha_entrega).toLocaleDateString()}
-          </Text>
-        )}
+        {/* Fechas compactas */}
+        <View style={styles.mobileFechasContainer}>
+          {orden.fecha_solicitud && (
+            <View style={styles.mobileFechaItem}>
+              <Ionicons name="calendar" size={12} color="#9CA3AF" />
+              <Text style={styles.mobileFechaText}>
+                {new Date(orden.fecha_solicitud).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
+          {orden.fecha_envio && (
+            <View style={styles.mobileFechaItem}>
+              <Ionicons name="send" size={12} color="#9CA3AF" />
+              <Text style={styles.mobileFechaText}>
+                {new Date(orden.fecha_envio).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
+          {orden.fecha_entrega && (
+            <View style={styles.mobileFechaItem}>
+              <Ionicons name="checkmark-done" size={12} color="#9CA3AF" />
+              <Text style={styles.mobileFechaText}>
+                {new Date(orden.fecha_entrega).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
+        </View>
         
         {/* Transportista para ventas */}
         {tipo === 'ventas' && orden.transportista && (
-          <Text style={styles.transportistaText}>
-            Transportista: {orden.transportista}
-          </Text>
+          <View style={styles.mobileInfoItem}>
+            <Ionicons name="car" size={14} color="#6B7280" />
+            <Text style={styles.mobileInfoText}>
+              {orden.transportista}
+            </Text>
+          </View>
         )}
         
         {/* Observaciones */}
         {orden.observaciones && (
-          <Text style={styles.observacionesText}>
-            {orden.observaciones}
-          </Text>
+          <View style={styles.mobileObservacionesContainer}>
+            <Ionicons name="chatbubble" size={14} color="#6B7280" />
+            <Text style={styles.mobileObservacionesText}>
+              {orden.observaciones}
+            </Text>
+          </View>
         )}
       </View>
     );
@@ -149,7 +169,7 @@ const styles = StyleSheet.create({
   ordenCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 16,
+    padding: 12, // Reducido para móviles
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -157,7 +177,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 2,
     borderColor: 'transparent',
-    marginBottom: 12,
+    marginBottom: 8, // Reducido para móviles
   },
   ordenSeleccionada: {
     borderColor: '#DC2626',
@@ -171,7 +191,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8, // Reducido para móviles
   },
   ordenTituloContainer: {
     flexDirection: 'row',
@@ -179,12 +199,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   checkbox: {
-    width: 24,
-    height: 24,
+    width: 20, // Reducido para móviles
+    height: 20, // Reducido para móviles
     borderWidth: 2,
     borderColor: '#D1D5DB',
     borderRadius: 4,
-    marginRight: 12,
+    marginRight: 8, // Reducido para móviles
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -193,33 +213,101 @@ const styles = StyleSheet.create({
     borderColor: '#DC2626',
   },
   ordenTitulo: {
-    fontSize: 16,
+    fontSize: 14, // Reducido para móviles
     fontWeight: 'bold',
     color: '#374151',
-    marginRight: 8,
+    marginRight: 6, // Reducido para móviles
   },
   estadoBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 6, // Reducido para móviles
+    paddingVertical: 2, // Reducido para móviles
+    borderRadius: 8,
   },
   ordenBadges: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 4, // Reducido para móviles
   },
   prioridadBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 6, // Reducido para móviles
+    paddingVertical: 2, // Reducido para móviles
+    borderRadius: 8,
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 10, // Reducido para móviles
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
   ordenInfo: {
-    marginBottom: 12,
+    marginBottom: 8, // Reducido para móviles
   },
+  // Estilos móviles optimizados
+  mobileInfoRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 6,
+    gap: 8,
+  },
+  mobileInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    minWidth: '45%',
+  },
+  mobileInfoText: {
+    fontSize: 12, // Reducido para móviles
+    color: '#6B7280',
+    marginLeft: 4,
+    flex: 1,
+  },
+  mobileProductoContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 6, // Reducido para móviles
+  },
+  mobileProductoInfo: {
+    flex: 1,
+    marginRight: 8, // Reducido para móviles
+  },
+  mobileProductoText: {
+    fontSize: 13, // Reducido para móviles
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 2,
+  },
+  mobileCantidadText: {
+    fontSize: 11, // Reducido para móviles
+    color: '#6B7280',
+  },
+  mobileFechasContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 6, // Reducido para móviles
+    gap: 8,
+  },
+  mobileFechaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  mobileFechaText: {
+    fontSize: 10, // Reducido para móviles
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+    marginLeft: 2,
+  },
+  mobileObservacionesContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 4,
+  },
+  mobileObservacionesText: {
+    fontSize: 11, // Reducido para móviles
+    color: '#374151',
+    fontStyle: 'italic',
+    marginLeft: 4,
+    flex: 1,
+  },
+  // Estilos originales mantenidos para compatibilidad
   clienteText: {
     fontSize: 14,
     color: '#6B7280',

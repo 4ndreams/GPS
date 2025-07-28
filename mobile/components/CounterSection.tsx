@@ -53,15 +53,15 @@ export const CounterSection: React.FC<CounterSectionProps> = ({
 const styles = StyleSheet.create({
   contadoresContainer: {
     flexDirection: 'row',
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    gap: 10,
+    paddingBottom: 16, // Reducido para móviles
+    paddingHorizontal: 16, // Reducido para móviles
+    gap: 8, // Reducido para móviles
   },
   contador: {
     flex: 1,
     backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: 10, // Reducido para móviles
+    padding: 16, // Reducido para móviles
     alignItems: 'center',
     borderWidth: 2,
     borderColor: 'transparent',
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   contadorNumero: {
-    fontSize: 28,
+    fontSize: 24, // Reducido para móviles
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
     color: '#DC2626',
   },
   contadorLabel: {
-    fontSize: 12,
+    fontSize: 10, // Reducido para móviles
     color: '#FFFFFF',
-    marginTop: 4,
+    marginTop: 2, // Reducido para móviles
     fontWeight: '600',
     textAlign: 'center',
   },
