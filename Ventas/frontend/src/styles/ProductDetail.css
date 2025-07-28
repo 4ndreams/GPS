@@ -1,10 +1,51 @@
+/* Fondos decorativos sutiles para la página de detalle */
+.producto-extra-shape1 {
+  position: absolute;
+  top: -60px;
+  left: -60px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, #ec221f22 60%, transparent 100%);
+  border-radius: 50%;
+  z-index: 0;
+  opacity: 0.18;
+  pointer-events: none;
+}
+.producto-extra-shape2 {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, #e5393530 60%, transparent 100%);
+  border-radius: 50%;
+  z-index: 0;
+  opacity: 0.13;
+  pointer-events: none;
+}
+.producto-extra-shape3 {
+  position: absolute;
+  top: 40%;
+  left: -40px;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, #e5393520 60%, transparent 100%);
+  border-radius: 50%;
+  z-index: 0;
+  opacity: 0.10;
+  pointer-events: none;
+}
 /* Contenedor principal */
 .producto-detalle-container {
   max-width: 1200px;
   margin: 40px auto;
-  padding: 0 24px;
+  padding: 48px 40px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #263238;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.13);
+  position: relative;
 }
 
 /* Botón volver */
@@ -30,10 +71,10 @@
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 56px;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.13);
-  padding: 48px 40px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
   align-items: flex-start;
 }
 
@@ -90,10 +131,6 @@
   font-weight: 800;
   margin-bottom: 12px;
   letter-spacing: 2px;
-  background: #fff;
-  padding: 8px 0 8px 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
 }
 
 /* Botones de acción */
@@ -159,9 +196,11 @@
 
 /* Responsivo */
 @media (max-width: 900px) {
+  .producto-detalle-container {
+    padding: 24px 8px;
+  }
   .detalle-producto {
     grid-template-columns: 1fr;
-    padding: 24px 8px;
     gap: 32px;
   }
   .detalle-imagen {
@@ -183,11 +222,10 @@
 @media (max-width: 600px) {
   .producto-detalle-container {
     margin: 12px auto;
-    padding: 0 4px;
+    padding: 8px 4px;
+    border-radius: 8px;
   }
   .detalle-producto {
-    padding: 8px 0;
-    border-radius: 8px;
     gap: 18px;
   }
   .detalle-imagen {

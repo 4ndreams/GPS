@@ -6,7 +6,7 @@ export async function getProductosService() {
   try {
     const repository = AppDataSource.getRepository(Producto);
     let productos = await repository.find({ 
-      relations: ["material", "tipo", "imagenes", "relleno"] 
+      relations: ["material", "tipo", "relleno"] 
     });
     
     // Si no hay productos, insertar materiales, tipos y productos de ejemplo
@@ -147,7 +147,7 @@ export async function getProductoByIdService(id_producto) {
     const repository = AppDataSource.getRepository(Producto);
     const producto = await repository.findOne({ 
       where: { id_producto },
-      relations: ["material", "tipo", "relleno", "imagenes"]
+      relations: ["material", "tipo", "relleno"]
     });
     return producto ? [producto, null] : [null, "Producto no encontrado"];
   } catch (error) {

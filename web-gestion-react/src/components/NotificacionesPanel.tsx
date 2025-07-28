@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 
 interface Notificacion {
-  id: number;
+  id: number | string;
   tipo: string;
   mensaje: string;
   tiempo: string;
@@ -21,43 +21,89 @@ interface Notificacion {
 
 interface NotificacionesPanelProps {
   notificaciones: Notificacion[]
+  onMarcarComoLeida?: (id: number | string) => void
+  onMarcarTodasComoLeidas?: () => void
 }
 
-export default function NotificacionesPanel({ notificaciones }: NotificacionesPanelProps) {
-  const getNotificacionIcon = (tipo: string) => {
-    switch (tipo) {
-      case 'alerta_faltante':
-        return <AlertTriangle className="h-4 w-4 text-orange-600" />
-      case 'rechazo_calidad':
-        return <AlertTriangle className="h-4 w-4 text-red-600" />
-      case 'completado':
-        return <CheckCircle2 className="h-4 w-4 text-green-600" />
-      case 'nueva_orden':
-        return <Package className="h-4 w-4 text-blue-600" />
-      default:
-        return <Bell className="h-4 w-4 text-gray-600" />
+export default function NotificacionesPanel({ notificaciones, onMarcarComoLeida, onMarcarTodasComoLeidas }: NotificacionesPanelProps) {
+  const getNotificacionIcon = (tipo: string, mensaje: string) => {
+    // Detectar el estado desde el mensaje
+    const mensajeLower = mensaje.toLowerCase();
+    
+    // Estados de producción
+    if (mensajeLower.includes('en producción') || mensajeLower.includes('en produccion') || mensajeLower.includes('fabricada')) {
+      return <Package className="h-4 w-4 text-orange-600" />
     }
-  }
+    
+    // Estados de tránsito
+    if (mensajeLower.includes('en tránsito') || mensajeLower.includes('en transito')) {
+      return <Package className="h-4 w-4 text-purple-600" />
+    }
+    
+    // Estados finales exitosos
+    if (mensajeLower.includes('recibido') && !mensajeLower.includes('problema')) {
+      return <CheckCircle2 className="h-4 w-4 text-green-600" />
+    }
+    
+    // Estados con problemas
+    if (mensajeLower.includes('problema') || mensajeLower.includes('cancelado')) {
+      return <AlertTriangle className="h-4 w-4 text-red-600" />
+    }
+    
+    // Estados pendientes
+    if (mensajeLower.includes('pendiente')) {
+      return <Clock className="h-4 w-4 text-blue-600" />
+    }
+    
+    // Por defecto, gris
+    return <Bell className="h-4 w-4 text-gray-600" />
+  };
 
-  const getNotificacionColor = (tipo: string) => {
-    switch (tipo) {
-      case 'alerta_faltante':
-        return 'bg-orange-50 border-orange-200'
-      case 'rechazo_calidad':
-        return 'bg-red-50 border-red-200'
-      case 'completado':
-        return 'bg-green-50 border-green-200'
-      case 'nueva_orden':
-        return 'bg-blue-50 border-blue-200'
-      default:
-        return 'bg-gray-50 border-gray-200'
+  const getNotificacionColor = (tipo: string, mensaje: string) => {
+    // Detectar el estado desde el mensaje
+    const mensajeLower = mensaje.toLowerCase();
+    
+    console.log('🎨 Detectando color para notificación:', { tipo, mensaje, mensajeLower });
+    
+    // Estados de producción
+    if (mensajeLower.includes('en producción') || mensajeLower.includes('en produccion') || mensajeLower.includes('fabricada')) {
+      console.log('🟠 Color naranja para producción');
+      return 'text-orange-600';
     }
-  }
+    
+    // Estados de tránsito
+    if (mensajeLower.includes('en tránsito') || mensajeLower.includes('en transito')) {
+      console.log('🟣 Color morado para tránsito');
+      return 'text-purple-600';
+    }
+    
+    // Estados finales exitosos
+    if (mensajeLower.includes('recibido') && !mensajeLower.includes('problema')) {
+      console.log('🟢 Color verde para recibido');
+      return 'text-green-600';
+    }
+    
+    // Estados con problemas
+    if (mensajeLower.includes('problema') || mensajeLower.includes('cancelado')) {
+      console.log('🔴 Color rojo para problemas');
+      return 'text-red-600';
+    }
+    
+    // Estados pendientes
+    if (mensajeLower.includes('pendiente')) {
+      console.log('🔵 Color azul para pendiente');
+      return 'text-blue-600';
+    }
+    
+    // Por defecto, gris
+    console.log('⚪ Color gris por defecto');
+    return 'text-gray-600';
+  };
 
   const notificacionesNoLeidas = notificaciones.filter(n => !n.leida).length
 
   return (
-    <Card className="h-full">
+    <Card className="max-h-[350px] overflow-hidden">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -69,7 +115,14 @@ export default function NotificacionesPanel({ notificaciones }: NotificacionesPa
               </Badge>
             )}
           </div>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              console.log('🖱️ Click en "Marcar todas como leídas"');
+              onMarcarTodasComoLeidas?.();
+            }}
+          >
             Marcar todas como leídas
           </Button>
         </div>
@@ -77,8 +130,8 @@ export default function NotificacionesPanel({ notificaciones }: NotificacionesPa
           Actividad reciente del sistema
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[400px]">
+      <CardContent className="max-h-[250px]">
+        <ScrollArea className="h-[200px]">
           <div className="space-y-3">
             {notificaciones.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
@@ -86,19 +139,23 @@ export default function NotificacionesPanel({ notificaciones }: NotificacionesPa
                 <p>No hay notificaciones</p>
               </div>
             ) : (
-              notificaciones.map((notificacion) => (
-                <div
-                  key={notificacion.id}
-                  className={`p-3 rounded-lg border ${getNotificacionColor(notificacion.tipo)} ${
-                    !notificacion.leida ? 'ring-2 ring-blue-200' : ''
-                  }`}
-                >
+                                        notificaciones.map((notificacion) => (
+                            <div
+                              key={notificacion.id}
+                              className={`p-3 rounded-lg border ${getNotificacionColor(notificacion.tipo, notificacion.mensaje)} ${
+                                !notificacion.leida ? 'ring-2 ring-blue-200' : ''
+                              } cursor-pointer hover:bg-gray-50 transition-colors`}
+                              onClick={() => {
+                                console.log('🖱️ Click en notificación:', notificacion.id, 'Tipo:', typeof notificacion.id);
+                                onMarcarComoLeida?.(notificacion.id);
+                              }}
+                            >
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-1">
-                      {getNotificacionIcon(notificacion.tipo)}
+                      {getNotificacionIcon(notificacion.tipo, notificacion.mensaje)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm text-black">
                         {notificacion.mensaje}
                       </p>
                       <div className="flex items-center gap-2 mt-1">

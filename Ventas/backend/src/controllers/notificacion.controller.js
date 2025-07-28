@@ -4,6 +4,7 @@ import {
     getNotificacionesService,
     getAlertasActivasService,
     marcarNotificacionLeidaService,
+    marcarTodasNotificacionesLeidasService,
     resolverAlertaService,
     crearAlertaFaltantes,
     crearAlertaDefectos,
@@ -45,8 +46,11 @@ export async function createNotificacionController(req, res) {
 // Obtener todas las notificaciones
 export async function getNotificacionesController(req, res) {
     try {
-        const { limit } = req.query;
-        const [notificaciones, err] = await getNotificacionesService(limit ? parseInt(limit) : 50);
+        const { limit, soloNoLeidas } = req.query;
+        const [notificaciones, err] = await getNotificacionesService(
+            limit ? parseInt(limit) : 50,
+            soloNoLeidas === 'true'
+        );
 
         if (err) {
             return handleErrorClient(res, 400, err);
@@ -86,6 +90,22 @@ export async function marcarNotificacionLeidaController(req, res) {
         }
 
         return handleSuccess(res, 200, "Notificación marked as read", notificacion);
+    } catch (error) {
+        console.error(error);
+        return handleErrorServer(res, 500, "Internal server error");
+    }
+}
+
+// Marcar todas las notificaciones como leídas
+export async function marcarTodasNotificacionesLeidasController(req, res) {
+    try {
+        const [cantidadMarcadas, err] = await marcarTodasNotificacionesLeidasService();
+
+        if (err) {
+            return handleErrorServer(res, 500, err);
+        }
+
+        return handleSuccess(res, 200, `Se marcaron ${cantidadMarcadas} notificaciones como leídas`, { cantidadMarcadas });
     } catch (error) {
         console.error(error);
         return handleErrorServer(res, 500, "Internal server error");

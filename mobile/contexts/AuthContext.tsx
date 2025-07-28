@@ -66,8 +66,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       // Llamar al servicio de autenticación real
       const response = await loginUser(email, password);
-      //asegurarme que se envie
-      Alert.alert('🔍 Respuesta del backend:', JSON.stringify(response));
       if (response) {
         // Extraer datos del usuario de la respuesta
         const userData: AuthUser = {

@@ -19,7 +19,10 @@ import {
   Truck,
   Clock,
   RefreshCw,
+  FileText,
+  FileSpreadsheet,
 } from "lucide-react"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +50,9 @@ interface OrdenesTableProps {
   onSelectAll: () => void
   onRefresh: () => void
   onExport: (format: string) => void
+  onVerDetalles?: (orden: OrdenDespacho) => void
+  onMarcarCompletada?: (orden: OrdenDespacho) => void
+  onCancelarOrden?: (orden: OrdenDespacho) => void
 }
 
 export default function OrdenesTable({
@@ -55,56 +61,128 @@ export default function OrdenesTable({
   onSelectRow,
   onSelectAll,
   onRefresh,
-  onExport
+  onExport,
+  onVerDetalles,
+  onMarcarCompletada,
+  onCancelarOrden
 }: OrdenesTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterEstado, setFilterEstado] = useState("todos")
   const [filterPrioridad, setFilterPrioridad] = useState("todos")
 
   const getEstadoBadge = (estado: string) => {
+    const estadoLower = estado.toLowerCase();
+    
     const estadoConfig = {
+      // Estados iniciales
+      pendiente: {
+        variant: "secondary" as const,
+        className: "bg-blue-100 text-blue-800",
+        icon: Clock,
+        texto: "Pendiente",
+      },
+      "pendiente recepción": {
+        variant: "secondary" as const,
+        className: "bg-blue-100 text-blue-800",
+        icon: Clock,
+        texto: "Pendiente Recepción",
+      },
+      
+      // Estados de producción
+      "en producción": {
+        variant: "default" as const,
+        className: "bg-orange-100 text-orange-800",
+        icon: Package,
+        texto: "En Producción",
+      },
+      "en produccion": {
+        variant: "default" as const,
+        className: "bg-orange-100 text-orange-800",
+        icon: Package,
+        texto: "En Producción",
+      },
+      fabricada: {
+        variant: "default" as const,
+        className: "bg-orange-100 text-orange-800",
+        icon: Package,
+        texto: "Fabricada",
+      },
+      
+      // Estados de tránsito
+      "en tránsito": {
+        variant: "default" as const,
+        className: "bg-purple-100 text-purple-800",
+        icon: Truck,
+        texto: "En Tránsito",
+      },
+      "en transito": {
+        variant: "default" as const,
+        className: "bg-purple-100 text-purple-800",
+        icon: Truck,
+        texto: "En Tránsito",
+      },
+      
+      // Estados finales exitosos
+      recibido: {
+        variant: "default" as const,
+        className: "bg-green-100 text-green-800",
+        icon: CheckCircle2,
+        texto: "Recibido",
+      },
       completado: {
         variant: "default" as const,
         className: "bg-green-100 text-green-800",
         icon: CheckCircle2,
         texto: "Completado",
       },
-      alerta: {
+      
+      // Estados con problemas
+      "recibido con problemas": {
         variant: "destructive" as const,
-        className: "bg-orange-100 text-orange-800",
+        className: "bg-red-100 text-red-800",
         icon: AlertTriangle,
-        texto: "Con Alertas",
+        texto: "Recibido con Problemas",
       },
-      pendiente: {
-        variant: "secondary" as const,
-        className: "bg-blue-100 text-blue-800",
-        icon: Clock,
-        texto: "Pendiente Recepción",
+      cancelado: {
+        variant: "destructive" as const,
+        className: "bg-red-100 text-red-800",
+        icon: XCircle,
+        texto: "Cancelado",
       },
-      en_transito: { 
-        variant: "default" as const, 
-        className: "bg-purple-100 text-purple-800", 
-        icon: Truck, 
-        texto: "En Tránsito" 
-      },
-      rechazado: { 
-        variant: "destructive" as const, 
-        className: "bg-red-100 text-red-800", 
-        icon: XCircle, 
-        texto: "Rechazado" 
+      rechazado: {
+        variant: "destructive" as const,
+        className: "bg-red-100 text-red-800",
+        icon: XCircle,
+        texto: "Rechazado",
       },
     }
 
-    const config = estadoConfig[estado as keyof typeof estadoConfig] || estadoConfig.pendiente
-    const Icon = config.icon
-
+    // Buscar la configuración exacta o por coincidencia parcial
+    let config = estadoConfig[estadoLower as keyof typeof estadoConfig];
+    
+    if (!config) {
+      // Buscar por coincidencia parcial
+      for (const [key, value] of Object.entries(estadoConfig)) {
+        if (estadoLower.includes(key) || key.includes(estadoLower)) {
+          config = value;
+          break;
+        }
+      }
+    }
+    
+    // Si no se encuentra, usar el estado por defecto
+    if (!config) {
+      config = estadoConfig.pendiente;
+    }
+    
+    const Icon = config.icon;
     return (
       <Badge variant={config.variant} className={config.className}>
         <Icon className="w-3 h-3 mr-1" />
         {config.texto}
       </Badge>
-    )
-  }
+    );
+  };
 
   const getPrioridadBadge = (prioridad: string) => {
     const prioridadConfig = {
@@ -128,14 +206,16 @@ export default function OrdenesTable({
                          orden.trabajadorFabrica.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          orden.vendedora?.toLowerCase().includes(searchTerm.toLowerCase())
     
-    const matchesEstado = filterEstado === "todos" || orden.estado === filterEstado
+    const matchesEstado = filterEstado === "todos" || 
+                         orden.estado.toLowerCase().includes(filterEstado.toLowerCase()) ||
+                         filterEstado.toLowerCase().includes(orden.estado.toLowerCase())
     const matchesPrioridad = filterPrioridad === "todos" || orden.prioridad === filterPrioridad
     
     return matchesSearch && matchesEstado && matchesPrioridad
   })
 
   return (
-    <Card>
+    <Card className="max-h-[600px] overflow-hidden">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -161,12 +241,15 @@ export default function OrdenesTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => onExport('excel')}>
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
                   Exportar a Excel
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onExport('pdf')}>
+                  <FileText className="h-4 w-4 mr-2" />
                   Exportar a PDF
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onExport('csv')}>
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
                   Exportar a CSV
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -174,7 +257,7 @@ export default function OrdenesTable({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-h-[450px] overflow-y-auto">
         <div className="flex items-center gap-4 mb-4">
           <div className="flex items-center gap-2 flex-1">
             <Search className="h-4 w-4 text-gray-400" />
@@ -193,11 +276,12 @@ export default function OrdenesTable({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="completado">Completado</SelectItem>
-                <SelectItem value="alerta">Con Alertas</SelectItem>
                 <SelectItem value="pendiente">Pendiente</SelectItem>
-                <SelectItem value="en_transito">En Tránsito</SelectItem>
-                <SelectItem value="rechazado">Rechazado</SelectItem>
+                <SelectItem value="en producción">En Producción</SelectItem>
+                <SelectItem value="en tránsito">En Tránsito</SelectItem>
+                <SelectItem value="recibido">Recibido</SelectItem>
+                <SelectItem value="recibido con problemas">Con Problemas</SelectItem>
+                <SelectItem value="cancelado">Cancelado</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterPrioridad} onValueChange={setFilterPrioridad}>
@@ -215,7 +299,7 @@ export default function OrdenesTable({
           </div>
         </div>
 
-        <div className="rounded-md border">
+        <div className="rounded-md border max-h-[350px] overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -232,7 +316,7 @@ export default function OrdenesTable({
                 <TableHead>Productos</TableHead>
                 <TableHead>Valor Total</TableHead>
                 <TableHead>Fecha</TableHead>
-                <TableHead>Vendedora</TableHead>
+                <TableHead>Producto</TableHead>
                 <TableHead className="w-12">Acciones</TableHead>
               </TableRow>
             </TableHeader>
@@ -267,14 +351,20 @@ export default function OrdenesTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onVerDetalles?.(orden)}>
                           <Eye className="h-4 w-4 mr-2" />
                           Ver detalles
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>Editar orden</DropdownMenuItem>
-                        <DropdownMenuItem>Marcar como completada</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem onClick={() => onMarcarCompletada?.(orden)}>
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Marcar como completada
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-red-600"
+                          onClick={() => onCancelarOrden?.(orden)}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
                           Cancelar orden
                         </DropdownMenuItem>
                       </DropdownMenuContent>
