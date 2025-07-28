@@ -29,8 +29,21 @@ export async function getOrdenByIdService(id) {
 export async function createOrdenService(body) {
   try {
     const repo = AppDataSource.getRepository(Orden);
+    
+    // Obtener el producto para calcular el total
+    const productoRepo = AppDataSource.getRepository("Producto");
+    const producto = await productoRepo.findOne({ where: { id_producto: body.id_producto } });
+    
+    if (!producto) {
+      return [null, "Producto no encontrado"];
+    }
+    
+    // Calcular el total: precio del producto * cantidad
+    const total = parseFloat(producto.precio) * parseInt(body.cantidad);
+    
     const nuevaOrden = repo.create({
       cantidad: body.cantidad,
+      total: total,
       origen: body.origen,
       destino: body.destino,
       fecha_envio: new Date(body.fecha_envio),
@@ -61,8 +74,29 @@ export async function updateOrdenService(id, body) {
 
     if (!orden) return [null, "Orden no encontrada"];
 
+    // Determinar si necesitamos recalcular el total
+    const cantidadCambio = body.cantidad !== undefined && body.cantidad !== orden.cantidad;
+    const productoCambio = body.id_producto !== undefined && body.id_producto !== orden.id_producto;
+    
+    let total = orden.total;
+    
+    // Si cambió la cantidad o el producto, recalcular el total
+    if (cantidadCambio || productoCambio) {
+      const productoRepo = AppDataSource.getRepository("Producto");
+      const idProducto = body.id_producto ?? orden.id_producto;
+      const producto = await productoRepo.findOne({ where: { id_producto: idProducto } });
+      
+      if (!producto) {
+        return [null, "Producto no encontrado"];
+      }
+      
+      const nuevaCantidad = body.cantidad ?? orden.cantidad;
+      total = parseFloat(producto.precio) * parseInt(nuevaCantidad);
+    }
+
     const updated = {
       cantidad: body.cantidad ?? orden.cantidad,
+      total: total,
       origen: body.origen ?? orden.origen,
       destino: body.destino ?? orden.destino,
       fecha_envio: body.fecha_envio ? new Date(body.fecha_envio) : orden.fecha_envio,
@@ -129,6 +163,87 @@ export async function deleteOrdenService(id) {
     return [orden, null];
   } catch (error) {
     console.error("Error al eliminar orden:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+export async function recalcularTotalesService() {
+  try {
+    const repo = AppDataSource.getRepository(Orden);
+    
+    // Obtener todas las órdenes con total = 0 o "0.00"
+    const ordenes = await repo.find({ 
+      relations: ["producto"] 
+    });
+    
+    let actualizadas = 0;
+    
+    for (const orden of ordenes) {
+      // Verificar si el total es 0 o "0.00"
+      const totalActual = parseFloat(orden.total);
+      if (totalActual === 0 && orden.producto && orden.producto.precio) {
+        const total = parseFloat(orden.producto.precio) * parseInt(orden.cantidad);
+        await repo.update({ id_orden: orden.id_orden }, { total: total });
+        actualizadas++;
+        console.log(`Recalculando orden ${orden.id_orden}: ${orden.producto.precio} * ${orden.cantidad} = ${total}`);
+      }
+    }
+    
+    return [actualizadas, null];
+  } catch (error) {
+    console.error("Error al recalcular totales:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+// Marcar orden como completada
+export async function marcarOrdenCompletadaService(id) {
+  try {
+    const repo = AppDataSource.getRepository(Orden);
+    const orden = await repo.findOneBy({ id_orden: id });
+
+    if (!orden) return [null, "Orden no encontrada"];
+
+    // Actualizar el estado a "Recibido"
+    await repo.update({ id_orden: id }, { 
+      estado: "Recibido",
+      updatedAt: new Date()
+    });
+
+    const ordenActualizada = await repo.findOne({
+      where: { id_orden: id },
+      relations: ["producto", "usuario", "bodega"],
+    });
+
+    return [ordenActualizada, null];
+  } catch (error) {
+    console.error("Error al marcar orden como completada:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+// Cancelar orden
+export async function cancelarOrdenService(id) {
+  try {
+    const repo = AppDataSource.getRepository(Orden);
+    const orden = await repo.findOneBy({ id_orden: id });
+
+    if (!orden) return [null, "Orden no encontrada"];
+
+    // Actualizar el estado a "Cancelado"
+    await repo.update({ id_orden: id }, { 
+      estado: "Cancelado",
+      updatedAt: new Date()
+    });
+
+    const ordenActualizada = await repo.findOne({
+      where: { id_orden: id },
+      relations: ["producto", "usuario", "bodega"],
+    });
+
+    return [ordenActualizada, null];
+  } catch (error) {
+    console.error("Error al cancelar orden:", error);
     return [null, "Error interno del servidor"];
   }
 }

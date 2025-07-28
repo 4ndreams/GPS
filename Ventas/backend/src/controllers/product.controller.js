@@ -14,7 +14,6 @@ export const getProducts = async (req, res) => {
     const productRepo = AppDataSource.getRepository("Producto");
     let query = productRepo.createQueryBuilder("producto")
       .leftJoinAndSelect("producto.tipo", "tipo")
-      .leftJoinAndSelect("producto.imagenes", "imagenes")
       .leftJoinAndSelect("producto.material", "material")
       .leftJoinAndSelect("producto.relleno", "relleno");
 
@@ -59,7 +58,7 @@ export const getProductById = async (req, res) => {
   try {
     const producto = await productoRepo.findOne({
       where: { id_producto: id },
-      relations: ["material", "tipo", "imagenes", "relleno"],
+      relations: ["material", "tipo", "relleno"],
     });
 
     if (!producto) {
@@ -250,7 +249,7 @@ export const createProductoConImagenesController = async (req, res) => {
     // Obtener producto completo con imágenes
     const productoCompleto = await productoRepo.findOne({
       where: { id_producto: nuevoProducto.id_producto },
-      relations: ["material", "tipo", "imagenes"]
+      relations: ["material", "tipo", "relleno"]
     });
 
     res.status(201).json({ 
@@ -328,7 +327,7 @@ export const updateProductoConImagenesController = async (req, res) => {
     // Obtener producto completo con imágenes
     const productoCompleto = await productoRepo.findOne({
       where: { id_producto },
-      relations: ["material", "tipo", "imagenes"]
+      relations: ["material", "tipo", "relleno"]
     });
 
     res.json({ 
