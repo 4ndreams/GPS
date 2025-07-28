@@ -8,10 +8,15 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
+  Image,
+  FlatList,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useOrderActions } from '../hooks/useOrderActions';
+import { useOrderPhotos } from '../hooks/useOrderPhotos';
 import api from '../services/api';
 
 // Componente para mostrar los detalles de una orden
@@ -26,6 +31,16 @@ export default function RevisarPedido() {
   const [observaciones, setObservaciones] = useState('');
   const [reportarProblema, setReportarProblema] = useState(false);
   const [cantidadCorrecta, setCantidadCorrecta] = useState(false);
+  
+  // Estados para el modal de imagen
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Hook para manejar las fotos de la orden
+  const { photos, loading: loadingPhotos } = useOrderPhotos(
+    orden?.id_orden || null
+  );
 
   // Cargar datos de la orden desde la API
   useEffect(() => {
@@ -41,7 +56,7 @@ export default function RevisarPedido() {
         console.log('✅ Orden cargada:', ordenData);
         
         // Mapear los datos de la API al formato esperado
-        setOrden({
+        const ordenMapeada = {
           id_orden: ordenData.id_orden,
           cantidad: ordenData.cantidad || 0,
           origen: ordenData.origen || 'Fábrica Principal',
@@ -55,7 +70,9 @@ export default function RevisarPedido() {
           fecha_entrega: ordenData.fecha_entrega || null,
           imagen_url: ordenData.imagen_url || null,
           producto: ordenData.producto || null,
-        });
+        };
+        
+        setOrden(ordenMapeada);
         
       } catch (error) {
         console.error('❌ Error cargando orden:', error);
@@ -99,6 +116,97 @@ export default function RevisarPedido() {
       console.error('❌ Error confirmando recepción:', error);
       Alert.alert('Error', 'No se pudo procesar la solicitud');
     }
+  };
+
+  // Función para abrir el modal de imagen
+  const openImageModal = (imageUrl: string, index: number) => {
+    setSelectedImage(imageUrl);
+    setCurrentImageIndex(index);
+    setModalVisible(true);
+  };
+
+  // Función para cerrar el modal
+  const closeImageModal = () => {
+    setModalVisible(false);
+    setSelectedImage(null);
+  };
+
+  // Navegación entre imágenes en el modal
+  const navigateImage = (direction: 'prev' | 'next') => {
+    if (photos.length <= 1) return;
+    
+    let newIndex;
+    if (direction === 'next') {
+      newIndex = currentImageIndex === photos.length - 1 ? 0 : currentImageIndex + 1;
+    } else {
+      newIndex = currentImageIndex === 0 ? photos.length - 1 : currentImageIndex - 1;
+    }
+    
+    setCurrentImageIndex(newIndex);
+    setSelectedImage(photos[newIndex].ruta_imagen);
+  };
+
+  // Renderizar las fotos de la orden
+  const renderFotos = () => {
+    if (loadingPhotos) {
+      return (
+        <View style={styles.imagenContainer}>
+          <View style={styles.imagenPlaceholder}>
+            <ActivityIndicator size="large" color="#3B82F6" />
+            <Text style={styles.imagenPlaceholderText}>Cargando imágenes...</Text>
+          </View>
+        </View>
+      );
+    }
+
+    if (photos.length === 0) {
+      return (
+        <View style={styles.imagenContainer}>
+          <View style={styles.imagenPlaceholder}>
+            <Ionicons name="image-outline" size={48} color="#9CA3AF" />
+            <Text style={styles.imagenPlaceholderText}>Sin imágenes disponibles</Text>
+            <Text style={styles.imagenPlaceholderSubtext}>
+              No hay fotos asociadas a este pedido
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.imagenContainer}>
+        <Text style={styles.imagenTitulo}>Imágenes del pedido ({photos.length})</Text>
+        <FlatList
+          data={photos}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => (item.id_photo || item.id_pht || Math.random()).toString()}
+          renderItem={({ item, index }) => (
+            <View style={styles.imagenItemContainer}>
+              <TouchableOpacity onPress={() => openImageModal(item.ruta_imagen, index)}>
+                <Image
+                  source={{ uri: item.ruta_imagen }}
+                  style={styles.imagenItem}
+                  resizeMode="cover"
+                  onError={(error) => {
+                    console.error('❌ Error cargando imagen en revisar-pedido:', error);
+                    console.error('📸 URL de imagen que falló:', item.ruta_imagen);
+                  }}
+                  onLoad={() => {
+                    console.log('✅ Imagen cargada exitosamente en revisar-pedido:', item.ruta_imagen);
+                  }}
+                  onLoadStart={() => {
+                    console.log('🔄 Iniciando carga de imagen en revisar-pedido:', item.ruta_imagen);
+                  }}
+                />
+              </TouchableOpacity>
+              <Text style={styles.imagenNumero}>{index + 1}</Text>
+            </View>
+          )}
+          contentContainerStyle={styles.imagenListContainer}
+        />
+      </View>
+    );
   };
 
   const handleReportarProblema = async () => {
@@ -218,16 +326,8 @@ export default function RevisarPedido() {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Detalles del Pedido</Text>
         
-        {/* Imagen del pedido */}
-        <View style={styles.imagenContainer}>
-          <View style={styles.imagenPlaceholder}>
-            <Ionicons name="image-outline" size={48} color="#9CA3AF" />
-            <Text style={styles.imagenPlaceholderText}>Imagen del pedido</Text>
-            <Text style={styles.imagenPlaceholderSubtext}>
-              {orden.imagen_url ? 'Cargando imagen...' : 'Sin imagen disponible'}
-            </Text>
-          </View>
-        </View>
+        {/* Imágenes del pedido */}
+        {renderFotos()}
         
         {/* Cantidad */}
         <View style={styles.cantidadContainer}>
@@ -336,6 +436,64 @@ export default function RevisarPedido() {
           </TouchableOpacity>
         )}
       </View>
+
+      {/* Modal para ver imagen en grande */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        statusBarTranslucent={true}
+        onRequestClose={closeImageModal}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity 
+            style={styles.modalBackdrop} 
+            onPress={closeImageModal}
+            activeOpacity={1}
+          />
+          
+          <View style={styles.modalContent}>
+            {/* Header del modal */}
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Imagen {currentImageIndex + 1} de {photos.length}
+              </Text>
+              <TouchableOpacity onPress={closeImageModal} style={styles.closeButton}>
+                <Ionicons name="close" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+            
+            {/* Imagen */}
+            <View style={styles.imageContainer}>
+              {selectedImage && (
+                <Image
+                  source={{ uri: selectedImage }}
+                  style={styles.fullScreenImage}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
+            
+            {/* Controles de navegación */}
+            {photos.length > 1 && (
+              <View style={styles.navigationControls}>
+                <TouchableOpacity 
+                  style={styles.navButton}
+                  onPress={() => navigateImage('prev')}
+                >
+                  <Ionicons name="chevron-back" size={32} color="#FFFFFF" />
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.navButton}
+                  onPress={() => navigateImage('next')}
+                >
+                  <Ionicons name="chevron-forward" size={32} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -594,5 +752,97 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 12,
+  },
+  // Estilos para las imágenes
+  imagenTitulo: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 12,
+  },
+  imagenListContainer: {
+    paddingHorizontal: 4,
+  },
+  imagenItemContainer: {
+    marginRight: 12,
+    alignItems: 'center',
+  },
+  imagenItem: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
+  imagenNumero: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  // Estilos para el modal de imagen
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  modalContent: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalHeader: {
+    position: 'absolute',
+    top: 50,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    zIndex: 1,
+  },
+  modalTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  closeButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    padding: 8,
+  },
+  imageContainer: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height * 0.8,
+  },
+  navigationControls: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    zIndex: 1,
+  },
+  navButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 25,
+    padding: 12,
   },
 });

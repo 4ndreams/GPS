@@ -180,154 +180,145 @@ export default function NuevoPedidoStock() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-          <View>
-            <Text style={styles.headerTitle}>Nuevo Pedido de Stock</Text>
-            <Text style={styles.headerSubtitle}>Solicitar productos para inventario</Text>
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>Nuevo Pedido de Stock</Text>
+            </View>
+
+
+      {/* Información del Pedido */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Información del Pedido</Text>
+        
+        {/* Nivel de Urgencia */}
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Nivel de Urgencia:</Text>
+          <View style={styles.prioridadContainer}>
+            <View style={[styles.prioridadIndicator, { backgroundColor: getPrioridadColor(prioridad) }]} />
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={prioridad}
+                onValueChange={(value) => setPrioridad(value)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Baja - Normal" value="Baja" />
+                <Picker.Item label="Media - Normal" value="Media" />
+                <Picker.Item label="Alta - Importante" value="Alta" />
+                <Picker.Item label="Urgente - Crítico" value="Urgente" />
+              </Picker>
+            </View>
           </View>
-          <View style={{ width: 24 }} />
+        </View>
+
+        {/* Observaciones */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Observaciones:</Text>
+          <TextInput
+            style={styles.observacionesInput}
+            placeholder="Observaciones adicionales sobre el pedido..."
+            placeholderTextColor="#6B7280"
+            value={observaciones}
+            onChangeText={setObservaciones}
+            maxLength={300}
+            multiline
+            numberOfLines={3}
+          />
         </View>
       </View>
 
-      <ScrollView style={styles.content}>
-        {/* Información del Pedido */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Información del Pedido</Text>
-          <Text style={styles.sectionSubtitle}>Configuración general del pedido</Text>
+      {/* Agregar Productos */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle}>Agregar Productos</Text>
+          <TouchableOpacity 
+            style={styles.agregarButton} 
+            onPress={agregarProducto}
+            disabled={!selectedProducto || parseInt(cantidad) <= 0}
+          >
+            <Ionicons name="add" size={16} color="#FFFFFF" />
+            <Text style={styles.agregarButtonText}>Agregar</Text>
+          </TouchableOpacity>
+        </View>
 
-          {/* Nivel de Urgencia */}
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Nivel de Urgencia</Text>
-            <View style={styles.prioridadContainer}>
-              <View style={[styles.prioridadIndicator, { backgroundColor: getPrioridadColor(prioridad) }]} />
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={prioridad}
-                  onValueChange={(value) => setPrioridad(value)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Baja - Normal" value="Baja" />
-                  <Picker.Item label="Media - Normal" value="Media" />
-                  <Picker.Item label="Alta - Importante" value="Alta" />
-                  <Picker.Item label="Urgente - Crítico" value="Urgente" />
-                </Picker>
-              </View>
+        {/* Selector de producto */}
+        <View style={styles.productSelector}>
+          <View style={styles.selectorGroup}>
+            <Text style={styles.formLabel}>Producto:</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedProducto}
+                onValueChange={(value) => setSelectedProducto(value)}
+                style={styles.picker}
+              >
+                <Picker.Item label="Seleccionar producto" value={null} />
+                {productos
+                .filter(producto => producto && producto.nombre_producto && producto.nombre_producto.trim() !== '') 
+                .map(producto => (
+                  <Picker.Item
+                    key={producto.id_producto}
+                    label={producto.nombre_producto}
+                    value={producto.id_producto}
+                  />
+                ))}
+              </Picker>
             </View>
           </View>
 
-          {/* Observaciones */}
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Observaciones</Text>
+          <View style={styles.selectorGroup}>
+            <Text style={styles.formLabel}>Cantidad:</Text>
             <TextInput
-              style={styles.observacionesInput}
-              placeholder="Observaciones adicionales sobre el pedido..."
-              placeholderTextColor="#666"
-              value={observaciones}
-              onChangeText={setObservaciones}
-              maxLength={300}
-              multiline
-              numberOfLines={3}
+              style={styles.cantidadInput}
+              value={cantidad}
+              onChangeText={setCantidad}
+              keyboardType="numeric"
+              placeholder="1"
+              maxLength={5}
             />
           </View>
         </View>
+      </View>
 
-        {/* Productos Solicitados */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View>
-              <Text style={styles.sectionTitle}>Productos Solicitados</Text>
-              <Text style={styles.sectionSubtitle}>Agrega los productos que necesitas</Text>
-            </View>
-            <TouchableOpacity 
-              style={styles.agregarButton} 
-              onPress={agregarProducto}
-            >
-              <Ionicons name="add" size={16} color="#FFFFFF" />
-              <Text style={styles.agregarButtonText}>Agregar</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Selector de producto */}
-          <View style={styles.productSelector}>
-            <View style={styles.formGroup}>
-              <Text style={styles.formLabel}>Producto</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={selectedProducto}
-                  onValueChange={(value) => setSelectedProducto(value)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Seleccionar producto" value={null} />
-                  {productos
-                  .filter(producto => producto && producto.nombre_producto && producto.nombre_producto.trim() !== '') 
-                  .map(producto => (
-                    <Picker.Item
-                      key={producto.id_producto}
-                      label={producto.nombre_producto}
-                      value={producto.id_producto}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            </View>
-
-            <View style={styles.formGroup}>
-              <Text style={styles.formLabel}>Cantidad</Text>
-              <TextInput
-                style={styles.cantidadInput}
-                value={cantidad}
-                onChangeText={setCantidad}
-                keyboardType="numeric"
-                placeholder="1"
-                maxLength={5}
-              />
-            </View>
-          </View>
-
-          {/* Lista de productos agregados */}
-          {productosSolicitados.length > 0 && (
-            <View style={styles.productosLista}>
-              {productosSolicitados.map(item => (
-                <View key={item.id_producto} style={styles.productoItem}>
-                  <View style={styles.productoInfo}>
-                    <Text style={styles.productoNombre}>{item.producto.nombre_producto}</Text>
-                    <View style={styles.cantidadContainer}>
-                      <TouchableOpacity
-                        style={styles.cantidadButton}
-                        onPress={() => modificarCantidad(item.id_producto, (item.cantidad - 1).toString())}
-                      >
-                        <Ionicons name="remove" size={16} color="#666" />
-                      </TouchableOpacity>
-                      <Text style={styles.cantidadText}>{item.cantidad}</Text>
-                      <TouchableOpacity
-                        style={styles.cantidadButton}
-                        onPress={() => modificarCantidad(item.id_producto, (item.cantidad + 1).toString())}
-                      >
-                        <Ionicons name="add" size={16} color="#666" />
-                      </TouchableOpacity>
-                    </View>
+      {/* Productos Solicitados */}
+      {productosSolicitados.length > 0 && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Productos Solicitados ({getTotalUnidades()} unidades)</Text>
+          
+          <View style={styles.productosLista}>
+            {productosSolicitados.map(item => (
+              <View key={item.id_producto} style={styles.productoItem}>
+                <View style={styles.productoInfo}>
+                  <Text style={styles.productoNombre}>{item.producto.nombre_producto}</Text>
+                  <View style={styles.cantidadControles}>
+                    <TouchableOpacity
+                      style={styles.cantidadButton}
+                      onPress={() => modificarCantidad(item.id_producto, (item.cantidad - 1).toString())}
+                    >
+                      <Ionicons name="remove" size={16} color="#6B7280" />
+                    </TouchableOpacity>
+                    <Text style={styles.cantidadText}>{item.cantidad}</Text>
+                    <TouchableOpacity
+                      style={styles.cantidadButton}
+                      onPress={() => modificarCantidad(item.id_producto, (item.cantidad + 1).toString())}
+                    >
+                      <Ionicons name="add" size={16} color="#6B7280" />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    style={styles.eliminarButton}
-                    onPress={() => eliminarProducto(item.id_producto)}
-                  >
-                    <Ionicons name="trash-outline" size={16} color="#DC2626" />
-                  </TouchableOpacity>
                 </View>
-              ))}
-            </View>
-          )}
+                <TouchableOpacity
+                  style={styles.eliminarButton}
+                  onPress={() => eliminarProducto(item.id_producto)}
+                >
+                  <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
         </View>
-      </ScrollView>
+      )}
 
       {/* Botón de crear pedido */}
-      <View style={styles.bottomButton}>
+      <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[
             styles.crearButton,
@@ -348,79 +339,76 @@ export default function NuevoPedidoStock() {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: '#F3F4F6',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5F7FA',
+    backgroundColor: '#F3F4F6',
   },
   loadingText: {
-    color: '#666',
     marginTop: 16,
     fontSize: 16,
+    color: '#6B7280',
   },
   header: {
-    backgroundColor: '#374151',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-  },
-  headerContent: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  backButton: {
+    padding: 4,
   },
   headerTitle: {
-    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#374151',
     textAlign: 'center',
-  },
-  headerSubtitle: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    opacity: 0.8,
-    textAlign: 'center',
-  },
-  content: {
     flex: 1,
-    padding: 20,
   },
-  section: {
+  card: {
     backgroundColor: '#FFFFFF',
+    margin: 16,
+    padding: 20,
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  sectionHeader: {
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#374151',
+    marginBottom: 16,
+  },
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#374151',
+  infoRow: {
+    marginBottom: 16,
   },
-  sectionSubtitle: {
+  infoLabel: {
     fontSize: 14,
     color: '#6B7280',
-    marginTop: 4,
+    fontWeight: '600',
+    marginBottom: 8,
   },
   formGroup: {
     marginBottom: 16,
@@ -455,7 +443,7 @@ const styles = StyleSheet.create({
   observacionesInput: {
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
-    padding: 12,
+    padding: 16,
     fontSize: 14,
     color: '#374151',
     borderWidth: 1,
@@ -464,7 +452,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
   },
   agregarButton: {
-    backgroundColor: '#22C55E', // Verde
+    backgroundColor: '#10B981',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -478,9 +466,11 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   productSelector: {
-    flexDirection: 'row',
-    gap: 12,
+    gap: 16,
     marginBottom: 16,
+  },
+  selectorGroup: {
+    flex: 1,
   },
   cantidadInput: {
     backgroundColor: '#F9FAFB',
@@ -491,15 +481,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     textAlign: 'center',
-    minWidth: 80,
   },
   productosLista: {
-    gap: 8,
+    gap: 12,
   },
   productoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: 16,
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
     borderWidth: 1,
@@ -507,47 +496,43 @@ const styles = StyleSheet.create({
   },
   productoInfo: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   productoNombre: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#374151',
-    flex: 1,
+    marginBottom: 8,
   },
-  cantidadContainer: {
+  cantidadControles: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 6,
+    borderRadius: 8,
     padding: 4,
+    alignSelf: 'flex-start',
   },
   cantidadButton: {
-    padding: 4,
+    padding: 8,
+    borderRadius: 6,
   },
   cantidadText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#374151',
-    marginHorizontal: 12,
-    minWidth: 20,
+    marginHorizontal: 16,
+    minWidth: 24,
     textAlign: 'center',
   },
   eliminarButton: {
     padding: 8,
-    marginLeft: 8,
+    marginLeft: 12,
   },
-  bottomButton: {
-    padding: 20,
-    paddingBottom: 30,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+  buttonContainer: {
+    margin: 16,
+    marginBottom: 32,
   },
   crearButton: {
-    backgroundColor: '#22C55E', // Verde cuando esté habilitado
+    backgroundColor: '#10B981',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -557,6 +542,7 @@ const styles = StyleSheet.create({
   },
   crearButtonDisabled: {
     backgroundColor: '#9CA3AF',
+    opacity: 0.6,
   },
   crearButtonText: {
     color: '#FFFFFF',

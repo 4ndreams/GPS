@@ -1,11 +1,11 @@
 // src/components/Navbar.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, AlertTriangle, BarChart3, LogOut, Search, Bell, User, Settings, Download } from 'lucide-react';
+import { Home, AlertTriangle, BarChart3, LogOut, Bell, User, Package, Clock, CheckCircle2, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,37 +17,92 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import './Navbar.css';
 
+interface Notificacion {
+  id: number;
+  tipo: string;
+  mensaje: string;
+  tiempo: string;
+  leida: boolean;
+  orden?: string;
+  fecha_creacion: string;
+  prioridad: string;
+  resuelta: boolean;
+  ordenId?: string; // Added for consistency with other fields
+}
+
 export default function Navbar() {
   const { usuario, logout } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
 
   const handleLogout = () => {
     logout();
   };
 
-  // Datos de notificaciones (simulados)
-  const notificaciones = [
-    {
-      id: 1,
-      tipo: "alerta_faltante",
-      mensaje: "Orden OD-2025-002: Faltan 3 puertas MDF modelo PM-002",
-      tiempo: "hace 15 min",
-      leida: false,
-      orden: "OD-2025-002",
-    },
-    {
-      id: 2,
-      tipo: "rechazo_calidad",
-      mensaje: "Orden OD-2025-005: Rechazada por defectos de calidad",
-      tiempo: "hace 1 hora",
-      leida: false,
-      orden: "OD-2025-005",
-    },
-  ];
+  // Función para obtener notificaciones del backend
+  const fetchNotificaciones = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/notificaciones?soloNoLeidas=false');
+      if (response.ok) {
+        const result = await response.json();
+        setNotificaciones(result.data || []);
+      }
+    } catch (error) {
+      console.error('Error obteniendo notificaciones:', error);
+    }
+  };
+
+  // Cargar notificaciones al montar el componente
+  useEffect(() => {
+    fetchNotificaciones();
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchNotificaciones, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Función para obtener el icono según el estado
+  const getNotificacionIcon = (tipo: string, mensaje: string) => {
+    const mensajeLower = mensaje.toLowerCase();
+    
+    // Estados de producción
+    if (mensajeLower.includes('en producción') || mensajeLower.includes('en produccion') || mensajeLower.includes('fabricada')) {
+      return <Package className="h-4 w-4 text-orange-600" />
+    }
+    
+    // Estados de tránsito
+    if (mensajeLower.includes('en tránsito') || mensajeLower.includes('en transito')) {
+      return <Package className="h-4 w-4 text-purple-600" />
+    }
+    
+    // Estados finales exitosos
+    if (mensajeLower.includes('recibido') && !mensajeLower.includes('problema')) {
+      return <CheckCircle2 className="h-4 w-4 text-green-600" />
+    }
+    
+    // Estados con problemas
+    if (mensajeLower.includes('problema') || mensajeLower.includes('cancelado')) {
+      return <AlertTriangleIcon className="h-4 w-4 text-red-600" />
+    }
+    
+    // Estados pendientes
+    if (mensajeLower.includes('pendiente')) {
+      return <Clock className="h-4 w-4 text-blue-600" />
+    }
+    
+    // Por defecto, gris
+    return <Bell className="h-4 w-4 text-gray-600" />
+  };
+
+
 
   const notificacionesNoLeidas = notificaciones.filter(n => !n.leida).length;
+  
+  // Debug: mostrar información de notificaciones
+  console.log('Notificaciones totales:', notificaciones.length);
+  console.log('Notificaciones no leídas:', notificacionesNoLeidas);
+  console.log('Notificaciones:', notificaciones);
 
   return (
     <nav className="navbar">
@@ -58,7 +113,7 @@ export default function Navbar() {
         </div>
       </div>
       
-      <div className="navbar-links">
+      <div className="navbar-links ml-0">
         <NavLink to="/" className="nav-link" end>
           <Home className="nav-icon" />
           <span>Administración</span>
@@ -71,29 +126,16 @@ export default function Navbar() {
           <BarChart3 className="nav-icon" />
           <span>Reportes</span>
         </NavLink>
-        <NavLink to="/configuracion" className="nav-link">
-          <Settings className="nav-icon" />
-          <span>Configuración</span>
-        </NavLink>
+
       </div>
 
       <div className="navbar-actions">
-        {/* Búsqueda */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Buscar..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-48 md:w-60 lg:w-72 bg-white/10 border-white/20 text-white placeholder-white/70 focus:text-white"
-          />
-        </div>
-
         {/* Notificaciones */}
         <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="relative bg-white/10 border-white/20 text-white hover:bg-white/20">
-              <Bell className="h-4 w-4" />
+              <Bell className="h-4 w-4 mr-2" />
+              <span>Notificaciones</span>
               {notificacionesNoLeidas > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs bg-red-500">
                   {notificacionesNoLeidas}
@@ -106,35 +148,89 @@ export default function Navbar() {
             <DropdownMenuSeparator />
             <ScrollArea className="h-64">
               {notificaciones.map((notif) => (
-                <DropdownMenuItem key={notif.id} className={`p-3 ${!notif.leida ? "bg-blue-50" : ""}`}>
+                <DropdownMenuItem 
+                  key={notif.id} 
+                  className={`p-3 ${!notif.leida ? "bg-blue-50" : ""}`}
+                  onClick={async () => {
+                    if (!notif.leida) {
+                      try {
+                        const response = await fetch(`http://localhost:3000/api/notificaciones/${notif.id}/leida`, {
+                          method: 'PATCH',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                          }
+                        });
+                        
+                        if (response.ok) {
+                          // Marcar la notificación como leída localmente
+                          setNotificaciones(prevNotificaciones => 
+                            prevNotificaciones.map(n => 
+                              n.id === notif.id ? { ...n, leida: true } : n
+                            )
+                          );
+                        } else {
+                          console.error('Error en la respuesta del servidor:', response.status);
+                        }
+                      } catch (error) {
+                        console.error('Error al marcar notificación como leída:', error);
+                      }
+                    }
+                  }}
+                >
                   <div className="flex flex-col space-y-1 w-full">
                     <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-xs">
-                        {notif.orden}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        {getNotificacionIcon(notif.tipo, notif.mensaje)}
+                        <Badge variant="outline" className="text-xs">
+                          {notif.ordenId || notif.orden}
+                        </Badge>
+                      </div>
                       <span className="text-xs text-gray-500">{notif.tiempo}</span>
                     </div>
-                    <p className="text-sm">{notif.mensaje}</p>
+                    <p className="text-sm text-black">
+                      {notif.mensaje}
+                    </p>
                     {!notif.leida && <div className="w-2 h-2 bg-blue-500 rounded-full ml-auto" />}
                   </div>
                 </DropdownMenuItem>
               ))}
             </ScrollArea>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Exportar */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-              <Download className="h-4 w-4 mr-1" />
-              Exportar
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom">
-            <DropdownMenuItem>Excel (.xlsx)</DropdownMenuItem>
-            <DropdownMenuItem>PDF</DropdownMenuItem>
-            <DropdownMenuItem>CSV</DropdownMenuItem>
+            {notificaciones.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={async () => {
+                    try {
+                      console.log('Marcando todas las notificaciones como leídas...');
+                      const response = await fetch('http://localhost:3000/api/notificaciones/todas/leidas', {
+                        method: 'PATCH',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                      });
+                      
+                      if (response.ok) {
+                        console.log('Notificaciones marcadas como leídas exitosamente');
+                        // Marcar todas las notificaciones como leídas localmente
+                        setNotificaciones(prevNotificaciones => 
+                          prevNotificaciones.map(notif => ({ ...notif, leida: true }))
+                        );
+                      } else {
+                        console.error('Error en la respuesta del servidor:', response.status);
+                      }
+                    } catch (error) {
+                      console.error('Error al marcar notificaciones como leídas:', error);
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  Marcar todas como leídas ({notificacionesNoLeidas} no leídas)
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -154,10 +250,7 @@ export default function Navbar() {
               <div className="text-xs">{usuario?.email || 'usuario@terplac.com'}</div>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Settings className="h-4 w-4 mr-2" />
-              Configuración
-            </DropdownMenuItem>
+
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Cerrar Sesión

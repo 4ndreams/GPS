@@ -46,11 +46,13 @@ export async function comprasTotalesFiltradas(body) {
 export async function ventasTotalesPorMes(body) {
     try {
         const token = cookies.get('token');
+        console.log("Cuerpo de la solicitud en ventasTotalesPorMes:", body);
         const response = await api.post('/com_mes/ventas', body, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
+        console.log("Response de ventasTotalesPorMes:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error al obtener ventas totales por mes:", error);

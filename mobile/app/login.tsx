@@ -42,8 +42,8 @@ export default function LoginScreen() {
         Alert.alert('Clave inválida', 'La contraseña ingresada es incorrecta. Por favor verifica e intenta nuevamente.');
       } else if (error.response?.status === 404) {
         Alert.alert('Usuario no encontrado', 'No existe una cuenta con este correo electrónico.');
-      } else {
-        Alert.alert('Error de conexión', `No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.${error}`);
+      } else if (error.response?.status === 400) {
+        Alert.alert('Error iniciando sesión', `${error.response?.data?.details?.message || error.message}`);
 
       }
     }
@@ -68,7 +68,7 @@ export default function LoginScreen() {
         {/* Logo y Header */}
         <View style={styles.header}>
           <Image
-            source={require('../assets/logo.png')}
+            source={require('../assets/terplac.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -115,10 +115,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
-          </TouchableOpacity>
-
           {/* Botón principal */}
           <TouchableOpacity
             style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
@@ -141,7 +137,7 @@ export default function LoginScreen() {
             <View style={styles.separatorLine} />
           </View>
 
-          {/* Botón de Google */}
+          {/*
           <TouchableOpacity
             style={styles.googleButton}
             onPress={handleGoogleLogin}
@@ -150,6 +146,7 @@ export default function LoginScreen() {
             <Ionicons name="logo-google" size={20} color="#FFFFFF" />
             <Text style={styles.googleButtonText}>Google</Text>
           </TouchableOpacity>
+             */}
 
           {/* Información para nuevos usuarios */}
           <View style={styles.toggleContainer}>
@@ -184,8 +181,9 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logo: {
-    width: 120,
-    height: 80,
+    // hacerlo mas grande
+    width: 250,
+    height: 150,
     marginBottom: 20,
   },
   title: {

@@ -1,197 +1,49 @@
 "use client"
 
-import { useState, useEffect, useContext } from "react"
-import { useNavigate } from "react-router-dom"
-import { AuthContext } from "../contexts/AuthContext"
-
-import DashboardStats from "../components/DashboardStats"
-import OrdenesTable from "../components/OrdenesTable"
-import NotificacionesPanel from "../components/NotificacionesPanel"
-import UsersManagement from "../components/UsersManagement"
-import CotizacionesManagement from "../components/CotizacionesManagement"
-import ComprarBodega from "../components/ComprarBodega"
-import AñadirPuertasForm from "../components/añadirProducto"
-import MaterialesRellenos from "../components/MaterialesRellenos"
-
-interface OrdenDespacho {
-  id: string;
-  fecha: string;
-  trabajadorFabrica: string;
-  estado: string;
-  prioridad: string;
-  productos: Array<{
-    tipo: string;
-    modelo: string;
-    cantidad: number;
-    medida: string;
-  }>;
-  totalProductos: number;
-  valorTotal: number;
-  fechaCreacion: string;
-  fechaRecepcion: string | null;
-  vendedora: string | undefined;
-  observaciones: string;
-  tiempoDespacho: string | null;
-  faltantes?: Array<{
-    tipo: string;
-    modelo: string;
-    cantidad: number;
-  }>;
-  defectos?: Array<{
-    tipo: string;
-    modelo: string;
-    cantidad: number;
-    motivo: string;
-  }>;
-}
-
-interface Notificacion {
-  id: number;
-  tipo: string;
-  mensaje: string;
-  tiempo: string;
-  leida: boolean;
-  orden?: string;
-}
-
-// Datos específicos de TERPLAC - Órdenes de despacho
-const ordenesDespacho: OrdenDespacho[] = [
-  {
-    id: "OD-2025-001",
-    fecha: "2025-01-15",
-    trabajadorFabrica: "Carlos Mendoza",
-    estado: "completado",
-    prioridad: "normal",
-    productos: [
-      { tipo: "Puerta Enchapada", modelo: "PE-001", cantidad: 15, medida: "80x200cm" },
-      { tipo: "Marco", modelo: "MR-001", cantidad: 15, medida: "80x200cm" },
-    ],
-    totalProductos: 30,
-    valorTotal: 450000,
-    fechaCreacion: "2025-01-15 08:30",
-    fechaRecepcion: "2025-01-15 14:20",
-    vendedora: "María González",
-    observaciones: "Entrega completa sin novedades",
-    tiempoDespacho: "5h 50min",
-  },
-  {
-    id: "OD-2025-002",
-    fecha: "2025-01-16",
-    trabajadorFabrica: "Luis Rodríguez",
-    estado: "alerta",
-    prioridad: "alta",
-    productos: [
-      { tipo: "Puerta MDF", modelo: "PM-002", cantidad: 8, medida: "70x200cm" },
-      { tipo: "Puerta Terciada", modelo: "PT-001", cantidad: 12, medida: "80x200cm" },
-      { tipo: "Moldura", modelo: "ML-003", cantidad: 25, medida: "2.5m" },
-    ],
-    totalProductos: 45,
-    valorTotal: 380000,
-    fechaCreacion: "2025-01-16 09:15",
-    fechaRecepcion: null,
-    vendedora: "María González",
-    observaciones: "Faltan 3 puertas MDF - Problema en producción",
-    tiempoDespacho: null,
-    faltantes: [{ tipo: "Puerta MDF", modelo: "PM-002", cantidad: 3 }],
-  },
-  {
-    id: "OD-2025-003",
-    fecha: "2025-01-17",
-    trabajadorFabrica: "Ana Martín",
-    estado: "pendiente",
-    prioridad: "normal",
-    productos: [
-      { tipo: "Puerta Enchapada Honeycomb", modelo: "PEH-001", cantidad: 20, medida: "90x210cm" },
-      { tipo: "Marco Enchapado", modelo: "ME-001", cantidad: 20, medida: "90x210cm" },
-    ],
-    totalProductos: 40,
-    valorTotal: 680000,
-    fechaCreacion: "2025-01-17 07:45",
-    fechaRecepcion: null,
-    vendedora: undefined,
-    observaciones: "Orden lista para despacho",
-    tiempoDespacho: null,
-  },
-  {
-    id: "OD-2025-004",
-    fecha: "2025-01-18",
-    trabajadorFabrica: "Pedro Silva",
-    estado: "en_transito",
-    prioridad: "alta",
-    productos: [
-      { tipo: "Puerta Terciada Premium", modelo: "PTP-001", cantidad: 10, medida: "80x200cm" },
-      { tipo: "Enchapado Decorativo", modelo: "ED-002", cantidad: 50, medida: "1.2x2.4m" },
-    ],
-    totalProductos: 60,
-    valorTotal: 520000,
-    fechaCreacion: "2025-01-18 10:20",
-    fechaRecepcion: null,
-    vendedora: undefined,
-    observaciones: "Productos especiales para cliente corporativo",
-    tiempoDespacho: null,
-  },
-  {
-    id: "OD-2025-005",
-    fecha: "2025-01-19",
-    trabajadorFabrica: "Roberto Vega",
-    estado: "rechazado",
-    prioridad: "crítica",
-    productos: [
-      { tipo: "Puerta MDF", modelo: "PM-003", cantidad: 5, medida: "75x200cm" },
-      { tipo: "Moldura Decorativa", modelo: "MD-001", cantidad: 15, medida: "3m" },
-    ],
-    totalProductos: 20,
-    valorTotal: 180000,
-    fechaCreacion: "2025-01-19 11:30",
-    fechaRecepcion: "2025-01-19 16:45",
-    vendedora: "María González",
-    observaciones: "Defectos de calidad en 3 puertas - Requiere reposición",
-    tiempoDespacho: "5h 15min",
-    defectos: [{ tipo: "Puerta MDF", modelo: "PM-003", cantidad: 3, motivo: "Rayones en superficie" }],
-  },
-]
-
-// Notificaciones específicas de TERPLAC
-const notificaciones: Notificacion[] = [
-  {
-    id: 1,
-    tipo: "alerta_faltante",
-    mensaje: "Orden OD-2025-002: Faltan 3 puertas MDF modelo PM-002",
-    tiempo: "hace 15 min",
-    leida: false,
-    orden: "OD-2025-002",
-  },
-  {
-    id: 2,
-    tipo: "rechazo_calidad",
-    mensaje: "Orden OD-2025-005: Rechazada por defectos de calidad",
-    tiempo: "hace 1 hora",
-    leida: false,
-    orden: "OD-2025-005",
-  },
-  {
-    id: 3,
-    tipo: "completado",
-    mensaje: "Orden OD-2025-001: Recibida exitosamente en tienda",
-    tiempo: "hace 3 horas",
-    leida: true,
-    orden: "OD-2025-001",
-  },
-  {
-    id: 4,
-    tipo: "nueva_orden",
-    mensaje: "Nueva orden creada por Carlos Mendoza",
-    tiempo: "hace 5 horas",
-    leida: true,
-    orden: "OD-2025-003",
-  },
-]
+import  { useContext, useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../contexts/AuthContext'
+import DashboardStats from '../components/DashboardStats'
+import OrdenesTable from '../components/OrdenesTable'
+import NotificacionesPanel from '../components/NotificacionesPanel'
+import UsersManagement from '../components/UsersManagement'
+import CotizacionesManagement from '../components/CotizacionesManagement'
+import ComprarBodega from '../components/ComprarBodega'
+import AñadirPuertasForm from '../components/añadirProducto'
+import MaterialesRellenos from '../components/MaterialesRellenos'
+import OrdenDetallesModal from '../components/OrdenDetallesModal'
+import { useOrdenes } from "../hooks/useOrdenes"
+import { useNotificaciones } from "../hooks/useNotificaciones"
+import { useWebSocket } from "../hooks/useWebSocket"
+import { useOrdenActions } from "../hooks/useOrdenActions"
+import { exportToPDF, exportToExcel, exportToCSV } from "../services/exportService"
 
 export default function Dashboard() {
   const authContext = useContext(AuthContext)
   const navigate = useNavigate()
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<'ordenes' | 'usuarios' | 'cotizaciones' | 'compras' | 'produccion' | 'materiales'>('ordenes')
+  const [modalOrden, setModalOrden] = useState<any>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Usar hooks para obtener datos del backend
+  const { ordenes, loading: ordenesLoading, refetch: refetchOrdenes } = useOrdenes()
+  const { notificacionesNoLeidas, marcarComoLeida, marcarTodasComoLeidas, refetch: refetchNotificaciones } = useNotificaciones()
+  const { marcarComoCompletada, cancelarOrden } = useOrdenActions()
+
+  // Callbacks estables para WebSocket
+  const handleOrdenActualizada = useCallback(() => {
+    console.log('🔄 Orden actualizada recibida')
+    refetchOrdenes() // Recargar órdenes
+  }, [refetchOrdenes])
+
+  const handleNuevaNotificacion = useCallback(() => {
+    console.log('🔔 Nueva notificación recibida')
+    refetchNotificaciones() // Recargar notificaciones
+  }, [refetchNotificaciones])
+
+  // Configurar WebSocket para actualizaciones en tiempo real
+  useWebSocket(handleOrdenActualizada, handleNuevaNotificacion)
 
   useEffect(() => {
     if (!authContext?.usuario) {
@@ -200,29 +52,54 @@ export default function Dashboard() {
   }, [authContext?.usuario, navigate])
 
   const handleSelectRow = (id: string) => {
-    setSelectedRows((prev: string[]) => 
-      prev.includes(id) 
+    setSelectedRows((prev: string[]) =>
+      prev.includes(id)
         ? prev.filter(rowId => rowId !== id)
         : [...prev, id]
     )
   }
 
+  const ordenesDespacho = ordenesLoading ? [] : ordenes; // No usar datos de ejemplo
+
   const handleSelectAll = () => {
-    setSelectedRows((prev: string[]) => 
-      prev.length === ordenesDespacho.length 
-        ? [] 
-        : ordenesDespacho.map(orden => orden.id)
+    setSelectedRows((prev: string[]) =>
+      prev.length === ordenesDespacho.length
+        ? []
+        : ordenesDespacho.map((orden: any) => orden.id) // Cast to any to resolve type error
     )
   }
 
   const handleRefresh = () => {
-    // Aquí se implementaría la lógica para refrescar los datos
-    console.log("Refrescando datos...")
+    refetchOrdenes();
+    refetchNotificaciones();
   }
 
   const handleExport = (format: string) => {
-    // Aquí se implementaría la lógica para exportar
-    console.log(`Exportando en formato ${format}...`)
+    const filename = `ordenes-despacho-${new Date().toISOString().split('T')[0]}`
+    
+    switch (format) {
+      case 'pdf':
+        exportToPDF(ordenesDespacho, filename)
+        break
+      case 'excel':
+        exportToExcel(ordenesDespacho, filename)
+        break
+      case 'csv':
+        exportToCSV(ordenesDespacho, filename)
+        break
+      default:
+        console.log(`Formato no soportado: ${format}`)
+    }
+  }
+
+  const handleVerDetalles = (orden: any) => {
+    setModalOrden(orden)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setModalOrden(null)
   }
 
   if (!authContext?.usuario) {
@@ -230,119 +107,118 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Dashboard TERPLAC
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Sistema de Gestión de Despachos, Usuarios y Cotizaciones - Bienvenido, {authContext.usuario.nombre}
-          </p>
-        </div>
+    <div className="space-y-6"> {/* Changed from min-h-screen bg-gray-50 */}
+      {/* Title */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard TERPLAC</h1>
+        <p className="text-gray-600 mt-2">
+          Sistema de Gestión de Despachos, Usuarios y Cotizaciones - Bienvenido, {authContext.usuario.nombre}.
+        </p>
+
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-2">
+      {/* Tab buttons */}
+      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
         <button
-          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
-            ${activeTab === 'ordenes'
-              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
-              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
-          `}
           onClick={() => setActiveTab('ordenes')}
-        >Órdenes</button>
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'ordenes'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Órdenes
+        </button>
         <button
-          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
-            ${activeTab === 'usuarios'
-              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
-              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
-          `}
           onClick={() => setActiveTab('usuarios')}
-        >Usuarios</button>
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'usuarios'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Usuarios
+        </button>
         <button
-          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
-            ${activeTab === 'cotizaciones'
-              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
-              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
-          `}
           onClick={() => setActiveTab('cotizaciones')}
-        >Cotizaciones</button>
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'cotizaciones'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Cotizaciones
+        </button>
         <button
-          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
-            ${activeTab === 'compras'
-              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
-              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
-          `}
           onClick={() => setActiveTab('compras')}
-        >Compras</button>
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'compras'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Compras
+        </button>
         <button
-          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
-            ${activeTab === 'produccion'
-              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
-              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
-          `}
           onClick={() => setActiveTab('produccion')}
-        >Producción</button>
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'produccion'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Producción
+        </button>
         <button
-          className={`px-5 py-2 rounded-xl font-semibold shadow-sm transition-all duration-200 border focus:outline-none
-            ${activeTab === 'materiales'
-              ? 'bg-white text-[#b71c1c] border-[#b71c1c] shadow-md'
-              : 'bg-transparent text-gray-600 border-transparent hover:bg-[#fff3f3] hover:text-[#b71c1c]'}
-          `}
           onClick={() => setActiveTab('materiales')}
-        >Materiales y Rellenos</button>
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'materiales'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Materiales
+        </button>
       </div>
 
-      {/* Estadísticas solo para Órdenes */}
-      {activeTab === 'ordenes' && <DashboardStats ordenesDespacho={ordenesDespacho} />}
-
-      {/* Contenido principal según la pestaña activa */}
+      {/* Content based on active tab */}
+      {activeTab === 'ordenes' && <DashboardStats ordenesDespacho={ordenesDespacho as any} />}
       {activeTab === 'ordenes' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Tabla de órdenes */}
           <div className="lg:col-span-2">
             <OrdenesTable
-              ordenesDespacho={ordenesDespacho}
+              ordenesDespacho={ordenesDespacho as any}
               selectedRows={selectedRows}
               onSelectRow={handleSelectRow}
               onSelectAll={handleSelectAll}
               onRefresh={handleRefresh}
               onExport={handleExport}
+              onVerDetalles={handleVerDetalles}
+              onMarcarCompletada={marcarComoCompletada}
+              onCancelarOrden={cancelarOrden}
             />
           </div>
-          {/* Panel de notificaciones */}
           <div className="lg:col-span-1">
-            <NotificacionesPanel notificaciones={notificaciones} />
+            <NotificacionesPanel 
+              notificaciones={notificacionesNoLeidas as any} 
+              onMarcarComoLeida={marcarComoLeida}
+              onMarcarTodasComoLeidas={marcarTodasComoLeidas}
+            />
           </div>
         </div>
       )}
-      {activeTab === 'usuarios' && (
-        <div>
-          <UsersManagement />
-        </div>
-      )}
-      {activeTab === 'cotizaciones' && (
-        <div>
-          <CotizacionesManagement />
-        </div>
-      )}
-      {activeTab === 'compras' && (
-        <div>
-          <ComprarBodega />
-        </div>
-      )}
-      {activeTab === 'produccion' && (
-        <div>
-          <AñadirPuertasForm />
-        </div>
-      )}
-      {activeTab === 'materiales' && (
-        <div>
-          <MaterialesRellenos />
-        </div>
-      )}
+      {activeTab === 'usuarios' && <UsersManagement />}
+      {activeTab === 'cotizaciones' && <CotizacionesManagement />}
+      {activeTab === 'compras' && <ComprarBodega />}
+      {activeTab === 'produccion' && <AñadirPuertasForm />}
+      {activeTab === 'materiales' && <MaterialesRellenos />}
+      
+      {/* Modal de detalles de orden */}
+      <OrdenDetallesModal
+        orden={modalOrden}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   )
 }

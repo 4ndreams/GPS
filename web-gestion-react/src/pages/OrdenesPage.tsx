@@ -1,86 +1,89 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import OrdenesTable from '../components/OrdenesTable';
-
-// Datos específicos de TERPLAC - Órdenes de despacho
-const ordenesDespacho = [
-  {
-    id: "OD-2025-001",
-    fecha: "2025-01-15",
-    trabajadorFabrica: "Carlos Mendoza",
-    estado: "completado",
-    prioridad: "normal",
-    totalProductos: 30,
-    valorTotal: 450000,
-    vendedora: "María González",
-  },
-  {
-    id: "OD-2025-002",
-    fecha: "2025-01-16",
-    trabajadorFabrica: "Luis Rodríguez",
-    estado: "alerta",
-    prioridad: "alta",
-    totalProductos: 45,
-    valorTotal: 380000,
-    vendedora: "María González",
-  },
-  {
-    id: "OD-2025-003",
-    fecha: "2025-01-17",
-    trabajadorFabrica: "Ana Martín",
-    estado: "pendiente",
-    prioridad: "normal",
-    totalProductos: 40,
-    valorTotal: 680000,
-    vendedora: undefined,
-  },
-  {
-    id: "OD-2025-004",
-    fecha: "2025-01-18",
-    trabajadorFabrica: "Pedro Silva",
-    estado: "en_transito",
-    prioridad: "alta",
-    totalProductos: 60,
-    valorTotal: 520000,
-    vendedora: undefined,
-  },
-  {
-    id: "OD-2025-005",
-    fecha: "2025-01-19",
-    trabajadorFabrica: "Roberto Vega",
-    estado: "rechazado",
-    prioridad: "crítica",
-    totalProductos: 20,
-    valorTotal: 180000,
-    vendedora: "María González",
-  },
-];
+import { useOrdenes } from '../hooks/useOrdenes';
+import { useNotificaciones } from '../hooks/useNotificaciones';
+import { useOrdenActions } from '../hooks/useOrdenActions';
+import NotificacionesPanel from '../components/NotificacionesPanel';
+import OrdenDetallesModal from '../components/OrdenDetallesModal';
+import { useWebSocket } from '../hooks/useWebSocket';
+import { exportToPDF, exportToExcel, exportToCSV } from "../services/exportService"
 
 export default function OrdenesPage() {
   const [selectedRows, setSelectedRows] = React.useState<string[]>([]);
+  const [modalOrden, setModalOrden] = useState<any>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // Usar hooks para obtener datos del backend
+  const { ordenes, loading: ordenesLoading, refetch: refetchOrdenes } = useOrdenes();
+  const { notificacionesNoLeidas, marcarComoLeida, marcarTodasComoLeidas, refetch: refetchNotificaciones } = useNotificaciones();
+  const { marcarComoCompletada, cancelarOrden } = useOrdenActions();
+
+  // Callbacks estables para WebSocket
+  const handleOrdenActualizada = useCallback(() => {
+    console.log('🔄 Orden actualizada recibida');
+    refetchOrdenes(); // Recargar órdenes
+  }, [refetchOrdenes]);
+
+  const handleNuevaNotificacion = useCallback(() => {
+    console.log('🔔 Nueva notificación recibida');
+    refetchNotificaciones(); // Recargar notificaciones
+  }, [refetchNotificaciones]);
+
+  // Configurar WebSocket para actualizaciones en tiempo real
+  useWebSocket(handleOrdenActualizada, handleNuevaNotificacion);
+
+  // Usar solo datos del backend - si no hay datos, mostrar array vacío
+  const ordenesDespacho = ordenesLoading ? [] : ordenes;
 
   const handleSelectRow = (id: string) => {
-    setSelectedRows((prev: string[]) => 
-      prev.includes(id) 
+    setSelectedRows((prev: string[]) =>
+      prev.includes(id)
         ? prev.filter(rowId => rowId !== id)
         : [...prev, id]
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedRows((prev: string[]) => 
-      prev.length === ordenesDespacho.length 
-        ? [] 
-        : ordenesDespacho.map(orden => orden.id)
+    setSelectedRows((prev: string[]) =>
+      prev.length === ordenesDespacho.length
+        ? []
+        : ordenesDespacho.map((orden: any) => orden.id)
     );
   };
 
   const handleRefresh = () => {
-    console.log("Refrescando datos...");
+    // Refrescar datos del backend
+    refetchOrdenes();
+    refetchNotificaciones();
   };
 
   const handleExport = (format: string) => {
-    console.log(`Exportando en formato ${format}...`);
+    const filename = `ordenes-despacho-${new Date().toISOString().split('T')[0]}`
+    
+    switch (format) {
+      case 'pdf':
+        exportToPDF(ordenesDespacho, filename)
+        break
+      case 'excel':
+        exportToExcel(ordenesDespacho, filename)
+        break
+      case 'csv':
+        exportToCSV(ordenesDespacho, filename)
+        break
+      default:
+        console.log(`Formato no soportado: ${format}`)
+    }
   };
+
+  const handleVerDetalles = (orden: any) => {
+    setModalOrden(orden)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setModalOrden(null)
+  }
 
   return (
     <div className="space-y-6">
@@ -93,17 +96,41 @@ export default function OrdenesPage() {
           <p className="text-gray-600 mt-1">
             Gestión y seguimiento de órdenes de despacho TERPLAC
           </p>
+
         </div>
       </div>
 
-      {/* Tabla de órdenes */}
-      <OrdenesTable
-        ordenesDespacho={ordenesDespacho}
-        selectedRows={selectedRows}
-        onSelectRow={handleSelectRow}
-        onSelectAll={handleSelectAll}
-        onRefresh={handleRefresh}
-        onExport={handleExport}
+      {/* Layout con tabla y notificaciones */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Tabla de órdenes */}
+        <div className="lg:col-span-2">
+          <OrdenesTable
+            ordenesDespacho={ordenesDespacho as any}
+            selectedRows={selectedRows}
+            onSelectRow={handleSelectRow}
+            onSelectAll={handleSelectAll}
+            onRefresh={handleRefresh}
+            onExport={handleExport}
+            onVerDetalles={handleVerDetalles}
+            onMarcarCompletada={marcarComoCompletada}
+            onCancelarOrden={cancelarOrden}
+          />
+        </div>
+        {/* Panel de notificaciones */}
+        <div className="lg:col-span-1 h-fit">
+          <NotificacionesPanel 
+            notificaciones={notificacionesNoLeidas as any} 
+            onMarcarComoLeida={marcarComoLeida}
+            onMarcarTodasComoLeidas={marcarTodasComoLeidas}
+          />
+        </div>
+      </div>
+      
+      {/* Modal de detalles de orden */}
+      <OrdenDetallesModal
+        orden={modalOrden}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
       />
     </div>
   );

@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { BaseDashboard } from '../../components/BaseDashboard';
 import { BaseOrderCard } from '../../components/BaseOrderCard';
+import { SimpleOrderCard } from '../../components/SimpleOrderCard';
 import { getConfigForProfile } from '../../config/dashboardConfig';
 import { useOrderActions } from '../../hooks/useOrderActions';
 import { useDashboardData } from '../../hooks/useDashboardData';
@@ -20,17 +21,18 @@ import { OrdenFabrica } from '../../types/dashboard';
 import * as ImagePicker from 'expo-image-picker';
 import { TokenService } from '../../services/tokenService';
 
+
 export default function DashboardFabrica() {
   const config = getConfigForProfile('fabrica');
   const { data, loading, refreshing, onRefresh } = useDashboardData(config);
-  const { procesando, cambiarEstado } = useOrderActions(onRefresh);
-  
+  const { procesando, cambiarEstado } = useOrderActions(onRefresh);  
   const [ordenesSeleccionadas, setOrdenesSeleccionadas] = useState<number[]>([]);
   const [transportista, setTransportista] = useState('');
   const [observacionesDespacho, setObservacionesDespacho] = useState('');
   const [fotosDespacho, setFotosDespacho] = useState<string[]>([]);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
+  const [currentActiveTab, setCurrentActiveTab] = useState('fabricados');
   
 
   const toggleOrdenSeleccionada = (id_orden: number) => {
@@ -39,6 +41,45 @@ export default function DashboardFabrica() {
     } else {
       setOrdenesSeleccionadas(prev => [...prev, id_orden]);
     }
+  };
+
+  // Función para tomar foto con cámara
+  const tomarFoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Error', 'Se necesitan permisos de cámara para tomar fotos');
+        return;
+      }
+
+      setSubiendoFoto(true);
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ Usar la versión que funciona
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        // Solo guardar localmente, NO subir aún - se subirá al crear el despacho
+        setSelectedFiles(prev => [...prev, asset]);
+        setFotosDespacho(prev => [...prev, asset.uri]);
+        Alert.alert('Éxito', 'Foto agregada correctamente');
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      Alert.alert('Error', 'No se pudo agregar la foto. Intenta nuevamente.');
+    } finally {
+      setSubiendoFoto(false);
+    }
+  };
+
+  // Elimina imagen de ambos arreglos
+  const eliminarFoto = (index: number) => {
+    setFotosDespacho(prev => prev.filter((_, i) => i !== index));
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   // Función para subir una imagen individual después de procesar una orden
@@ -98,45 +139,6 @@ export default function DashboardFabrica() {
     }
   };
 
-  // Función para tomar foto con cámara
-  const tomarFoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Error', 'Se necesitan permisos de cámara para tomar fotos');
-        return;
-      }
-
-      setSubiendoFoto(true);
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images, // ✅ Usar la versión que funciona
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-        exif: false,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        // Solo guardar localmente, NO subir aún - se subirá al crear el despacho
-        setSelectedFiles(prev => [...prev, asset]);
-        setFotosDespacho(prev => [...prev, asset.uri]);
-        Alert.alert('Éxito', 'Foto agregada correctamente');
-      }
-    } catch (error) {
-      console.error('Error al tomar foto:', error);
-      Alert.alert('Error', 'No se pudo agregar la foto. Intenta nuevamente.');
-    } finally {
-      setSubiendoFoto(false);
-    }
-  };
-
-  // Elimina imagen de ambos arreglos
-  const eliminarFoto = (index: number) => {
-    setFotosDespacho(prev => prev.filter((_, i) => i !== index));
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
   // Sube todas las imágenes después de cambiar estado de órdenes
   const subirTodasLasImagenes = async (ordenesActualizadas: number[]): Promise<string[]> => {
     const urls: string[] = [];
@@ -149,26 +151,29 @@ export default function DashboardFabrica() {
       for (let i = 0; i < selectedFiles.length; i++) {
         const asset = selectedFiles[i];
         
-        // Para cada imagen, usar una orden procesada (rotación para distribuir las imágenes)
-        const ordenIndex = i % ordenesActualizadas.length;
-        const ordenId = ordenesActualizadas[ordenIndex];
-
-        console.log(`📤 Subiendo imagen ${i + 1}/${selectedFiles.length} para orden ID: ${ordenId}`);
-        
-        try {
-          // Subir imagen asociándola directamente con el id_orden
-          const urlImagen = await subirImagenIndividual(asset.uri, ordenId);
-          urls.push(urlImagen);
-          console.log(`✅ Imagen ${i + 1} subida exitosamente: ${urlImagen}`);
-        } catch (imageError) {
-          console.error(`❌ Error al subir imagen ${i + 1}:`, imageError);
-          // Continuar con las demás imágenes en lugar de fallar completamente
-          console.warn(`⚠️ Saltando imagen ${i + 1} debido a error de subida`);
+        // Para cada imagen, subirla para TODAS las órdenes seleccionadas
+        for (const ordenId of ordenesActualizadas) {
+          console.log(`📤 Subiendo imagen ${i + 1}/${selectedFiles.length} para orden ID: ${ordenId}`);
+          
+          try {
+            // Subir imagen asociándola directamente con el id_orden
+            const urlImagen = await subirImagenIndividual(asset.uri, ordenId);
+            
+            // Solo agregar la URL una vez por imagen (no por cada orden)
+            if (!urls.includes(urlImagen)) {
+              urls.push(urlImagen);
+            }
+            
+            console.log(`✅ Imagen ${i + 1} subida exitosamente para orden ${ordenId}: ${urlImagen}`);
+          } catch (imageError) {
+            console.error(`❌ Error al subir imagen ${i + 1} para orden ${ordenId}:`, imageError);
+            // Continuar con las demás órdenes
+          }
         }
       }
       
       console.log('🎉 Proceso de subida completado');
-      console.log(`📋 URLs generadas exitosamente: ${urls.length}/${selectedFiles.length}`);
+      console.log(`📋 URLs generadas: ${urls.length}`);
       
       if (urls.length === 0) {
         throw new Error('No se pudo subir ninguna imagen');
@@ -181,9 +186,7 @@ export default function DashboardFabrica() {
     }
   };
 
-  // Crear despacho: 
-  // 1. Primero procesar órdenes (cambiar estado)
-  // 2. Luego subir imágenes asociándolas directamente con los ids de orden
+
   const handleCrearDespacho = async () => {
     // Validaciones
     if (!transportista.trim()) {
@@ -243,6 +246,15 @@ export default function DashboardFabrica() {
 
   const renderFabricaContent = (activeTab: string, data: any) => {
     const ordenes: OrdenFabrica[] = data[activeTab] || [];
+    
+    // Actualizar el tab activo actual y limpiar selecciones si cambió de pestaña
+    if (currentActiveTab !== activeTab) {
+      setCurrentActiveTab(activeTab);
+      // Limpiar selecciones cuando cambias de pestaña
+      if (ordenesSeleccionadas.length > 0) {
+        setOrdenesSeleccionadas([]);
+      }
+    }
 
     return (
       <View>
@@ -338,46 +350,53 @@ export default function DashboardFabrica() {
         {/* Lista de órdenes */}
         <View style={styles.ordenesContainer}>
           {ordenes.length > 0 ? (
-            ordenes.map(orden => (
-              <BaseOrderCard
-                key={orden.id_orden}
-                orden={orden}
-                tipo="fabrica"
-                showCheckbox={activeTab === 'fabricados'}
-                isSelected={ordenesSeleccionadas.includes(orden.id_orden)}
-                onToggleSelect={() => toggleOrdenSeleccionada(orden.id_orden)}
-              >
-                {/* Botón de acción para pendientes y fabricando */}
-                {activeTab !== 'fabricados' && (
-                  <TouchableOpacity
-                    style={[
-                      styles.accionButton,
-                      activeTab === 'pendientes' ? styles.iniciarButton : styles.fabricarButton
-                    ]}
-                    onPress={() => {
-                      const nuevoEstado = activeTab === 'pendientes' ? 'En producción' : 'Fabricada';
-                      cambiarEstado(orden.id_orden, nuevoEstado);
-                    }}
-                    disabled={procesando[orden.id_orden]}
-                  >
-                    {procesando[orden.id_orden] ? (
-                      <ActivityIndicator color="#FFFFFF" size="small" />
-                    ) : (
-                      <>
-                        <Ionicons 
-                          name={activeTab === 'pendientes' ? "play" : "checkmark-circle"} 
-                          size={16} 
-                          color="#FFFFFF" 
-                        />
-                        <Text style={styles.accionButtonText}>
-                          {activeTab === 'pendientes' ? 'Iniciar Fabricación' : 'Marcar como Fabricado'}
-                        </Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                )}
-              </BaseOrderCard>
-            ))
+            ordenes.map(orden => {
+              // Usar SimpleOrderCard para pendientes y fabricando, BaseOrderCard para fabricados
+              const CardComponent = (activeTab === 'pendientes' || activeTab === 'fabricando') 
+                ? SimpleOrderCard 
+                : BaseOrderCard;
+              
+              return (
+                <CardComponent
+                  key={orden.id_orden}
+                  orden={orden}
+                  tipo="fabrica"
+                  showCheckbox={activeTab === 'fabricados'}
+                  isSelected={ordenesSeleccionadas.includes(orden.id_orden)}
+                  onToggleSelect={() => toggleOrdenSeleccionada(orden.id_orden)}
+                >
+                  {/* Botón de acción para pendientes y fabricando */}
+                  {activeTab !== 'fabricados' && (
+                    <TouchableOpacity
+                      style={[
+                        styles.accionButton,
+                        activeTab === 'pendientes' ? styles.iniciarButton : styles.fabricarButton
+                      ]}
+                      onPress={() => {
+                        const nuevoEstado = activeTab === 'pendientes' ? 'En producción' : 'Fabricada';
+                        cambiarEstado(orden.id_orden, nuevoEstado);
+                      }}
+                      disabled={procesando[orden.id_orden]}
+                    >
+                      {procesando[orden.id_orden] ? (
+                        <ActivityIndicator color="#FFFFFF" size="small" />
+                      ) : (
+                        <>
+                          <Ionicons 
+                            name={activeTab === 'pendientes' ? "play" : "checkmark-circle"} 
+                            size={16} 
+                            color="#FFFFFF" 
+                          />
+                          <Text style={styles.accionButtonText}>
+                            {activeTab === 'pendientes' ? 'Iniciar Fabricación' : 'Marcar como Fabricado'}
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </CardComponent>
+              );
+            })
           ) : (
             <View style={styles.emptyStateContainer}>
               <Ionicons name="checkmark-circle-outline" size={48} color="#666" />
@@ -392,8 +411,7 @@ export default function DashboardFabrica() {
   };
 
   const renderFloatingButton = () => {
-    if (ordenesSeleccionadas.length === 0) return null;
-
+    if (ordenesSeleccionadas.length === 0 || currentActiveTab !== 'fabricados') return null;
     return (
       <View style={styles.floatingButtonContainer}>
         <TouchableOpacity
@@ -531,6 +549,7 @@ const styles = StyleSheet.create({
   },
   ordenesContainer: {
     gap: 12,
+    paddingBottom: 100, // Espacio extra al final para evitar que la última orden quede pegada al fondo
   },
   accionButton: {
     flexDirection: 'row',

@@ -5,6 +5,35 @@ import { sendDespachoAlertEmail, sendDespachoRecepcionExitosaEmail } from "../he
 let notificaciones = [];
 let alertasActivas = [];
 
+// Función temporal para crear notificaciones de prueba
+export function crearNotificacionPrueba() {
+  const notificacion = {
+    id: Date.now() + Math.random(),
+    tipo: 'test',
+    mensaje: 'Notificación de prueba para marcar como leída',
+    ordenId: null,
+    tiendaId: null,
+    productos_faltantes: [],
+    productos_defectuosos: [],
+    observaciones: null,
+    prioridad: 'normal',
+    fecha_creacion: new Date().toISOString(),
+    tiempo: new Date().toLocaleString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    leida: false,
+    resuelta: false
+  };
+
+  notificaciones.unshift(notificacion);
+  console.log('🧪 Notificación de prueba creada:', notificacion.id);
+  return notificacion;
+}
+
 // Crear una notificación/alerta
 export async function createNotificacionService(notificacionData) {
   try {
@@ -30,6 +59,13 @@ export async function createNotificacionService(notificacionData) {
       observaciones,
       prioridad,
       fecha_creacion: new Date().toISOString(),
+      tiempo: new Date().toLocaleString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
       leida: false,
       resuelta: false
     };
@@ -38,12 +74,12 @@ export async function createNotificacionService(notificacionData) {
     notificaciones.unshift(notificacion);
 
     // Si es una alerta crítica, agregarla a alertas activas
-    if (tipo === 'alerta_faltante' || tipo === 'defecto_calidad') {
+    if (tipo === 'alerta_faltante' || tipo === 'defecto_calidad' || tipo === 'recepcion_con_problemas') {
       alertasActivas.unshift(notificacion);
     }
 
     // Enviar email al administrador si es crítico
-    if (prioridad === 'crítica' || tipo === 'alerta_faltante') {
+    if (prioridad === 'crítica' || tipo === 'alerta_faltante' || tipo === 'recepcion_con_problemas') {
       await enviarEmailAlerta(notificacion);
     }
 
@@ -62,9 +98,15 @@ export async function createNotificacionService(notificacionData) {
 }
 
 // Obtener todas las notificaciones
-export async function getNotificacionesService(limit = 50) {
+export async function getNotificacionesService(limit = 50, soloNoLeidas = false) {
   try {
-    return [notificaciones.slice(0, limit), null];
+    let notificacionesFiltradas = notificaciones;
+    
+    if (soloNoLeidas) {
+      notificacionesFiltradas = notificaciones.filter(n => !n.leida);
+    }
+    
+    return [notificacionesFiltradas.slice(0, limit), null];
   } catch (error) {
     console.error("Error al obtener notificaciones:", error);
     return [[], error.message];
@@ -85,15 +127,42 @@ export async function getAlertasActivasService() {
 // Marcar notificación como leída
 export async function marcarNotificacionLeidaService(notificacionId) {
   try {
-    const notificacion = notificaciones.find(n => n.id === notificacionId);
+    const notificacion = notificaciones.find(n => {
+      // Comparar como strings para manejar IDs decimales
+      return String(n.id) === String(notificacionId);
+    });
+    
     if (!notificacion) {
       return [null, "Notificación no encontrada"];
     }
 
     notificacion.leida = true;
+    console.log('✅ Notificación marcada como leída:', notificacion.id);
     return [notificacion, null];
   } catch (error) {
     console.error("Error al marcar notificación como leída:", error);
+    return [null, error.message];
+  }
+}
+
+// Marcar todas las notificaciones como leídas
+export async function marcarTodasNotificacionesLeidasService() {
+  try {
+    const notificacionesNoLeidas = notificaciones.filter(n => !n.leida);
+    
+    if (notificacionesNoLeidas.length === 0) {
+      return [0, null]; // No hay notificaciones para marcar
+    }
+
+    // Marcar todas las notificaciones no leídas como leídas
+    notificacionesNoLeidas.forEach(notificacion => {
+      notificacion.leida = true;
+    });
+
+    console.log('✅ Todas las notificaciones marcadas como leídas:', notificacionesNoLeidas.length);
+    return [notificacionesNoLeidas.length, null];
+  } catch (error) {
+    console.error("Error al marcar todas las notificaciones como leídas:", error);
     return [null, error.message];
   }
 }
