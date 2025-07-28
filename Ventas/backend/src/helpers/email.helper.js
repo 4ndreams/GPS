@@ -278,8 +278,8 @@ export async function sendLoginAlertEmail(email) {
 }
 
 export async function sendVerificationEmail(to, token) {
-  const verificationLink = `http://${process.env.HOST}:${process.env.PORT}/api/verify-email?token=${token}`;
-  
+  const verificationLink = `http://${process.env.VERIFY_EMAIL_URL}?token=${token}`;
+
   await transporter.sendMail({
     to,
     subject: "Verifica tu cuenta en TERPLAC",
