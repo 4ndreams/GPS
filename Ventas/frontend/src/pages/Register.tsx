@@ -107,9 +107,22 @@ function Register() {
       setValidationErrors({});
       
     } catch (err: any) {
-      setNotification({ 
-        message: err.response?.data?.details || "Error al registrar. Verifica los campos.", 
-        type: "error" 
+      let errorMsg = "Error al registrar. Verifica los campos.";
+      if (err?.response?.data) {
+        const details = err.response.data.details;
+        if (typeof details === "string") {
+          errorMsg = details;
+        } else if (typeof details === "object" && details !== null) {
+          errorMsg = details.message || JSON.stringify(details);
+        } else if (err.response.data.message) {
+          errorMsg = err.response.data.message;
+        }
+      } else if (err?.message) {
+        errorMsg = err.message;
+      }
+      setNotification({
+        message: errorMsg,
+        type: "error"
       });
     }
   };
