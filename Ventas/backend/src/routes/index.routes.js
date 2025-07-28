@@ -20,7 +20,6 @@ import productoPersonalizadoRoutes from "./producto_personalizado.routes.js"; //
 import tiendaRoutes from "./tienda.routes.js";
 import imagenesRoutes from "./imagenes.routes.js"; 
 import notificacionRoutes from "./notificacion.routes.js"; // Import notificacion routes 
-import minioRoutes from "./minio.routes.js";
 import productoDestacadoRoutes from "./producto_destacado.routes.js";
 import orderRoutes from "./order.routes.js"; // Import order routes for Mercado Pago 
 
@@ -34,7 +33,6 @@ router.get("/", (req, res) => {
 
 router.use(authRoutes);       
 router.use(contactRoutes);
-router.use(minioRoutes);
 router.use('/bodega',bodegaRoutes);  
 router.use('/photo', photoRoutes);
 router.use('/tipo', tipoRoutes);

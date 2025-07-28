@@ -3,9 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BaseOrden } from '../types/dashboard';
 import { getPrioridadColor, getEstadoColor } from '../config/dashboardConfig';
-import { OrderPhotoPreview } from './OrderPhotoPreview';
 
-interface BaseOrderCardProps {
+interface SimpleOrderCardProps {
   orden: BaseOrden;
   tipo: 'fabrica' | 'ventas' | 'stock';
   children?: React.ReactNode;
@@ -15,7 +14,7 @@ interface BaseOrderCardProps {
   onToggleSelect?: () => void;
 }
 
-export const BaseOrderCard: React.FC<BaseOrderCardProps> = ({
+export const SimpleOrderCard: React.FC<SimpleOrderCardProps> = ({
   orden,
   tipo,
   children,
@@ -79,18 +78,15 @@ export const BaseOrderCard: React.FC<BaseOrderCardProps> = ({
           <Text style={styles.tipoText}>Pedido de stock interno</Text>
         )}
         
-        {/* Producto con vista previa de foto */}
+        {/* Producto SIN vista previa de foto */}
         <View style={styles.productoContainer}>
-          <View style={styles.productoInfo}>
-            <Text style={styles.productoText}>
-              • {orden.producto.nombre_producto}
-            </Text>
-            {/* Cantidad */}
-            <Text style={styles.cantidadText}>
-              Cantidad: {orden.cantidad} unidades
-            </Text>
-          </View>
-          <OrderPhotoPreview id_orden={orden.id_orden} size="small" />
+          <Text style={styles.productoText}>
+            • {orden.producto.nombre_producto}
+          </Text>
+          {/* Cantidad */}
+          <Text style={styles.cantidadText}>
+            Cantidad: {orden.cantidad} unidades
+          </Text>
         </View>
         
         {/* Fechas */}
@@ -236,6 +232,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontStyle: 'italic',
   },
+  productoContainer: {
+    marginBottom: 8,
+  },
   productoText: {
     fontSize: 15,
     fontWeight: '600',
@@ -263,15 +262,5 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontStyle: 'italic',
     marginTop: 4,
-  },
-  productoContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  productoInfo: {
-    flex: 1,
-    marginRight: 12,
   },
 });

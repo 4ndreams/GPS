@@ -33,13 +33,7 @@ export default function TabLayout() {
     []
   );
 
-  // Botón de revisar minutas (solo para tienda)
-  const renderReviewIcon = useCallback(
-    ({ color, size }: { color: string; size: number }) => (
-      <Ionicons name="checkmark-circle-outline" size={size} color={color} />
-    ),
-    []
-  );
+
 
   // Botón de dashboard de ventas
   const renderSalesIcon = useCallback(
@@ -119,13 +113,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="dashboard-fabrica"
         options={{
-          title: 'Flujo de despacho',
+          title: 'Flujo despacho',
           tabBarIcon: renderFactoryIcon,
-          tabBarAccessibilityLabel: 'Flujo de despacho de fábrica',
+          tabBarAccessibilityLabel: 'Flujo despacho',
           // Ocultar del tab bar si no es perfil de fábrica
           tabBarButton: usuario.perfil === 'fabrica' ? undefined : () => null,
         }}
       />
+
+      
       {/* Tab para crear minuta - OCULTO - no se usa actualmente */}
       <Tabs.Screen
         name="crear-minuta"
@@ -137,8 +133,8 @@ export default function TabLayout() {
           tabBarButton: () => null,
         }}
       />
-      
-      {/* Tab para revisar minutas - siempre presente pero oculto si no es tienda */}
+      {/*
+       Tab para revisar minutas - siempre presente pero oculto si no es tienda 
       <Tabs.Screen
         name="revisar-minuta"
         options={{
@@ -148,7 +144,7 @@ export default function TabLayout() {
           // Ocultar del tab bar si no es perfil de tienda
           tabBarButton: usuario.perfil === 'tienda' ? undefined : () => null,
         }}
-      />
+      />*/}
 
       <Tabs.Screen
         name="about"

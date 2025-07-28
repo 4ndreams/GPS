@@ -4,21 +4,19 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { BaseDashboard } from '../../components/BaseDashboard';
 import { BaseOrderCard } from '../../components/BaseOrderCard';
+import { SimpleOrderCard } from '../../components/SimpleOrderCard';
 import { getConfigForProfile } from '../../config/dashboardConfig';
 import { useDashboardData } from '../../hooks/useDashboardData';
-import { useOrderActions } from '../../hooks/useOrderActions';
 import { OrdenVentas, PedidoStock } from '../../types/dashboard';
 
 export default function DashboardVentas() {
   const config = getConfigForProfile('tienda');
   const { data, loading, refreshing, onRefresh } = useDashboardData(config);
-  const { procesando, cambiarEstado } = useOrderActions(onRefresh);
   const { tab } = useLocalSearchParams<{ tab?: string }>();
 
   // Refrescar datos cuando la pantalla recibe foco (ej: al volver de revisar-pedido)
@@ -72,39 +70,44 @@ export default function DashboardVentas() {
         {/* Lista de órdenes */}
         <View style={styles.ordenesContainer}>
           {ordenes.length > 0 ? (
-            ordenes.map((orden: OrdenVentas | PedidoStock) => (
-              <BaseOrderCard
-                key={orden.id_orden}
-                orden={orden}
-                tipo={activeTab === 'pedidos-stock' ? 'stock' : 'ventas'}
-              >
-                {/* Contenido específico para despachos en tránsito */}
-                {activeTab === 'despachos' && (
-                  <View>
-                    {/* Botón de revisar pedido */}
-                    <TouchableOpacity
-                      style={styles.revisarButton}
-                      onPress={() => {
-                        router.push({
-                          pathname: '/revisar-pedido',
-                          params: { id: orden.id_orden }
-                        });
-                      }}
-                    >
-                      <Ionicons 
-                        name="eye" 
-                        size={16} 
-                        color="#FFFFFF" 
-                      />
-                      <Text style={styles.revisarButtonText}>
-                        Revisar Pedido
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
+            ordenes.map((orden: OrdenVentas | PedidoStock) => {
+              // Usar SimpleOrderCard para pedidos de stock, BaseOrderCard para despachos
+              const CardComponent = activeTab === 'pedidos-stock' ? SimpleOrderCard : BaseOrderCard;
+              
+              return (
+                <CardComponent
+                  key={orden.id_orden}
+                  orden={orden}
+                  tipo={activeTab === 'pedidos-stock' ? 'stock' : 'ventas'}
+                >
+                  {/* Contenido específico para despachos en tránsito */}
+                  {activeTab === 'despachos' && (
+                    <View>
+                      {/* Botón de revisar pedido */}
+                      <TouchableOpacity
+                        style={styles.revisarButton}
+                        onPress={() => {
+                          router.push({
+                            pathname: '/revisar-pedido',
+                            params: { id: orden.id_orden }
+                          });
+                        }}
+                      >
+                        <Ionicons 
+                          name="eye" 
+                          size={16} 
+                          color="#FFFFFF" 
+                        />
+                        <Text style={styles.revisarButtonText}>
+                          Revisar Pedido
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
 
-              </BaseOrderCard>
-            ))
+                </CardComponent>
+              );
+            })
           ) : (
             <View style={styles.emptyStateContainer}>
               <Ionicons 
@@ -170,6 +173,7 @@ const styles = StyleSheet.create({
   },
   ordenesContainer: {
     gap: 12,
+    paddingBottom: 100, // Espacio extra al final para evitar que la última orden quede pegada al fondo
   },
   revisarButton: {
     backgroundColor: '#3B82F6',
