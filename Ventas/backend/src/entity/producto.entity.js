@@ -3,6 +3,7 @@ import { EntitySchema } from "typeorm";
 import MaterialSchema from "./material.entity.js";
 import TipoSchema from "./tipo.entity.js";
 import RellenoSchema from "./relleno.entity.js";
+import ImagenesSchema from "./imagenes.entity.js";
 const ProductoSchema = new EntitySchema({
     name: "Producto",
     tableName: "productos",
@@ -74,7 +75,7 @@ const ProductoSchema = new EntitySchema({
         },
         relleno: {
             type: "many-to-one",
-            target: RellenoSchema, // Assuming RellenoSchema is defined elsewhere
+            target: RellenoSchema, 
             joinColumn: {
                 name: "id_relleno",
             },
@@ -89,6 +90,12 @@ const ProductoSchema = new EntitySchema({
             },
             inverseSide: "productos",
             nullable: false
+        },
+        imagenes: {
+            type: "one-to-many",
+            target: ImagenesSchema,
+            inverseSide: "producto",
+            cascade: true,
         },
     },
 });

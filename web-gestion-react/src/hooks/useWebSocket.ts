@@ -44,7 +44,7 @@ export const useWebSocket = (
         // Importar socket.io-client dinámicamente
         const { io } = await import('socket.io-client');
         
-        socketRef.current = io('http://localhost:3000', {
+        socketRef.current = io(`${import.meta.env.VITE_API_BASE_URL}`, {
           transports: ['websocket', 'polling'],
           autoConnect: true,
           reconnection: true,
@@ -104,4 +104,4 @@ export const useWebSocket = (
     socket: socketRef.current,
     isConnected
   };
-}; 
+};

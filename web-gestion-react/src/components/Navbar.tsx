@@ -44,7 +44,7 @@ export default function Navbar() {
   // Función para obtener notificaciones del backend
   const fetchNotificaciones = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/notificaciones?soloNoLeidas=false');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/notificaciones?soloNoLeidas=false`);
       if (response.ok) {
         const result = await response.json();
         setNotificaciones(result.data || []);
@@ -63,7 +63,7 @@ export default function Navbar() {
   }, []);
 
   // Función para obtener el icono según el estado
-  const getNotificacionIcon = (tipo: string, mensaje: string) => {
+  const getNotificacionIcon = ( mensaje: string) => {
     const mensajeLower = mensaje.toLowerCase();
     
     // Estados de producción
@@ -154,7 +154,7 @@ export default function Navbar() {
                   onClick={async () => {
                     if (!notif.leida) {
                       try {
-                        const response = await fetch(`http://localhost:3000/api/notificaciones/${notif.id}/leida`, {
+                        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/notificaciones/${notif.id}/leida`, {
                           method: 'PATCH',
                           headers: {
                             'Content-Type': 'application/json',
@@ -181,7 +181,7 @@ export default function Navbar() {
                   <div className="flex flex-col space-y-1 w-full">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        {getNotificacionIcon(notif.tipo, notif.mensaje)}
+                        {getNotificacionIcon(notif.mensaje)}
                         <Badge variant="outline" className="text-xs">
                           {notif.ordenId || notif.orden}
                         </Badge>
@@ -203,7 +203,7 @@ export default function Navbar() {
                   onClick={async () => {
                     try {
                       console.log('Marcando todas las notificaciones como leídas...');
-                      const response = await fetch('http://localhost:3000/api/notificaciones/todas/leidas', {
+                      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/notificaciones/todas/leidas`, {
                         method: 'PATCH',
                         headers: {
                           'Content-Type': 'application/json',

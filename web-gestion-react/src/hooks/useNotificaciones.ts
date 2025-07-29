@@ -22,7 +22,7 @@ export function useNotificaciones() {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/notificaciones?soloNoLeidas=true', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/notificaciones?soloNoLeidas=true`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -54,7 +54,7 @@ export function useNotificaciones() {
         return;
       }
 
-      const url = `http://localhost:3000/api/notificaciones/${notificacionId}/leida`;
+      const url = `${import.meta.env.VITE_API_BASE_URL}/notificaciones/${notificacionId}/leida`;
       console.log('🌐 Haciendo PATCH a:', url);
 
       const response = await fetch(url, {
@@ -94,7 +94,7 @@ export function useNotificaciones() {
         return;
       }
 
-      const url = 'http://localhost:3000/api/notificaciones/todas/leidas';
+      const url = `${import.meta.env.VITE_API_BASE_URL}/notificaciones/todas/leidas`;
       console.log('🌐 Haciendo PATCH a:', url);
 
       const response = await fetch(url, {

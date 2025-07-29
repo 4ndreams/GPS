@@ -26,7 +26,7 @@ interface NotificacionesPanelProps {
 }
 
 export default function NotificacionesPanel({ notificaciones, onMarcarComoLeida, onMarcarTodasComoLeidas }: NotificacionesPanelProps) {
-  const getNotificacionIcon = (tipo: string, mensaje: string) => {
+  const getNotificacionIcon = (mensaje: string) => {
     // Detectar el estado desde el mensaje
     const mensajeLower = mensaje.toLowerCase();
     
@@ -152,7 +152,7 @@ export default function NotificacionesPanel({ notificaciones, onMarcarComoLeida,
                             >
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-1">
-                      {getNotificacionIcon(notificacion.tipo, notificacion.mensaje)}
+                      {getNotificacionIcon(notificacion.mensaje)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-black">

@@ -21,7 +21,7 @@ export function useOrdenActions() {
         throw new Error('No hay token de autenticación');
       }
 
-      const response = await fetch(`http://localhost:3000/api/orden/${orden.id}/completada`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orden/${orden.id}/completada`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -56,7 +56,7 @@ export function useOrdenActions() {
         throw new Error('No hay token de autenticación');
       }
 
-      const response = await fetch(`http://localhost:3000/api/orden/${orden.id}/cancelada`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orden/${orden.id}/cancelada`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -93,4 +93,4 @@ export function useOrdenActions() {
     cancelarOrden,
     verDetalles
   };
-} 
+}

@@ -14,7 +14,7 @@ interface OrdenDespacho {
 
 interface OrdenBackend {
   id_orden: number;
-  id: number; // This 'id' field is also present in backend, but frontend uses id_orden
+  id: number; 
   cantidad: number;
   total: string;
   origen: string;
@@ -38,7 +38,7 @@ export const useOrdenes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { usuario } = useAuth();
-  const token = localStorage.getItem('token'); // Corrected token access
+  const token = localStorage.getItem('token'); 
 
   const fetchOrdenes = useCallback(async () => {
     if (!token) {
@@ -49,7 +49,7 @@ export const useOrdenes = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/orden', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/orden`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -79,7 +79,7 @@ export const useOrdenes = () => {
     } catch (err) {
       console.error('Error obteniendo órdenes:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
-      setOrdenes([]); // Show empty array on error, no example data
+      setOrdenes([]); 
     } finally {
       setLoading(false);
     }
@@ -92,4 +92,4 @@ export const useOrdenes = () => {
   }, [usuario, token, fetchOrdenes]);
 
   return { ordenes, loading, error, refetch: fetchOrdenes };
-}; 
+};
